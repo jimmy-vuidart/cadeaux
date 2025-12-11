@@ -96,3 +96,14 @@ Note: When passing function inputs to child components (e.g., `isUpdating`), kee
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+### List IDs generation
+
+- New lists created via `ListService.createList(title)` no longer use Firebase auto-generated keys.
+- The list ID is derived from the provided title transformed into kebab-case:
+  - Lowercased
+  - Diacritics removed (NFD normalization, combining marks stripped)
+  - Any non-alphanumeric characters collapsed to single `-`
+  - Leading/trailing dashes trimmed
+- If an ID already exists, a numeric suffix is appended to ensure uniqueness: `id`, `id-2`, `id-3`, ...
+- The list is stored at `lists/<computed-id>` with payload `{ title }`.

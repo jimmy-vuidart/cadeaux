@@ -39,3 +39,10 @@ The gift list page is organized into clear sections, each managed by a focused s
 - When adding a gift, the user can optionally provide a URL to the product/page.
 - When a gift has a URL, its title is displayed as a clickable link that opens in a new tab.
 - When no URL is provided, the title is shown as plain text.
+
+### List creation and IDs
+
+- When creating a new list, the list ID used in the URL is derived from the provided title.
+- The ID is the title transformed into kebab-case (lowercase, spaces and non-alphanumeric characters replaced by dashes, diacritics removed).
+- If the resulting ID already exists, a numeric suffix is appended (e.g., `ma-liste`, `ma-liste-2`, `ma-liste-3`, ...).
+- This guarantees stable, human-readable URLs like `/lists/anniversaire-julie`.
