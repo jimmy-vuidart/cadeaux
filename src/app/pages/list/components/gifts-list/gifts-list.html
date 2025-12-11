@@ -7,7 +7,7 @@
       (click)="toggleFillMode.emit()"
       [attr.aria-pressed]="fillMode() ? 'true' : null"
     >
-      {{ fillMode() ? 'Quitter le mode remplissage' : 'Passer en mode remplissage' }}
+      {{ fillMode() ? 'Quitter le mode "cadeaux achetés"' : 'Passer en mode "déclarer les achats"' }}
     </button>
   </div>
   @if (fillMode()) {
