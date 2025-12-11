@@ -67,11 +67,11 @@
     </main>
   </div>
 
-  @if (dev) {
-  <div class="mt-8">
-    <app-debug-lists></app-debug-lists>
+
+  <div class="mt-6">
+    <app-list-of-lists></app-list-of-lists>
   </div>
-  }
+
   @if (showModal()) {
   <app-create-list-modal (cancel)="closeModal()" (created)="handleCreated($event)"></app-create-list-modal>
   }

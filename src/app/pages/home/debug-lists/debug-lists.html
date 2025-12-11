@@ -3,7 +3,7 @@
   aria-labelledby="debug-lists-title"
 >
   <h2 id="debug-lists-title" class="text-lg font-semibold text-amber-200">
-    Debug uniquement — Listes existantes
+    Listes de cadeaux
   </h2>
 
   @if (lists().length === 0) {
@@ -16,7 +16,7 @@
             <div class="min-w-0">
               <div class="truncate font-medium text-amber-100">{{ l.title || 'Sans titre' }}</div>
               <div class="mt-1 text-xs text-amber-200/80">
-                URL: <code class="rounded bg-amber-900/40 px-1 py-0.5">{{ baseUrl }}/lists/{{ l.id }}</code>
+                <code class="rounded bg-amber-900/40 px-1 py-0.5">{{ baseUrl }}/lists/{{ l.id }}</code>
               </div>
             </div>
             <a
