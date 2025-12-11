@@ -1,44 +1,25 @@
 <div class="fixed inset-0 z-40 bg-black/60" aria-hidden="true" (click)="onCancel()"></div>
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="create-list-title"
-    class="w-full max-w-md rounded-xl border border-slate-700 bg-slate-800 p-5 shadow-xl outline-none"
-  >
-    <h2 id="create-list-title" class="text-lg font-semibold text-white">Nouvelle liste</h2>
-    <p class="mt-1 text-sm text-slate-300">Entre un titre pour ta liste.</p>
+  <div role="dialog" aria-modal="true" aria-labelledby="create-list-title"
+    class="w-full max-w-md card p-5 outline-none">
+    <h2 id="create-list-title" class="text-lg font-semibold text-text ribbon-underline inline-block pb-1">Nouvelle liste
+    </h2>
+    <p class="mt-2 text-sm text-text-muted">Entre un titre pour ta liste.</p>
 
     <form class="mt-4 space-y-3" (ngSubmit)="submit()">
       <label for="list-title" class="sr-only">Titre de la liste</label>
-      <input
-        id="list-title"
-        type="text"
-        class="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-        [formControl]="titleCtrl"
-        placeholder="Ex. Noël 2025"
-        [attr.aria-invalid]="titleCtrl.invalid ? 'true' : null"
-        autofocus
-      />
+      <input id="list-title" type="text" class="input-base" [formControl]="titleCtrl" placeholder="Ex. Noël 2025"
+        [attr.aria-invalid]="titleCtrl.invalid ? 'true' : null" autofocus />
 
       @if (error()) {
-        <p class="text-sm text-red-300" role="alert">{{ error() }}</p>
+      <p class="text-sm text-red-300" role="alert">{{ error() }}</p>
       }
 
       <div class="mt-2 flex items-center justify-end gap-2">
-        <button
-          type="button"
-          class="rounded-full px-4 py-2 text-sm font-medium text-slate-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-          (click)="onCancel()"
-          [disabled]="creating()"
-        >
+        <button type="button" class="btn-secondary btn-sm" (click)="onCancel()" [disabled]="creating()">
           Annuler
         </button>
-        <button
-          type="submit"
-          class="rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60"
-          [disabled]="creating() || titleCtrl.invalid"
-        >
+        <button type="submit" class="btn-primary btn-sm" [disabled]="creating() || titleCtrl.invalid">
           {{ creating() ? 'Création…' : 'Créer la liste' }}
         </button>
       </div>

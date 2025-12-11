@@ -3,213 +3,297 @@
 
 /* UX Theme tokens centralized via CSS variables + Tailwind @theme (Tailwind v4) */
 :root {
-  /* brand */
-  /* playful gift-inspired palette (candy pinks, teals, gold accents) */
-  --brand-50: #fff1f7;
-  --brand-100: #ffe4ef;
-  --brand-200: #ffc8de;
-  --brand-300: #ff9fc6;
-  --brand-400: #ff79b1;
-  --brand-500: #fb4996; /* primary */
-  --brand-600: #e22984;
-  --brand-700: #c0176f;
-  --brand-800: #980e59;
-  --brand-900: #6a0a41;
+  /* Midnight Christmas Palette */
 
-  /* accent palette */
-  --accent-500: #14b8a6; /* teal */
-  --accent-600: #0d9488;
+  /* Backgrounds */
+  --midnight-950: #020617;
+  /* Deepest blue */
+  --midnight-900: #0f172a;
+  --midnight-800: #1e293b;
+  --midnight-glow: #1e1b4b;
+  /* Indigo tint for glow */
+
+  /* Golds */
+  --gold-100: #fef9c3;
+  --gold-300: #fde047;
   --gold-400: #facc15;
+  --gold-500: #eab308;
+  /* Primary Gold */
+  --gold-600: #ca8a04;
+  --gold-glow: #fef08a;
 
-  /* surfaces */
-  --surface: 255 255 255; /* white */
-  --surface-muted: 248 250 252; /* slate-50 */
-  --text: 15 23 42; /* slate-900 */
-  --text-muted: 71 85 105; /* slate-600 */
+  /* Warm Reds (Accents) */
+  --xmas-red-400: #f87171;
+  --xmas-red-500: #ef4444;
+  --xmas-red-600: #dc2626;
+  --xmas-red-glow: #fee2e2;
 
-  /* shape & motion */
+  /* Glass / Surface */
+  --glass-surface: rgba(255, 255, 255, 0.07);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-highlight: rgba(255, 255, 255, 0.4);
+
+  /* Typography Colors */
+  --text-primary: #f8fafc;
+  /* Slate 50 */
+  --text-secondary: #cbd5e1;
+  /* Slate 300 */
+  --text-accent: var(--gold-400);
+
+  /* Semantic mappings */
+  --brand-500: var(--gold-500);
+  --accent-500: var(--xmas-red-500);
+
   --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --ring: 0 0 0 3px rgba(251, 73, 150, 0.35);
+  --radius-md: 0.75rem;
+  --radius-lg: 1.5rem;
+  /* Large rounded corners for premium feel */
 }
 
-/* Dark theme override (opt-in by class) */
-.theme-dark {
-  --surface: 9 9 11; /* zinc-950 */
-  --surface-muted: 24 24 27; /* zinc-900 */
-  --text: 244 244 245; /* zinc-100 */
-  --text-muted: 161 161 170; /* zinc-400 */
-}
-
-/* Tailwind semantic tokens */
 @theme {
-  --color-brand-50: var(--brand-50);
-  --color-brand-100: var(--brand-100);
-  --color-brand-200: var(--brand-200);
-  --color-brand-300: var(--brand-300);
-  --color-brand-400: var(--brand-400);
-  --color-brand-500: var(--brand-500);
-  --color-brand-600: var(--brand-600);
-  --color-brand-700: var(--brand-700);
-  --color-brand-800: var(--brand-800);
-  --color-brand-900: var(--brand-900);
-
-  --color-surface: rgb(var(--surface));
-  --color-surface-muted: rgb(var(--surface-muted));
-  --color-text: rgb(var(--text));
-  --color-text-muted: rgb(var(--text-muted));
-  --color-accent-500: var(--accent-500);
-  --color-accent-600: var(--accent-600);
+  --color-midnight-950: var(--midnight-950);
+  --color-midnight-900: var(--midnight-900);
   --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-xmas-red-500: var(--xmas-red-500);
+  --color-text-primary: var(--text-primary);
 
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
+  --font-display: "Mountains of Christmas", cursive;
+  --font-body: "Nunito", sans-serif;
+
   --radius-lg: var(--radius-lg);
 }
 
-/* Reusable utilities tied to tokens */
-@utility focus-ring {
-  outline: none;
-  box-shadow: var(--ring);
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  /* Deep Midnight Gradient with a central spotlight */
+  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 60%, #000000 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-@utility card {
-  background-color: var(--color-surface);
-  color: var(--color-text);
+/* Subtle Snow (Opacity reduced for classiness) */
+.snowflake {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.8em;
+  font-family: Arial, sans-serif;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  position: fixed;
+  top: -10%;
+  z-index: 0;
+  user-select: none;
+  cursor: default;
+  animation-name: snowflakes-fall, snowflakes-shake;
+  animation-duration: 15s, 5s;
+  /* Slower, more elegant fall */
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-play-state: running, running;
+}
+
+.snowflake:nth-of-type(0) {
+  left: 1%;
+  animation-delay: 0s, 0s
+}
+
+.snowflake:nth-of-type(1) {
+  left: 10%;
+  animation-delay: 1s, 1s
+}
+
+.snowflake:nth-of-type(2) {
+  left: 20%;
+  animation-delay: 6s, .5s
+}
+
+.snowflake:nth-of-type(3) {
+  left: 30%;
+  animation-delay: 4s, 2s
+}
+
+.snowflake:nth-of-type(4) {
+  left: 40%;
+  animation-delay: 2s, 2s
+}
+
+.snowflake:nth-of-type(5) {
+  left: 50%;
+  animation-delay: 8s, 3s
+}
+
+.snowflake:nth-of-type(6) {
+  left: 60%;
+  animation-delay: 6s, 2s
+}
+
+.snowflake:nth-of-type(7) {
+  left: 70%;
+  animation-delay: 2.5s, 1s
+}
+
+.snowflake:nth-of-type(8) {
+  left: 80%;
+  animation-delay: 1s, 0s
+}
+
+.snowflake:nth-of-type(9) {
+  left: 90%;
+  animation-delay: 3s, 1.5s
+}
+
+@keyframes snowflakes-fall {
+  0% {
+    top: -10%
+  }
+
+  100% {
+    top: 100%
+  }
+}
+
+@keyframes snowflakes-shake {
+
+  0%,
+  100% {
+    transform: translateX(0)
+  }
+
+  50% {
+    transform: translateX(80px)
+  }
+}
+
+/* Glassmorphism Utilities */
+@utility glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   border-radius: var(--radius-lg);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.1);
 }
 
-/* Fancy card variant with gradient border and subtle confetti dots */
-@utility card-fancy {
+@utility card-glass {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
   position: relative;
-  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,1)) padding-box,
-              linear-gradient(135deg, var(--color-brand-400), var(--color-accent-500)) border-box;
-  border: 2px solid transparent;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 8px 24px 0 rgb(251 73 150 / 0.08), 0 2px 8px 0 rgb(20 184 166 / 0.08);
+  overflow: hidden;
 }
-@utility card-fancy-hover {
-  transition: transform 180ms ease, box-shadow 180ms ease;
-}
-.card-fancy-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px 0 rgb(251 73 150 / 0.10), 0 4px 12px 0 rgb(20 184 166 / 0.10);
-}
-/* Motion-safe */
-:root[data-motion='reduce'] .card-fancy-hover:hover { transform: none; }
 
+.card-glass:hover {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 215, 0, 0.3);
+  /* Gold hint on hover */
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Typography Overrides */
+h1,
+h2,
+h3,
+.font-christmas {
+  font-family: var(--font-display);
+  letter-spacing: 1px;
+}
+
+@utility text-gold-gradient {
+  background: linear-gradient(to bottom, #fde047, #d97706);
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 10px rgba(234, 179, 8, 0.2);
+}
+
+/* Buttons */
 @utility btn-base {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+  font-family: var(--font-body);
+  font-weight: 700;
+  border-radius: 9999px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
 }
 
 @utility btn-primary {
-  background: linear-gradient(90deg, var(--color-brand-600), var(--color-brand-500));
+  background: linear-gradient(135deg, var(--xmas-red-500), var(--xmas-red-600));
   color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .btn-primary:hover {
-  background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-400));
-  box-shadow: 0 8px 16px 0 rgb(251 73 150 / 0.25);
-  transform: translateY(-1px);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
+
 .btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px 0 rgb(251 73 150 / 0.18);
-}
-@utility btn-shine {
-  position: relative;
-  overflow: hidden;
-}
-.btn-shine::after {
-  content: "";
-  position: absolute;
-  inset: -150% auto -150% -150%;
-  width: 50%;
-  transform: rotate(25deg);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
-  animation: shine 1.8s ease-in-out infinite;
-}
-:root[data-motion='reduce'] .btn-shine::after { animation: none; display: none; }
-@keyframes shine {
-  0% { left: -150%; }
-  60% { left: 120%; }
-  100% { left: 120%; }
+  transform: scale(0.95);
 }
 
 @utility btn-secondary {
-  background-color: var(--color-surface-muted);
-  color: var(--color-text);
-  border: 1px solid rgb(226 232 240);
-}
-.btn-secondary:hover { box-shadow: 0 4px 10px 0 rgb(0 0 0 / 0.08); transform: translateY(-1px); }
-.btn-secondary:active { transform: translateY(0); box-shadow: 0 2px 6px 0 rgb(0 0 0 / 0.06); }
-
-@utility btn-sm { padding: 0.375rem 0.625rem; font-size: 0.875rem; }
-@utility btn-md { padding: 0.5rem 0.875rem; font-size: 0.95rem; }
-@utility btn-lg { padding: 0.75rem 1rem; font-size: 1rem; }
-
-/* Density adjustments */
-:root[data-density='compact'] {
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  backdrop-filter: blur(4px);
 }
 
-:root[data-density='compact'] .btn-sm { padding: 0.25rem 0.5rem; }
-:root[data-density='compact'] .btn-md { padding: 0.375rem 0.625rem; }
-:root[data-density='compact'] .btn-lg { padding: 0.5rem 0.75rem; }
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--gold-400);
+  color: var(--gold-400);
+  box-shadow: 0 0 15px rgba(250, 204, 21, 0.1);
+}
+
+@utility btn-sm {
+  padding: 0.5rem 1rem;
+}
+
+@utility btn-md {
+  padding: 0.75rem 1.5rem;
+}
 
 /* Inputs */
 @utility input-base {
   width: 100%;
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid rgb(226 232 240);
+  background-color: rgba(0, 0, 0, 0.4);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s;
 }
 
-@utility input-invalid { border-color: rgb(248 113 113); }
-
-/* App-level fun background and decorative helpers */
-body {
-  background:
-    radial-gradient(1200px 500px at -10% -10%, rgba(251,73,150,0.08), transparent 60%),
-    radial-gradient(1000px 500px at 110% 10%, rgba(20,184,166,0.08), transparent 65%),
-    linear-gradient(180deg, rgb(255 255 255), rgb(250 250 250));
-}
-.theme-dark body, .theme-dark {
-  background:
-    radial-gradient(1200px 500px at -10% -10%, rgba(251,73,150,0.10), transparent 60%),
-    radial-gradient(1000px 500px at 110% 10%, rgba(20,184,166,0.10), transparent 65%),
-    linear-gradient(180deg, rgb(9 9 11), rgb(15 15 18));
+.input-base:focus {
+  border-color: var(--gold-500);
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
 }
 
-/* Confetti utility (opt-in, light performance) */
-@utility confetti {
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(250,204,21,.6) 2px, transparent 3px),
-    radial-gradient(circle at 80% 30%, rgba(59,130,246,.5) 2px, transparent 3px),
-    radial-gradient(circle at 30% 70%, rgba(236,72,153,.5) 2px, transparent 3px),
-    radial-gradient(circle at 60% 60%, rgba(34,197,94,.5) 2px, transparent 3px);
-  background-size: 60px 60px;
+@utility input-invalid {
+  border-color: var(--xmas-red-500);
 }
 
-/* Ribbon underline for headings */
-@utility ribbon-underline {
-  position: relative;
-}
-.ribbon-underline::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -0.25rem; height: 6px;
-  background: linear-gradient(90deg, var(--color-brand-500), var(--color-accent-500), var(--color-gold-400));
-  border-radius: 9999px;
+/* Material Symbols */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }

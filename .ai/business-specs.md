@@ -31,7 +31,7 @@ The gift list page is organized into clear sections, each managed by a focused s
 - Each gift has an Edit action (when not in fill mode) to change the title and optional URL. The edition form opens inline just under the concerned gift item.
 - Each gift has Edit and Delete actions (when not in fill mode). Deleting asks for confirmation: the usual actions are temporarily replaced with two clear buttons — a green check to confirm deletion and a red cross to cancel — to avoid accidental removals.
   - The Edit action is displayed as a small pen icon button to keep the interface clean and familiar.
-  - All action buttons for a gift (edit, delete, confirm, cancel) share the same compact form factor for visual consistency: a small round button of equal size with a clear icon inside. Icons are legible on dark backgrounds (e.g., the edit pen is white) and each button has an accessible label for screen readers.
+  - All action buttons for a gift (edit, delete, confirm, cancel) share the same compact form factor for visual consistency: a small round button of equal size with a clear, familiar icon inside. Icons remain legible in both light and dark themes and each button has an accessible label for screen readers.
 - Add gift form: inputs to add a new gift (title and optional URL) with validation and error message.
 - Share toast: transient confirmation message for share/copy actions.
 
@@ -54,6 +54,7 @@ The gift list page is organized into clear sections, each managed by a focused s
 - When adding a gift, the user can optionally provide a URL to the product/page.
 - When a gift has a URL, its title is displayed as a clickable link that opens in a new tab.
 - When no URL is provided, the title is shown as plain text.
+ - Convenience: if the user types a URL without a protocol (e.g., `amazon.com/item`), the app automatically saves it with `https://` so the link works correctly.
 
 ### Edit a gift
 

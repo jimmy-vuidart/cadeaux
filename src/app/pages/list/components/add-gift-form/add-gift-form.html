@@ -1,34 +1,20 @@
-<h2 class="mt-6 mb-3 text-lg font-semibold text-white">Ajouter un cadeau</h2>
-<section class="rounded-xl border border-slate-700 bg-slate-800/70 p-4 sm:p-6">
+<h2
+  class="mt-8 mb-4 text-2xl font-bold text-white font-christmas drop-shadow-md border-b border-white/10 inline-block pb-1 pr-4">
+  Ajouter un cadeau</h2>
+<section class="card p-4 sm:p-6">
   <form class="flex flex-col gap-3 sm:flex-row" (ngSubmit)="addGift.emit()">
     <label for="gift-title" class="sr-only">Titre du cadeau</label>
-    <input
-      id="gift-title"
-      type="text"
-      class="min-w-0 flex-1 rounded-full border border-slate-600 bg-slate-900 px-4 py-2 text-slate-100 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-      [formControl]="titleControl()"
-      placeholder="Ex. Lego, livre, etc."
-      [attr.aria-invalid]="titleInvalid() ? 'true' : null"
-    />
+    <input id="gift-title" type="text" class="input-base" [formControl]="titleControl()"
+      placeholder="Ex. Lego, livre, etc." [attr.aria-invalid]="titleInvalid() ? 'true' : null" />
     <label for="gift-url" class="sr-only">URL du cadeau (optionnel)</label>
-    <input
-      id="gift-url"
-      type="url"
-      class="min-w-0 flex-1 rounded-full border border-slate-600 bg-slate-900 px-4 py-2 text-slate-100 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-      [formControl]="urlControl()"
-      placeholder="https://exemple.com/produit (optionnel)"
-      inputmode="url"
-    />
-    <button
-      type="submit"
-      class="rounded-full bg-blue-500 px-5 py-2 font-semibold text-white hover:bg-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60"
-      [disabled]="submitting() || titleInvalid()"
-    >
+    <input id="gift-url" type="url" class="input-base" [formControl]="urlControl()"
+      placeholder="https://exemple.com/produit (optionnel)" inputmode="url" />
+    <button type="submit" class="btn-primary flex-shrink-0" [disabled]="submitting() || titleInvalid()">
       Ajouter
     </button>
   </form>
 
   @if (error()) {
-    <p class="mt-2 text-sm text-red-300" role="alert">{{ error() }}</p>
+  <p class="mt-2 text-sm text-red-300" role="alert">{{ error() }}</p>
   }
 </section>

@@ -1,180 +1,127 @@
 <section class="mt-8">
-  <div class="mb-3 flex items-center justify-between gap-3">
-    <h2 class="text-lg font-semibold text-white">Cadeaux</h2>
-    <button
-      type="button"
-      class="rounded-full border border-slate-600 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-      (click)="toggleFillMode.emit()"
-      [attr.aria-pressed]="fillMode() ? 'true' : null"
-    >
-      {{ fillMode() ? 'Quitter le mode "cadeaux achetés"' : 'Passer en mode "déclarer les achats"' }}
+  <div class="mb-4 flex items-center justify-between gap-3">
+    <h2 class="text-3xl font-christmas text-gold-gradient drop-shadow-lg">Cadeaux</h2>
+    <button type="button" class="btn-secondary btn-sm" (click)="toggleFillMode.emit()"
+      [attr.aria-pressed]="fillMode() ? 'true' : null">
+      {{ fillMode() ? 'Quitter le mode remplissage' : 'Passer en mode remplissage' }}
     </button>
   </div>
   @if (fillMode()) {
-    <p class="mb-2 text-sm text-slate-300">Mode remplissage actif : coche un cadeau pour indiquer qu’il est déjà acheté.</p>
+  <p
+    class="mb-4 text-sm text-green-300 font-bold bg-black/40 p-3 rounded-lg border border-green-900/50 backdrop-blur-sm flex items-center gap-2">
+    <span class="material-symbols-outlined text-green-400">info</span>
+    Mode remplissage actif : coche un cadeau pour indiquer qu’il est déjà acheté.
+  </p>
   } @else if (gifts().length > 1) {
-    <p class="mb-2 text-xs text-slate-400">Astuce : fais glisser le bouton ≡ pour réordonner les cadeaux.</p>
+  <p class="mb-3 text-xs text-white/50 italic text-right">Astuce : déplace les cadeaux pour les réorganiser.</p>
   }
-  <ul class="divide-y divide-slate-800 rounded-xl border border-slate-800 bg-slate-800/50" role="list">
+  <ul class="flex flex-col gap-4" role="list">
     @for (g of gifts(); track g.id; let i = $index) {
-      <li
-        class="px-4 py-3 transition-colors"
-        (dragover)="onDragOver($event, i)"
-        (drop)="onDrop(i)"
-        [class.opacity-60]="isDragging(i)"
-        [class.bg-slate-700]="isDropTarget(i)"
-        [class.ring-2]="isDropTarget(i)"
-        [class.ring-blue-400]="isDropTarget(i)"
-        role="listitem"
-      >
-        @if (!fillMode() && editingId() === g.id) {
-          <form class="flex flex-col gap-3 sm:flex-row" (ngSubmit)="submitEdit.emit()">
-            <label [for]="'edit-title-' + g.id" class="sr-only">Titre du cadeau</label>
-            <input
-              [id]="'edit-title-' + g.id"
-              type="text"
-              class="min-w-0 flex-1 rounded-full border border-slate-600 bg-slate-900 px-4 py-2 text-slate-100 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-              [formControl]="editTitleControl()!"
-              placeholder="Titre du cadeau"
-              [attr.aria-invalid]="editTitleInvalid() ? 'true' : null"
-              [disabled]="editSubmitting() || isUpdating()(g.id!)"
-            />
-            <label [for]="'edit-url-' + g.id" class="sr-only">URL du cadeau (optionnel)</label>
-            <input
-              [id]="'edit-url-' + g.id"
-              type="url"
-              class="min-w-0 flex-1 rounded-full border border-slate-600 bg-slate-900 px-4 py-2 text-slate-100 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-              [formControl]="editUrlControl()!"
-              placeholder="https://exemple.com/produit (optionnel)"
-              inputmode="url"
-              [disabled]="editSubmitting() || isUpdating()(g.id!)"
-            />
-            <div class="flex items-center gap-2">
-              <button
-                type="submit"
-                class="rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60"
-                [disabled]="editSubmitting() || editTitleInvalid() || isUpdating()(g.id!)"
-                [attr.aria-label]="'Enregistrer les modifications pour ' + g.title"
-              >
-                Enregistrer
-              </button>
-              <button
-                type="button"
-                class="rounded-full border border-slate-600 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                (click)="cancelEdit.emit()"
-              >
-                Annuler
-              </button>
-            </div>
-          </form>
-          @if (editError()) {
-            <p class="mt-2 text-sm text-red-300" role="alert">{{ editError() }}</p>
-          }
-        } @else {
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex min-w-0 items-center gap-2">
-              <button
-                type="button"
-                class="inline-flex size-6 shrink-0 cursor-grab items-center justify-center rounded-full text-slate-300 hover:bg-slate-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-50 motion-safe:transition motion-safe:active:scale-95"
-                [attr.aria-label]="'Déplacer ' + g.title"
-                [disabled]="fillMode() || !!editingId() || isUpdating()(g.id!)"
-                [attr.draggable]="!fillMode() && !editingId() ? 'true' : null"
-                (dragstart)="onDragStart(i, $event)"
-                (dragend)="onDragEnd()"
-                [class.cursor-grabbing]="isDragging(i)"
-                [attr.aria-grabbed]="isDragging(i) ? 'true' : null"
-              >
-                <span aria-hidden="true">≡</span>
-              </button>
-              <div class="min-w-0">
-                @if (g.url) {
-                  <a
-                    class="truncate font-medium text-blue-300 underline decoration-blue-400 decoration-2 underline-offset-4 hover:text-blue-200 hover:decoration-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                    [href]="g.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {{ g.title }}
-                  </a>
-                } @else {
-                  <p class="truncate text-slate-100">{{ g.title }}</p>
-                }
-                @if (fillMode() && g.bought) {
-                  <p class="text-xs text-green-300">Déjà acheté</p>
-                }
-              </div>
-            </div>
-            @if (fillMode()) {
-              <div class="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  class="size-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                  [checked]="!!g.bought"
-                  (change)="toggleBought.emit(g)"
-                  [disabled]="isUpdating()(g.id!)"
-                  [attr.aria-label]="'Marquer ' + g.title + ' comme acheté'"
-                />
-              </div>
+    <li class="card-glass px-4 py-4 transition-all" (dragover)="onDragOver($event, i)" (drop)="onDrop(i)"
+      [class.opacity-50]="isDragging(i)" [class.scale-[1.02]]="isDropTarget(i)" [class.ring-1]="isDropTarget(i)"
+      [class.ring-gold-400]="isDropTarget(i)" role="listitem">
+      @if (!fillMode() && editingId() === g.id) {
+      <form class="flex flex-col gap-3" (ngSubmit)="submitEdit.emit()">
+        <label [for]="'edit-title-' + g.id" class="sr-only">Titre du cadeau</label>
+        <input [id]="'edit-title-' + g.id" type="text" class="input-base" [formControl]="editTitleControl()!"
+          placeholder="Titre du cadeau" [attr.aria-invalid]="editTitleInvalid() ? 'true' : null"
+          [disabled]="editSubmitting() || isUpdating()(g.id!)" />
+        <label [for]="'edit-url-' + g.id" class="sr-only">URL du cadeau (optionnel)</label>
+        <input [id]="'edit-url-' + g.id" type="url" class="input-base" [formControl]="editUrlControl()!"
+          placeholder="https://exemple.com/produit (optionnel)" inputmode="url"
+          [disabled]="editSubmitting() || isUpdating()(g.id!)" />
+        <div class="flex items-center gap-2 justify-end mt-2">
+          <button type="button" class="btn-secondary btn-sm" (click)="cancelEdit.emit()">
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary btn-sm"
+            [disabled]="editSubmitting() || editTitleInvalid() || isUpdating()(g.id!)"
+            [attr.aria-label]="'Enregistrer les modifications pour ' + g.title">
+            Enregistrer
+          </button>
+        </div>
+      </form>
+      @if (editError()) {
+      <p class="mt-2 text-sm text-red-400" role="alert">{{ editError() }}</p>
+      }
+      } @else {
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex min-w-0 items-center gap-3">
+          <button type="button"
+            class="inline-flex size-8 shrink-0 cursor-grab items-center justify-center rounded-full text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
+            [attr.aria-label]="'Déplacer ' + g.title" [disabled]="fillMode() || !!editingId() || isUpdating()(g.id!)"
+            [attr.draggable]="!fillMode() && !editingId() ? 'true' : null" (dragstart)="onDragStart(i, $event)"
+            (dragend)="onDragEnd()" [class.cursor-grabbing]="isDragging(i)"
+            [attr.aria-grabbed]="isDragging(i) ? 'true' : null">
+            <span aria-hidden="true" class="material-symbols-outlined">drag_indicator</span>
+          </button>
+          <div class="min-w-0 flex flex-col">
+            @if (g.url) {
+            <a class="truncate font-bold text-lg text-gold-gradient hover:underline decoration-gold-400/50 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+              [href]="g.url" target="_blank" rel="noopener noreferrer">
+              {{ g.title }}
+              <span class="material-symbols-outlined text-sm align-middle ml-1 opacity-70">open_in_new</span>
+            </a>
             } @else {
-              <div class="flex items-center gap-2">
-                @if (deletingId() === g.id) {
-                  <button
-                    type="button"
-                    class="rounded inline-flex size-8 items-center justify-center border border-green-600/90 text-white hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-60"
-                    (click)="confirmDelete.emit()"
-                    [disabled]="isUpdating()(g.id!)"
-                    [attr.aria-label]="'Confirmer la suppression de ' + g.title"
-                  >
-                    <svg class="size-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <span class="sr-only">Confirmer</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex size-8 items-center justify-center rounded border border-red-700/90 text-red-300 hover:bg-red-900/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60"
-                    (click)="cancelDelete.emit()"
-                    [disabled]="isUpdating()(g.id!)"
-                    [attr.aria-label]="'Annuler la suppression de ' + g.title"
-                  >
-                    <svg class="size-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <span class="sr-only">Annuler</span>
-                  </button>
-                } @else {
-                  <button
-                    type="button"
-                    class="inline-flex size-8 items-center justify-center rounded border border-slate-600 text-white hover:bg-slate-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60"
-                    (click)="startEdit.emit(g)"
-                    [disabled]="isUpdating()(g.id!)"
-                    [attr.aria-label]="'Modifier ' + g.title"
-                  >
-                    <svg class="size-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M15.232 5.232l3.536 3.536M4 20h4.243L19.778 8.465a1.5 1.5 0 0 0 0-2.121L17.657 4.222a1.5 1.5 0 0 0-2.121 0L4 15.757V20z" fill="currentColor"/>
-                    </svg>
-                    <span class="sr-only">Modifier</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex size-8 items-center justify-center rounded border border-red-700 text-red-300 hover:bg-red-900/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60"
-                    (click)="startDelete.emit(g)"
-                    [disabled]="isUpdating()(g.id!) || !!editingId()"
-                    [attr.aria-label]="'Supprimer ' + g.title"
-                  >
-                    <svg class="size-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M9 3h6m-9 4h12M10 11v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span class="sr-only">Supprimer</span>
-                  </button>
-                }
-              </div>
+            <p class="truncate font-bold text-lg text-white">{{ g.title }}</p>
+            }
+            @if (fillMode() && g.bought) {
+            <p class="text-xs font-bold text-green-400 flex items-center gap-1 mt-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              DÉJÀ ACHETÉ
+            </p>
             }
           </div>
+        </div>
+        @if (fillMode()) {
+        <div class="flex items-center gap-2">
+          <div class="relative flex items-center">
+            <input type="checkbox"
+              class="peer size-6 appearance-none rounded border-2 border-white/30 bg-black/20 checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer transition-all"
+              [checked]="!!g.bought" (change)="toggleBought.emit(g)" [disabled]="isUpdating()(g.id!)"
+              [attr.aria-label]="'Marquer ' + g.title + ' comme acheté'" />
+            <span
+              class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 material-symbols-outlined text-xl">check</span>
+          </div>
+        </div>
+        } @else {
+        <div class="flex items-center gap-2">
+          @if (deletingId() === g.id) {
+          <button type="button"
+            class="rounded-full inline-flex size-9 items-center justify-center bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-60 transition-all backdrop-blur-md"
+            (click)="confirmDelete.emit()" [disabled]="isUpdating()(g.id!)"
+            [attr.aria-label]="'Confirmer la suppression de ' + g.title" title="Confirmer">
+            <span class="material-symbols-outlined text-xl" aria-hidden="true">check</span>
+          </button>
+          <button type="button"
+            class="inline-flex size-9 items-center justify-center rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-all backdrop-blur-md"
+            (click)="cancelDelete.emit()" [disabled]="isUpdating()(g.id!)"
+            [attr.aria-label]="'Annuler la suppression de ' + g.title" title="Annuler">
+            <span class="material-symbols-outlined text-xl" aria-hidden="true">close</span>
+          </button>
+          } @else {
+          <button type="button"
+            class="btn-secondary btn-sm px-2 border-0 bg-transparent hover:bg-white/10 text-white/70 hover:text-white"
+            (click)="startEdit.emit(g)" [disabled]="isUpdating()(g.id!)" [attr.aria-label]="'Modifier ' + g.title">
+            <span class="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
+          </button>
+          <button type="button"
+            class="inline-flex size-9 items-center justify-center rounded-full text-white/40 hover:text-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-colors"
+            (click)="startDelete.emit(g)" [disabled]="isUpdating()(g.id!) || !!editingId()"
+            [attr.aria-label]="'Supprimer ' + g.title">
+            <span class="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
+          </button>
+          }
+        </div>
         }
-      </li>
+      </div>
+      }
+    </li>
     } @empty {
-      <li class="px-4 py-5 text-slate-300">Aucun cadeau pour le moment.</li>
+    <li class="px-4 py-12 text-center text-white/50 italic border border-dashed border-white/10 rounded-xl bg-white/5">
+      <span class="block text-4xl mb-3 opacity-50">✨</span>
+      Ta liste est vide pour le moment.<br />Ajoute ton premier souhait ci-dessous.
+    </li>
     }
   </ul>
 </section>

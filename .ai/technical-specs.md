@@ -38,8 +38,12 @@
     - Outputs: `toggleFillMode()`, `toggleBought(gift: Gift)`, `startEdit(gift: Gift)`, `cancelEdit()`, `submitEdit()`, `startDelete(gift: Gift)`, `cancelDelete()`, `confirmDelete()`, `reorderMove({ fromIndex: number; toIndex: number })`
     - Notes:
       - Includes a drag handle button at the start of each gift row to support HTML5 drag & drop reordering. Dragging is disabled while in fill mode or during inline editing. Visual feedback: the dragged row becomes semi-transparent and the hovered drop target row is highlighted with a blue ring and background tint; the handle shows a grabbing cursor while active and sets `aria-grabbed="true"`.
-      - Action buttons (Edit, Delete, Confirm, Cancel) use a consistent compact icon‑button style: each control is a `32x32` round button (`size-8`) containing a `24x24` icon (`size-6`). Hover/focus/disabled states mirror the app theme.
-      - Icons are inline SVG with `fill`/`stroke` set to `currentColor` so color is controlled through button text color classes (e.g., `text-white` for the edit pen on dark background). This guarantees the edit pen appears white.
+      - Action buttons (Edit, Delete, Confirm, Cancel) use a consistent compact icon‑button style: each control is a `32x32` round button (`size-8`) containing a `24px` icon. Hover/focus/disabled states mirror the app theme.
+      - Icons use the Material Symbols Outlined web font to keep bundle size small and ensure consistent visuals. Implementation:
+        - `src/index.html` includes the Google Fonts stylesheet for Material Symbols Outlined.
+        - `src/styles.css` defines the `.material-symbols-outlined` class with appropriate font‑variation settings (`FILL 0, wght 400, GRAD 0, opsz 24`).
+        - In templates, use: `<span class="material-symbols-outlined text-2xl" aria-hidden="true">edit</span>` and keep the visible button size with `size-8` and proper color classes (e.g., `text-white`, `text-red-300`).
+        - Accessibility: keep `aria-label` on the button and an optional visually hidden text (`sr-only`) for clarity.
   - `add-gift-form/` (`AddGiftFormComponent`): Form to add a gift with validation and error message.
     - Inputs: `titleControl: FormControl<string>`, `urlControl: FormControl<string|null>`, `submitting: boolean`, `titleInvalid: boolean`, `error: string | null`
     - Outputs: `addGift()`
@@ -176,6 +180,7 @@ Note: When passing function inputs to child components (e.g., `isUpdating`), kee
   - Implementation detail: new gifts receive a default `order` timestamp so they appear at the end until reordered.
 - `toggleBought(listId: string, giftId: string, bought: boolean): Promise<void>`: toggle bought flag.
 - `updateGift(listId: string, giftId: string, patch: { title?: string; url?: string | null }): Promise<void>`: update a gift title and/or URL. Passing `null` or empty string for URL removes it.
+  - URL normalization: when `patch.url` is a non-empty string without a protocol, the service prefixes `https://` before saving. Existing protocols are preserved.
 - `renameList(id: string, title: string): Promise<void>`: rename list title.
 - `deleteGift(listId: string, giftId: string): Promise<void>`: delete a gift.
 - `reorderGifts(listId: string, orderedIds: string[]): Promise<void>`: persist a new order by writing sequential `order` values (0..n-1) for the provided IDs.
