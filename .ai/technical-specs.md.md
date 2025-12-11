@@ -3,6 +3,19 @@
 - This app uses Firebase Realtime Database via AngularFire for data storage.
 - This app use TailwindCSS for styling.
 
+## Local development – Firebase Emulators
+
+- The project uses Firebase Emulators locally for Auth and Realtime Database.
+- Start them with: `npm run emulators`.
+  - This runs the Firebase emulators (Auth on 9099, RTDB on 9000, Emulator UI on 4000) and seeds the RTDB with initial data from `tests/mock-data.json`.
+  - Seeding is handled by `scripts/seed-rtdb.cjs`, which waits for the RTDB emulator to be ready and PUTs the mock JSON to the root.
+- The Angular app automatically connects to emulators when running on `localhost`:
+  - `connectAuthEmulator(getAuth(), 'http://127.0.0.1:9099')`
+  - `connectDatabaseEmulator(getDatabase(), '127.0.0.1', 9000)`
+- Emulator configuration:
+  - Defined in `firebase.json` under `emulators` (auth, database, ui) and `database.rules.json` for permissive local rules.
+  - Seed data location: `tests/mock-data.json`.
+
 ## File structure
 
 - All main pages are stored in the `src/app/pages` folder.
