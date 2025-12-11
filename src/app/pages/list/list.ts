@@ -26,6 +26,9 @@ export class ListPage {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(200)],
   });
+  readonly giftUrl = new FormControl<string | null>('', {
+    validators: [Validators.maxLength(500)],
+  });
   // Derive a primitive signal for invalid state, avoids querying AbstractControl in template repeatedly
   readonly giftTitleInvalid = toSignal(
     this.giftTitle.statusChanges.pipe(map(() => this.giftTitle.invalid)),
@@ -66,8 +69,11 @@ export class ListPage {
     this.submitting.set(true);
     this.addError.set(null);
     try {
-      await this.lists.addGift(id, this.giftTitle.value.trim());
+      const rawUrl = (this.giftUrl.value ?? '').trim();
+      const url = rawUrl.length > 0 ? rawUrl : undefined;
+      await this.lists.addGift(id, this.giftTitle.value.trim(), url);
       this.giftTitle.reset('');
+      this.giftUrl.reset('');
     } catch (e) {
       console.error(e);
       this.addError.set('Impossible d’ajouter le cadeau. Réessaie.');

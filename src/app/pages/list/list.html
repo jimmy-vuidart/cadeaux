@@ -4,32 +4,6 @@
       <h1 class="text-2xl font-bold text-white">{{ title }}</h1>
     </header>
 
-    <section class="rounded-xl border border-slate-700 bg-slate-800/70 p-4 sm:p-6">
-      <h2 class="sr-only">Ajouter un cadeau</h2>
-      <form class="flex flex-col gap-3 sm:flex-row" (ngSubmit)="addGift()">
-        <label for="gift-title" class="sr-only">Titre du cadeau</label>
-        <input
-          id="gift-title"
-          type="text"
-          class="min-w-0 flex-1 rounded-full border border-slate-600 bg-slate-900 px-4 py-2 text-slate-100 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          [formControl]="giftTitle"
-          placeholder="Ex. Lego, livre, etc."
-          [attr.aria-invalid]="giftTitleInvalid() ? 'true' : null"
-        />
-        <button
-          type="submit"
-          class="rounded-full bg-blue-500 px-5 py-2 font-semibold text-white hover:bg-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60"
-          [disabled]="submitting() || giftTitleInvalid()"
-        >
-          Ajouter
-        </button>
-      </form>
-
-      @if (addError()) {
-        <p class="mt-2 text-sm text-red-300" role="alert">{{ addError() }}</p>
-      }
-    </section>
-
     <section class="mt-6">
       <div class="mb-3 flex items-center justify-between gap-3">
         <h2 class="text-lg font-semibold text-white">Cadeaux</h2>
@@ -49,7 +23,18 @@
         @for (g of gifts(); track g.id) {
           <li class="flex items-center justify-between gap-3 px-4 py-3">
             <div class="min-w-0">
-              <p class="truncate text-slate-100">{{ g.title }}</p>
+              @if (g.url) {
+                <a
+                  class="truncate font-medium text-blue-300 underline decoration-blue-400 decoration-2 underline-offset-4 hover:text-blue-200 hover:decoration-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                  [href]="g.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ g.title }}
+                </a>
+              } @else {
+                <p class="truncate text-slate-100">{{ g.title }}</p>
+              }
               @if (fillMode() && g.bought) {
                 <p class="text-xs text-green-300">Déjà acheté</p>
               }
@@ -71,6 +56,41 @@
           <li class="px-4 py-5 text-slate-300">Aucun cadeau pour le moment.</li>
         }
       </ul>
+    </section>
+
+    <h2 class="mt-6 mb-3 text-lg font-semibold text-white">Ajouter un cadeau</h2>
+    <section class="rounded-xl border border-slate-700 bg-slate-800/70 p-4 sm:p-6">
+      <form class="flex flex-col gap-3 sm:flex-row" (ngSubmit)="addGift()">
+        <label for="gift-title" class="sr-only">Titre du cadeau</label>
+        <input
+          id="gift-title"
+          type="text"
+          class="min-w-0 flex-1 rounded-full border border-slate-600 bg-slate-900 px-4 py-2 text-slate-100 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          [formControl]="giftTitle"
+          placeholder="Ex. Lego, livre, etc."
+          [attr.aria-invalid]="giftTitleInvalid() ? 'true' : null"
+        />
+        <label for="gift-url" class="sr-only">URL du cadeau (optionnel)</label>
+        <input
+          id="gift-url"
+          type="url"
+          class="min-w-0 flex-1 rounded-full border border-slate-600 bg-slate-900 px-4 py-2 text-slate-100 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          [formControl]="giftUrl"
+          placeholder="https://exemple.com/produit (optionnel)"
+          inputmode="url"
+        />
+        <button
+          type="submit"
+          class="rounded-full bg-blue-500 px-5 py-2 font-semibold text-white hover:bg-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60"
+          [disabled]="submitting() || giftTitleInvalid()"
+        >
+          Ajouter
+        </button>
+      </form>
+
+      @if (addError()) {
+        <p class="mt-2 text-sm text-red-300" role="alert">{{ addError() }}</p>
+      }
     </section>
   </div>
 

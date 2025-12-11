@@ -49,11 +49,13 @@ export class ListService {
     return listVal<Gift>(this.giftsRef(listId), { keyField: 'id' });
   }
 
-  async addGift(listId: string, title: string): Promise<string> {
+  async addGift(listId: string, title: string, url?: string): Promise<string> {
     const newRef = push(this.giftsRef(listId));
     await set(newRef, {
       title,
       bought: false,
+      // Only persist url when provided
+      ...(url ? { url } : {}),
     } satisfies Omit<Gift, 'id'>);
     return newRef.key as string;
   }

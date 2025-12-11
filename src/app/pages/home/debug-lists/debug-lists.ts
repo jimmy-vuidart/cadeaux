@@ -8,7 +8,7 @@ import type { GiftList } from '@shared/models/gift-list';
 @Component({
   selector: 'app-debug-lists',
   standalone: true,
-  imports: [RouterLink, NgIf],
+  imports: [RouterLink],
   templateUrl: './debug-lists.html',
   styleUrl: './debug-lists.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
