@@ -2,7 +2,7 @@
   <div class="mb-4 flex items-center justify-between gap-3">
     <h2 class="text-3xl font-christmas text-gold-gradient drop-shadow-lg">Cadeaux</h2>
     <app-christmas-button variant="primary" size="sm" [pressed]="fillMode()" (click)="toggleFillMode.emit()">
-      {{ fillMode() ? 'Quitter le mode remplissage' : 'Passer en mode remplissage' }}
+      {{ fillMode() ? 'Quitter le mode « cadeaux achetés »' : 'Passer en mode « cadeaux achetés »' }}
     </app-christmas-button>
   </div>
   @if (fillMode()) {

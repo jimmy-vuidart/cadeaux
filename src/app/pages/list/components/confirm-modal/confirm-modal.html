@@ -4,7 +4,7 @@
   <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
 
   <!-- Dialog -->
-  <div #dialogEl class="relative z-10 w-full max-w-md glass-panel p-8 outline-none" role="dialog" aria-modal="true"
+  <div #dialogEl [class]="computedSizeClass()" class="relative z-10 glass-panel p-8 outline-none" role="dialog" aria-modal="true"
     [attr.aria-labelledby]="'confirm-title'" [attr.aria-describedby]="'confirm-desc'" tabindex="-1"
     (click)="onDialogClick($event)" (keydown)="onKeydown($event)">
 

@@ -7,8 +7,12 @@ import {
   ViewChild,
   input,
   output,
+  signal,
+  computed,
 } from '@angular/core';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
+
+type ModalSize = 'sm' | 'md' | 'lg';
 
 @Component({
   selector: 'app-confirm-modal',
@@ -20,12 +24,15 @@ export class ConfirmModalComponent implements OnChanges {
   open = input(false);
   title = input<string>('Confirmation');
   message = input<string>('');
+  size = input<ModalSize>('md');
   confirmLabel = input<string>('Confirmer');
   cancelLabel = input<string>('Annuler');
 
   confirm = output<void>();
   cancel = output<void>();
   close = output<void>();
+
+  protected readonly computedSizeClass = computed(() => `max-w-${this.size()}`);
 
   @ViewChild('dialogEl') dialogEl?: ElementRef<HTMLDivElement>;
   @ViewChild('confirmBtn') confirmBtn?: ElementRef<HTMLButtonElement>;
