@@ -1,1 +1,11 @@
 /* Page-specific styles (minimal; styling handled via Tailwind classes) */
+
+/* Respect reduced motion for the toast animation */
+.toast-transition {
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-transition {
+    transition: none !important;
+  }
+}

@@ -14,6 +14,26 @@ On this page, the user will be able to view all gifts added to the list, and add
 
 On the list, a button will allow to pass the list in "fill" mode. This mode is a "spoiler", allowing everyone else to pick a gift as "bought already" using a check list.
 
+When enabling the "fill" mode, the app MUST ask for confirmation to avoid spoilers: a modal confirmation warns that enabling this mode will reveal which gifts are already bought. If the list is intended for the current user (recipient), they risk being spoiled. The user must confirm to proceed; otherwise the mode stays disabled.
+
+### UI structure (subcomponents)
+
+The gift list page is organized into clear sections, each managed by a focused subcomponent (no change in features, only structure):
+
+- Header: shows the list title and the Share button.
+- Gifts list: shows all gifts, with a toggle for the fill mode and a checkbox per gift in fill mode.
+- Add gift form: inputs to add a new gift (title and optional URL) with validation and error message.
+- Share toast: transient confirmation message for share/copy actions.
+
+### Partage d’une liste
+
+- Un bouton « Partager » est disponible sur la page d’une liste.
+- Sur smartphone/navigateur compatible, l’application utilise l’API Web Share pour ouvrir les options de partage du système.
+- Sur desktop/PC, si le partage natif n’est pas disponible, l’URL de la liste est copiée dans le presse‑papiers.
+- Un message bref confirme l’action (ou propose de copier manuellement en cas d’échec).
+- Ce message est présenté dans un toast en bas de l’écran, qui apparaît/disparaît avec une légère animation et se ferme automatiquement après quelques secondes (respect du « reduced motion » quand activé).
+
+
 ### Gifts URL (optional)
 
 - When adding a gift, the user can optionally provide a URL to the product/page.

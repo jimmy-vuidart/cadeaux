@@ -9,6 +9,30 @@
   - Any component who is exclusive to a page should be stored in the same folder as the page. (ex: a 'Gift' component for the 'GiftPage' should be stored in the same folder as the 'GiftPage', inside a subfolder for the component)
 - All shared features across all app (auth systems, data models, etc.) should be stored in the `src/app/shared` folder, with subfolders for each element type.
 
+### Gift List page subcomponents
+
+- Path: `src/app/pages/list/components/`
+  - `list-header/` (`ListHeaderComponent`): Displays the page title and a Share button.
+    - Inputs: `title: string`, `sharing: boolean`
+    - Outputs: `share()`
+  - `gifts-list/` (`GiftsListComponent`): Renders the list of gifts and the fill-mode UI.
+    - Inputs: `gifts: Gift[]`, `fillMode: boolean`, `isUpdating: (id: string | null | undefined) => boolean`
+    - Outputs: `toggleFillMode()`, `toggleBought(gift: Gift)`
+  - `add-gift-form/` (`AddGiftFormComponent`): Form to add a gift with validation and error message.
+    - Inputs: `titleControl: FormControl<string>`, `urlControl: FormControl<string|null>`, `submitting: boolean`, `titleInvalid: boolean`, `error: string | null`
+    - Outputs: `submit()`
+  - `share-toast/` (`ShareToastComponent`): Non-blocking toast for share/copy feedback.
+    - Inputs: `message: string | null`, `visible: boolean`
+
+These components are consumed by `ListPage` (`src/app/pages/list/list.ts`) and wired in its `imports` array. They follow the rule: page-only components live alongside the page, under a `components` directory.
+
+### Fill mode confirmation (anti-spoiler)
+
+- When the user attempts to enable the fill mode from the gifts list, `ListPage.toggleFillMode()` intercepts the action and displays a native confirmation dialog (`window.confirm`).
+- The dialog warns in French that enabling fill mode will reveal which gifts have already been bought and may spoil the recipient if the list is intended for them.
+- If the user cancels, the state remains unchanged (fill mode stays off). If confirmed, `fillMode` signal is toggled on.
+- This uses a native confirm for simplicity and accessibility; replaceable later by a custom modal if a design system is introduced.
+
 # TypeScript Best Practices
 
 - Use strict type checking
@@ -17,13 +41,14 @@
 
 # Angular Best Practices
 
-- Always use standalone components over NgModules
-- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
+- Always use standalone components over NgModules.
+- Do NOT set `standalone: true` inside Angular decorators (default in Angular v20+).
 - Use signals for state management
 - Implement lazy loading for feature routes
 - Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
 - Use `NgOptimizedImage` for all static images.
   - `NgOptimizedImage` does not work for inline base64 images.
+- Make small subcomponents often in a page, like for every page features
 
 ## Accessibility Requirements
 
@@ -32,15 +57,15 @@
 
 ### Components
 
-- Keep components small and focused on a single responsibility
-- Use `input()` and `output()` functions instead of decorators
-- Use `computed()` for derived state
-- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator
-- Prefer inline templates for small components
-- Prefer Reactive forms instead of Template-driven ones
-- Do NOT use `ngClass`, use `class` bindings instead
-- Do NOT use `ngStyle`, use `style` bindings instead
-- When using external templates/styles, use paths relative to the component TS file.
+- Keep components small and focused on a single responsibility.
+- Use `input()` and `output()` functions instead of decorators. The list subcomponents implement this.
+- Use `computed()` for derived state when needed.
+- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator.
+- Prefer inline templates for small components; for larger sections, use external templates co-located with the component TS file.
+- Prefer Reactive forms instead of Template-driven ones. The add gift form uses `FormControl`s passed from the parent.
+- Do NOT use `ngClass`; use `class` bindings instead.
+- Do NOT use `ngStyle`; use `style` bindings instead.
+- When using external templates/styles, use paths relative to the component TS file (done for list subcomponents).
 
 ## State Management
 
@@ -52,10 +77,12 @@
 ## Templates
 
 - Keep templates simple and avoid complex logic
-- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
-- Use the async pipe to handle observables
+- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`.
+- Use the async pipe to handle observables.
 - Do not assume globals like (`new Date()`) are available.
 - Do not write arrow functions in templates (they are not supported).
+
+Note: When passing function inputs to child components (e.g., `isUpdating`), keep the reference stable by exposing a bound method or a readonly arrow function on the class, then call it inside the child template via `isUpdating()(id)` because `input()` returns a signal.
 
 ## Services
 

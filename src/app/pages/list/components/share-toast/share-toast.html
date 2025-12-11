@@ -1,0 +1,20 @@
+@if (message()) {
+  <div
+    class="fixed inset-x-0 bottom-4 z-50 flex justify-center px-4"
+    [attr.role]="visible() ? 'status' : null"
+    [attr.aria-live]="visible() ? 'polite' : null"
+    [attr.aria-hidden]="visible() ? null : 'true'"
+  >
+    <div
+      class="toast-transition max-w-fit rounded-full bg-slate-800/95 px-4 py-2 text-sm text-slate-100 shadow-lg ring-1 ring-slate-700 transition-all duration-200 ease-out"
+      [class.opacity-100]="visible()"
+      [class.opacity-0]="!visible()"
+      [class.translate-y-0]="visible()"
+      [class.translate-y-2]="!visible()"
+      [class.pointer-events-auto]="visible()"
+      [class.pointer-events-none]="!visible()"
+    >
+      {{ message() }}
+    </div>
+  </div>
+}
