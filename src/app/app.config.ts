@@ -7,11 +7,13 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getDatabase, provideDatabase } from '@angular/fire/database';
 import { connectAuthEmulator } from 'firebase/auth';
 import { connectDatabaseEmulator } from 'firebase/database';
+import { provideUx } from './ux/ux.config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    provideUx({ theme: 'auto', density: 'comfortable', motion: 'auto' }),
     provideFirebaseApp(() =>
       initializeApp({
         projectId: 'cadeaux-vuidart',

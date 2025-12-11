@@ -57,3 +57,29 @@ The gift list page is organized into clear sections, each managed by a focused s
 - The ID is the title transformed into kebab-case (lowercase, spaces and non-alphanumeric characters replaced by dashes, diacritics removed).
 - If the resulting ID already exists, a numeric suffix is appended (e.g., `ma-liste`, `ma-liste-2`, `ma-liste-3`, ...).
 - This guarantees stable, human-readable URLs like `/lists/anniversaire-julie`.
+
+## App UX customization and consistency
+
+Overview
+- The app’s user experience (UX) is centrally configurable. Product owners can tune the visual theme, component density, and motion preferences without touching page code.
+
+What can be customized
+- Theme mode: Choose between automatic (follows device), light, or dark.
+- Brand colors: Adjust the brand palette to match identity.
+- Density: Choose comfortable or compact layout to fit more items on screen if needed.
+- Motion: Respect device preferences and optionally reduce or prefer motion.
+- Shape: Adjust the global roundness of UI elements.
+
+Shared UI building blocks
+- Buttons: Primary and secondary buttons with consistent states and accessibility.
+- Cards: Standard container for sections and panels.
+- Inputs: Text inputs and textareas styled consistently across the app.
+
+Principles
+- Consistency: All pages share the same look‑and‑feel through shared components and tokens.
+- Accessibility: Focus states are clearly visible; motion respects user preferences.
+- Brandability: Key visual aspects (colors, density, shape) can be changed from a central place.
+
+How teams use it
+- Configure the global UX in one place (no page‑by‑page tweaking).
+- Compose pages using shared UI components (Button, Card, Inputs) for consistent behavior and appearance.

@@ -83,7 +83,7 @@ These components are consumed by `ListPage` (`src/app/pages/list/list.ts`) and w
 - Use `input()` and `output()` functions instead of decorators. The list subcomponents implement this.
 - Use `computed()` for derived state when needed.
 - Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator.
-- Prefer inline templates for small components; for larger sections, use external templates co-located with the component TS file.
+- Always use external templates files co-located with the component TS file.
 - Prefer Reactive forms instead of Template-driven ones. The add gift form uses `FormControl`s passed from the parent.
 - Do NOT use `ngClass`; use `class` bindings instead.
 - Do NOT use `ngStyle`; use `style` bindings instead.
@@ -148,3 +148,84 @@ Note: When passing function inputs to child components (e.g., `isUpdating`), kee
   - Leading/trailing dashes trimmed
 - If an ID already exists, a numeric suffix is appended to ensure uniqueness: `id`, `id-2`, `id-3`, ...
 - The list is stored at `lists/<computed-id>` with payload `{ title }`.
+
+## Centralized UX architecture (Tailwind + Angular)
+
+Overview
+- TailwindCSS v4 is used for styling. UX tokens (colors, surfaces, text colors, radii) are centralized in `src/styles.css` using CSS variables and Tailwind `@theme` tokens.
+- A configurable Angular service (`UxService`) exposes a single source of truth for theme mode, density, motion preference, and radius scaling. It is provided app-wide via `provideUx()` in `app.config.ts`.
+- Shared UI components and utilities ensure consistent styling and accessibility across the app.
+
+Files
+- `src/styles.css`
+  - Imports Tailwind: `@import 'tailwindcss';`
+  - Defines CSS variables on `:root` for brand palette (`--brand-50..900`), surfaces (`--surface`, `--surface-muted`), text colors, and radii (`--radius-sm|md|lg`).
+  - Defines a `.theme-dark` class to switch tokens for dark mode.
+  - Exposes Tailwind v4 tokens via `@theme` mapping, e.g. `--color-brand-600: var(--brand-600);` and `--color-surface: rgb(var(--surface));`.
+  - Provides reusable utilities via Tailwind `@utility` for: focus ring (`focus-ring`), cards (`card`), buttons (`btn-base`, `btn-primary`, `btn-secondary`, size variants), inputs (`input-base`, `input-invalid`).
+  - Supports density via `:root[data-density='compact']` to adjust radii and paddings.
+
+- `src/app/ux/ux.config.ts`
+  - `UxConfig` interface with: `theme: 'auto'|'light'|'dark'`, `density: 'comfortable'|'compact'`, `motion: 'auto'|'reduce'|'prefer'`, `radiusScale`, and optional `brand` overrides.
+  - `UX_CONFIG` injection token with `DEFAULT_UX_CONFIG`.
+  - `UxService` (provided in root):
+    - `init()` applies config to `document.documentElement`: theme class (`.theme-dark`), `data-density`, `data-motion`, scales radii tokens, and applies brand overrides to CSS variables.
+    - `update(partial)` merges and reapplies.
+  - `provideUx(config?)` returns providers for `UX_CONFIG` and an `APP_INITIALIZER` that runs `UxService.init()` at startup.
+
+- `src/app/app.config.ts`
+  - Spreads `...provideUx({ theme: 'auto', density: 'comfortable', motion: 'auto' })` into providers list.
+
+- Shared UI components (standalone)
+  - `src/app/shared/ui/button/button.ts` — `<ui-button>`
+    - Inputs: `variant: 'primary'|'secondary'`, `size: 'sm'|'md'|'lg'`, `type`, `disabled`.
+    - Uses utilities: `btn-base`, `btn-primary`/`btn-secondary`, `btn-sm|md|lg`, and `focus-visible:focus-ring`.
+  - `src/app/shared/ui/card/card.ts` — `<ui-card>`
+    - Inputs: `title?`, `ariaLabel?`.
+    - Uses `card` utility and standard padding.
+  - `src/app/shared/ui/input/input.ts` — `uiInput` directive for `<input>`/`<textarea>`
+    - Inputs: `size`, `invalid`.
+    - Applies `input-base`, size text classes, `focus-visible:focus-ring`, and `input-invalid` when needed.
+
+Usage guidelines
+- Theming
+  - To force dark mode globally: `ux.update({ theme: 'dark' })` or set initial provideUx config.
+  - To follow system preference: use `theme: 'auto'` (default). `UxService` toggles `.theme-dark` automatically.
+  - To customize brand color family at runtime:
+    ```ts
+    ux.update({ brand: { 600: '#0ea5e9' /* cyan-600 */ } });
+    ```
+
+- Density
+  - Switch to compact: `ux.update({ density: 'compact' })`.
+  - Components that rely on `btn-*` or `input-base` automatically adapt.
+
+- Motion
+  - Default `auto` respects `prefers-reduced-motion`. Force: `ux.update({ motion: 'reduce' })`.
+
+- Components
+  - Buttons:
+    ```html
+    <ui-button variant="primary" size="md" (clicked)="save()">Save</ui-button>
+    <ui-button variant="secondary" size="sm">Cancel</ui-button>
+    ```
+  - Card:
+    ```html
+    <ui-card title="Gifts">
+      <!-- content -->
+    </ui-card>
+    ```
+  - Inputs:
+    ```html
+    <input uiInput placeholder="Title" [invalid]="titleCtrl.invalid" />
+    <textarea uiInput size="lg"></textarea>
+    ```
+
+Best practices
+- Prefer shared UI components and utilities over ad-hoc Tailwind classes to ensure centralized control.
+- Keep page CSS minimal; rely on tokens/utilities for color, spacing, and states.
+- Ensure focus styles use `focus-visible:focus-ring` and do not remove outlines.
+- Never hardcode brand colors in pages; use semantic tokens or shared utilities.
+
+Notes
+- The root README.md is intentionally not modified.

@@ -1,3 +1,118 @@
-/* You can add global styles to this file, and also import other style files */
-
+/* Global styles and Tailwind setup */
 @import 'tailwindcss';
+
+/* UX Theme tokens centralized via CSS variables + Tailwind @theme (Tailwind v4) */
+:root {
+  /* brand */
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #4338ca;
+  --brand-800: #3730a3;
+  --brand-900: #312e81;
+
+  /* surfaces */
+  --surface: 255 255 255; /* white */
+  --surface-muted: 248 250 252; /* slate-50 */
+  --text: 15 23 42; /* slate-900 */
+  --text-muted: 71 85 105; /* slate-600 */
+
+  /* shape & motion */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --ring: 0 0 0 3px rgba(99, 102, 241, 0.35);
+}
+
+/* Dark theme override (opt-in by class) */
+.theme-dark {
+  --surface: 9 9 11; /* zinc-950 */
+  --surface-muted: 24 24 27; /* zinc-900 */
+  --text: 244 244 245; /* zinc-100 */
+  --text-muted: 161 161 170; /* zinc-400 */
+}
+
+/* Tailwind semantic tokens */
+@theme {
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  --color-surface: rgb(var(--surface));
+  --color-surface-muted: rgb(var(--surface-muted));
+  --color-text: rgb(var(--text));
+  --color-text-muted: rgb(var(--text-muted));
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+}
+
+/* Reusable utilities tied to tokens */
+@utility focus-ring {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+@utility card {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+@utility btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+@utility btn-primary { background-color: var(--color-brand-600); color: white; }
+
+@utility btn-secondary {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+  border: 1px solid rgb(226 232 240);
+}
+
+@utility btn-sm { padding: 0.375rem 0.625rem; font-size: 0.875rem; }
+@utility btn-md { padding: 0.5rem 0.875rem; font-size: 0.95rem; }
+@utility btn-lg { padding: 0.75rem 1rem; font-size: 1rem; }
+
+/* Density adjustments */
+:root[data-density='compact'] {
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+}
+
+:root[data-density='compact'] .btn-sm { padding: 0.25rem 0.5rem; }
+:root[data-density='compact'] .btn-md { padding: 0.375rem 0.625rem; }
+:root[data-density='compact'] .btn-lg { padding: 0.5rem 0.75rem; }
+
+/* Inputs */
+@utility input-base {
+  width: 100%;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid rgb(226 232 240);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+}
+
+@utility input-invalid { border-color: rgb(248 113 113); }
