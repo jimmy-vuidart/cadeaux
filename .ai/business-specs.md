@@ -14,7 +14,7 @@ On this page, the user will be able to view all gifts added to the list, and add
 
 On the list, a button will allow to pass the list in "fill" mode. This mode is a "spoiler", allowing everyone else to pick a gift as "bought already" using a check list.
 
-When enabling the "fill" mode, the app MUST ask for confirmation to avoid spoilers: a modal confirmation warns that enabling this mode will reveal which gifts are already bought. If the list is intended for the current user (recipient), they risk being spoiled. The user must confirm to proceed; otherwise the mode stays disabled.
+When enabling the "fill" mode, the app MUST ask for confirmation to avoid spoilers using a custom in-app modal (not the browser native confirm). The modal warns that enabling this mode will reveal which gifts are already bought. If the list is intended for the current user (recipient), they risk being spoiled. The user must confirm to proceed; otherwise the mode stays disabled.
 
 ### UI structure (subcomponents)
 

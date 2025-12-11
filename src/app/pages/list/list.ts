@@ -9,10 +9,11 @@ import { ListHeaderComponent } from './components/list-header/list-header';
 import { GiftsListComponent } from './components/gifts-list/gifts-list';
 import { AddGiftFormComponent } from './components/add-gift-form/add-gift-form';
 import { ShareToastComponent } from './components/share-toast/share-toast';
+import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal';
 
 @Component({
   selector: 'app-list',
-  imports: [ReactiveFormsModule, FormsModule, ListHeaderComponent, GiftsListComponent, AddGiftFormComponent, ShareToastComponent],
+  imports: [ReactiveFormsModule, FormsModule, ListHeaderComponent, GiftsListComponent, AddGiftFormComponent, ShareToastComponent, ConfirmModalComponent],
   templateUrl: './list.html',
   styleUrl: './list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +50,8 @@ export class ListPage {
   readonly sharing = signal(false);
   readonly shareInfo = signal<string | null>(null);
   readonly toastVisible = signal(false);
+  readonly confirmFillOpen = signal(false);
+  private lastFocusedEl: HTMLElement | null = null;
 
   // Data signals
   readonly listData = toSignal(
@@ -93,14 +96,32 @@ export class ListPage {
 
   toggleFillMode(): void {
     const currentlyOn = this.fillMode();
-    // Only confirm when enabling the fill mode
-    if (!currentlyOn) {
-      const ok = confirm(
-        "Activer le mode remplissage va afficher quels cadeaux sont déjà achetés.\n\nSi cette liste est destinée pour toi, tu risques d'être spoilé(e).\n\nVeux-tu vraiment activer le mode remplissage ?",
-      );
-      if (!ok) return;
+    if (currentlyOn) {
+      // Turning off does not require confirmation
+      this.fillMode.set(false);
+      return;
     }
-    this.fillMode.update((v) => !v);
+    // Enabling: open custom confirmation modal
+    this.lastFocusedEl = (document.activeElement as HTMLElement) ?? null;
+    this.confirmFillOpen.set(true);
+  }
+
+  confirmEnableFillMode(): void {
+    this.fillMode.set(true);
+    this.confirmFillOpen.set(false);
+    this.restoreFocus();
+  }
+
+  cancelEnableFillMode(): void {
+    this.confirmFillOpen.set(false);
+    this.restoreFocus();
+  }
+
+  private restoreFocus(): void {
+    try {
+      this.lastFocusedEl?.focus();
+    } catch {}
+    this.lastFocusedEl = null;
   }
 
   // Avoid Set.prototype.has in template to keep bindings primitive-only

@@ -28,10 +28,17 @@ These components are consumed by `ListPage` (`src/app/pages/list/list.ts`) and w
 
 ### Fill mode confirmation (anti-spoiler)
 
-- When the user attempts to enable the fill mode from the gifts list, `ListPage.toggleFillMode()` intercepts the action and displays a native confirmation dialog (`window.confirm`).
-- The dialog warns in French that enabling fill mode will reveal which gifts have already been bought and may spoil the recipient if the list is intended for them.
-- If the user cancels, the state remains unchanged (fill mode stays off). If confirmed, `fillMode` signal is toggled on.
-- This uses a native confirm for simplicity and accessibility; replaceable later by a custom modal if a design system is introduced.
+- When the user attempts to enable the fill mode from the gifts list, `ListPage.toggleFillMode()` opens a custom in-app confirmation modal (`ConfirmModalComponent`).
+- The modal warns in French that enabling fill mode will reveal which gifts have already been bought and may spoil the recipient if the list is intended for them.
+- If the user cancels/closes, the state remains unchanged (fill mode stays off). If confirmed, the page sets `fillMode = true`.
+- Accessibility: the modal uses `role="dialog"`, `aria-modal="true"`, labelled title and description, focuses a button on open, supports Escape and backdrop click to close, and restores focus to the trigger on close.
+
+#### Components
+
+- `ConfirmModalComponent` (path: `src/app/pages/list/components/confirm-modal/`)
+  - Inputs: `open: boolean`, `title: string`, `message: string`, `confirmLabel: string`, `cancelLabel: string`.
+  - Outputs: `confirm()`, `cancel()`, `close()`.
+  - Styling matches existing Tailwind look (rounded panel, slate colors, focus rings).
 
 # TypeScript Best Practices
 
