@@ -76,9 +76,20 @@ The workflow expects the Angular build output at `dist/cadeaux-vuidart/browser` 
 
 ### Triggering a Deployment
 
-1. Go to GitHub → Actions → "Build and Deploy to Firebase Hosting".
-2. Click "Run workflow".
-3. Optionally set the `environment` input to a Firebase project ID if you want to override the `FIREBASE_PROJECT_ID` secret for this run (useful for staging vs production).
+Two ways:
+
+1. Manual dispatch
+   - Go to GitHub → Actions → "Build and Deploy to Firebase Hosting".
+   - Click "Run workflow".
+   - Optionally set the `environment` input to a Firebase project ID if you want to override the `FIREBASE_PROJECT_ID` secret for this run (useful for staging vs production).
+
+2. Push tags
+   - Pushing a git tag that starts with `v` (e.g., `v1.0.0`, `v2025.12.11`) will automatically trigger the workflow.
+   - Example:
+     ```bash
+     git tag v1.0.0
+     git push origin v1.0.0
+     ```
 
 ### Implementation Details
 
