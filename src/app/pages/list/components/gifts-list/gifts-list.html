@@ -15,9 +15,10 @@
   <p class="mb-3 text-xs text-white/50 italic text-right">Astuce : déplace les cadeaux pour les réorganiser.</p>
   }
 
-  <ul class="card-glass flex flex-col divide-y divide-white/10 overflow-hidden" role="list">
+  <ul class="card-glass flex flex-col divide-y divide-white/10 overflow-hidden w-full" role="list">
     @for (g of gifts(); track g.id; let i = $index) {
-    <li class="px-4 py-3 transition-colors hover:bg-white/5" (dragover)="onDragOver($event, i)" (drop)="onDrop(i)"
+      <li (dragover)="onDragOver($event, i)" (drop)="onDrop(i)"
+          class="px-4 py-3 transition-colors hover:bg-white/5 w-full"
       [ngClass]="{
         'bg-white/10': isDragging(i),
         'ring-inset': isDropTarget(i),
@@ -53,8 +54,8 @@
       <p class="mt-2 text-sm text-red-400" role="alert">{{ editError() }}</p>
       }
       } @else {
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex min-w-0 items-center gap-3">
+        <div class="flex items-center justify-between gap-3 w-full flex-nowrap">
+          <div class="flex flex-1 min-w-0 items-center gap-3">
           <button type="button"
             class="inline-flex size-8 shrink-0 cursor-grab items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
             [attr.aria-label]="'Déplacer ' + g.title" [disabled]="fillMode() || !!editingId() || isUpdating()(g.id!)"
@@ -65,12 +66,13 @@
           </button>
           <div class="min-w-0 flex flex-col">
             @if (g.url) {
-            <a class="truncate font-bold text-base text-gold-gradient underline decoration-gold-400/50 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+              <a
+                class="whitespace-normal break-words sm:truncate font-bold text-base text-gold-gradient underline decoration-gold-400/50 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
               [href]="g.url" target="_blank" rel="noopener noreferrer">
               {{ g.title }}
             </a>
             } @else {
-            <p class="truncate font-bold text-base text-white">{{ g.title }}</p>
+              <p class="whitespace-normal break-words sm:truncate font-bold text-base text-white">{{ g.title }}</p>
             }
             @if (fillMode() && g.bought) {
             <p class="text-[0.65rem] font-bold text-green-400 flex items-center gap-1 mt-0.5 uppercase tracking-wide">
@@ -81,7 +83,7 @@
           </div>
         </div>
         @if (fillMode()) {
-        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
           <div class="relative flex items-center">
             <input type="checkbox"
               class="peer size-6 appearance-none rounded-md border-2 border-white/30 bg-black/20 checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer transition-all"
@@ -92,7 +94,7 @@
           </div>
         </div>
         } @else {
-        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
           @if (deletingId() === g.id) {
           <button type="button"
             class="rounded-md inline-flex size-8 items-center justify-center bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-60 transition-all backdrop-blur-md"

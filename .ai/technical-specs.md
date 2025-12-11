@@ -28,6 +28,27 @@
 - `src/app/pages/home/home.html`: hero title scales on mobile; primary CTA becomes full‑width on small screens.
 - `src/app/pages/list/components/gifts-list/gifts-list.html`: header row wraps on small screens; toggle button can be full width on mobile.
 
+#### Gift cards width and title wrapping (phones)
+
+- Ensure gift list cards fully fit the viewport on small devices:
+  - The list container uses `w-full` on the `<ul>` and each `<li>`.
+  - The row wrapper inside each `<li>` uses `w-full flex-nowrap` so action buttons stay aligned at the right and never wrap to a new line.
+  - Left info block uses `flex-1 min-w-0` so text can wrap/truncate within the available space instead of expanding the row.
+  - Right action clusters keep `shrink-0` so they don’t compress or stretch layout.
+- Title rendering strategy:
+  - On phones, allow wrapping and breaking long words/URLs: `whitespace-normal break-words`.
+  - From `sm` breakpoint and up, revert to a single-line `truncate` for a tidy table‑like look.
+
+#### Additional fixes for iPhone horizontal scrolling
+
+- Global overflow prevention: add `html { overflow-x: hidden; }` in `src/styles.css` alongside the existing `body { overflow-x: hidden; }` to avoid iOS Safari edge overflows.
+- Decorative snowflakes: on small screens, disable the horizontal shake animation to prevent any off‑viewport translations from creating scrollbars:
+  - In `src/styles.css` add a media query `@media (max-width: 640px) { .snowflake { animation-name: snowflakes-fall, none; } }`.
+- Gifts list row layout: ensure rows don’t expand horizontally on narrow viewports:
+  - Wrap the row container on small screens with `flex-wrap sm:flex-nowrap`.
+  - Keep the left content container clamped with `min-w-0` so the title can truncate.
+  - Prevent the right action clusters (checkbox or icon buttons) from shrinking the title area with `shrink-0`.
+
 ## Local development – Firebase Emulators
 
 - The project uses Firebase Emulators locally for Auth and Realtime Database.

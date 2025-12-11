@@ -74,6 +74,11 @@ body {
   overflow-x: hidden;
 }
 
+/* Prevent any horizontal scrolling on iOS/Safari by also hiding it on html */
+html {
+  overflow-x: hidden;
+}
+
 /* Subtle Snow (Opacity reduced for classiness) */
 .snowflake {
   color: rgba(255, 255, 255, 0.3);
@@ -91,6 +96,13 @@ body {
   animation-timing-function: linear, ease-in-out;
   animation-iteration-count: infinite, infinite;
   animation-play-state: running, running;
+}
+
+/* On small screens, disable horizontal shake to avoid any chance of horizontal overflow */
+@media (max-width: 640px) {
+  .snowflake {
+    animation-name: snowflakes-fall, none;
+  }
 }
 
 .snowflake:nth-of-type(0) {

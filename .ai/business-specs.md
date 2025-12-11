@@ -25,6 +25,9 @@ When enabling the "fill" mode, the app MUST ask for confirmation to avoid spoile
 - The app is fully usable on smartphones. Content adapts to small screens without horizontal scrolling.
 - Primary actions become full‑width buttons on mobile to make them easy to tap.
 - Dialogs fit the screen height and scroll internally when content is long, so confirmations are readable and accessible on phones.
+- Decorative animations are tuned for stability on phones to avoid accidental horizontal scrolling.
+- Cards on the gift list fit the screen width on phones; long titles wrap neatly without breaking the layout.
+- In the gifts list, action buttons (edit/delete or the checkbox in fill mode) remain aligned on the right; the gift title wraps on multiple lines before the actions when needed.
 
 ### UI structure (subcomponents)
 
