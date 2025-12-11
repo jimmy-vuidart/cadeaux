@@ -41,6 +41,10 @@ export class ListService {
     return objectVal<GiftList>(this.listRef(id), { keyField: 'id' });
   }
 
+  listAll(): Observable<GiftList[]> {
+    return listVal<GiftList>(this.listsRef(), { keyField: 'id' });
+  }
+
   listGifts(listId: string): Observable<Gift[]> {
     return listVal<Gift>(this.giftsRef(listId), { keyField: 'id' });
   }

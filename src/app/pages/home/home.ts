@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, isDevMode, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CreateListModalComponent } from './create-list-modal/create-list-modal';
+import { DebugListsComponent } from './debug-lists/debug-lists';
 
 @Component({
   selector: 'app-home',
-  imports: [CreateListModalComponent],
+  imports: [CreateListModalComponent, DebugListsComponent],
   templateUrl: './home.html',
   styleUrl: './home.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,10 +15,7 @@ export class Home {
 
   // Modal state
   readonly showModal = signal(false);
-
-  ngOnInit() {
-    throw new Error('Method not implemented.');
-  }
+  readonly dev = isDevMode();
 
   onCreateList(): void {
     this.showModal.set(true);

@@ -57,6 +57,9 @@
       </section>
     </main>
   </div>
+  @if (dev) {
+    <app-debug-lists></app-debug-lists>
+  }
   @if (showModal()) {
     <app-create-list-modal (cancel)="closeModal()" (created)="handleCreated($event)"></app-create-list-modal>
   }
