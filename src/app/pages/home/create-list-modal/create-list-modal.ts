@@ -3,9 +3,11 @@ import { ReactiveFormsModule, FormControl, Validators, FormsModule } from '@angu
 import { output } from '@angular/core';
 import { ListService } from '@shared/services/list.service';
 
+import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
+
 @Component({
   selector: 'app-create-list-modal',
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [ReactiveFormsModule, FormsModule, ChristmasButtonComponent],
   templateUrl: './create-list-modal.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

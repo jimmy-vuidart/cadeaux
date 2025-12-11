@@ -2,9 +2,9 @@
   <div class="flex items-center justify-between gap-3">
     <h1 class="text-5xl font-bold text-gold-gradient font-christmas drop-shadow-2xl pb-2 tracking-wider">{{ title() }}
     </h1>
-    <button type="button" class="btn-secondary btn-sm rounded-md" (click)="onShareClick()" [disabled]="sharing()"
-      [attr.aria-busy]="sharing() ? 'true' : null" aria-label="Partager la liste" title="Partager la liste">
+    <app-christmas-button variant="primary" size="sm" [busy]="sharing()" (click)="onShareClick()"
+      aria-label="Partager la liste" title="Partager la liste">
       {{ sharing() ? 'Partage…' : 'Partager' }}
-    </button>
+    </app-christmas-button>
   </div>
 </header>

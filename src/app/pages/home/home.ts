@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, inject, isDevMode, signal } from '@
 import { Router } from '@angular/router';
 import { CreateListModalComponent } from './create-list-modal/create-list-modal';
 import { DebugListsComponent } from './debug-lists/debug-lists';
+import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 
 @Component({
   selector: 'app-home',
-  imports: [CreateListModalComponent, DebugListsComponent],
+  imports: [CreateListModalComponent, DebugListsComponent, ChristmasButtonComponent],
   templateUrl: './home.html',
   styleUrl: './home.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,1 +1,1 @@
-- Instructions are in .ai/guidelines.md
+- Refer to .ai/guidelines.md to have your direct instructions. Read this file first.

@@ -24,14 +24,13 @@
     </header>
 
     <main class="space-y-10">
-      <section aria-labelledby="get-started-title" class="space-y-6">
+      <section aria-labelledby="get-started-title" class="space-y-6 flex flex-col items-center">
         <h2 id="get-started-title" class="sr-only">Commencer</h2>
 
-        <button type="button"
-          class="btn-primary btn-lg w-full sm:w-auto px-10 py-4 text-xl rounded-full shadow-xl shadow-red-600/20 hover:scale-105 transition-transform"
+        <app-christmas-button variant="primary" size="lg"
           (click)="onCreateList()">
           Créer ma liste de Noël
-        </button>
+        </app-christmas-button>
 
         <p class="text-sm text-white/60">
           Ensuite, invite ta famille et active le mode <strong class="text-gold-400">«&nbsp;remplissage&nbsp;»</strong>

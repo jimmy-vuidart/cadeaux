@@ -8,10 +8,12 @@ import {
   input,
   output,
 } from '@angular/core';
+import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 
 @Component({
   selector: 'app-confirm-modal',
   templateUrl: './confirm-modal.html',
+  imports: [ChristmasButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmModalComponent implements OnChanges {

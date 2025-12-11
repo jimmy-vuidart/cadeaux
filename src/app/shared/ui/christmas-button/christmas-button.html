@@ -1,0 +1,14 @@
+<button  [class]="computedClass()" [disabled]="disabled() || busy()"
+    [attr.aria-busy]="busy() ? 'true' : null" [attr.aria-pressed]="pressed() ? 'true' : null">
+
+    @if (busy()) {
+    <span
+        class="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-1"></span>
+    } @else if (icon()) {
+    <span class="material-symbols-outlined text-lg">{{ icon() }}</span>
+    }
+
+    <span>
+        <ng-content></ng-content>
+    </span>
+</button>

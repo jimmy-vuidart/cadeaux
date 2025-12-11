@@ -15,8 +15,11 @@
     </div>
 
     <div class="flex justify-end pt-2">
-      <button type="submit" class="btn-primary rounded-md px-6 shadow-lg shadow-red-500/20"
-        [disabled]="submitting() || titleInvalid()">
+      <button type="button" class="btn-secondary rounded-md mr-auto" (click)="cancel.emit()" title="Fermer"
+        aria-label="Fermer">
+        Fermer
+      </button>
+      <button type="submit" class="btn-primary rounded-md px-6" [disabled]="submitting() || titleInvalid()">
         Ajouter
       </button>
     </div>

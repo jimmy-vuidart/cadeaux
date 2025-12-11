@@ -10,10 +10,20 @@ import { GiftsListComponent } from './components/gifts-list/gifts-list';
 import { AddGiftFormComponent } from './components/add-gift-form/add-gift-form';
 import { ShareToastComponent } from './components/share-toast/share-toast';
 import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal';
+import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 
 @Component({
   selector: 'app-list',
-  imports: [ReactiveFormsModule, FormsModule, ListHeaderComponent, GiftsListComponent, AddGiftFormComponent, ShareToastComponent, ConfirmModalComponent],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    ListHeaderComponent,
+    GiftsListComponent,
+    AddGiftFormComponent,
+    ShareToastComponent,
+    ConfirmModalComponent,
+    ChristmasButtonComponent
+  ],
   templateUrl: './list.html',
   styleUrl: './list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,7 +78,12 @@ export class ListPage {
   readonly shareInfo = signal<string | null>(null);
   readonly toastVisible = signal(false);
   readonly confirmFillOpen = signal(false);
+  readonly showAddForm = signal(false);
   private lastFocusedEl: HTMLElement | null = null;
+
+  toggleAddForm(): void {
+    this.showAddForm.update((v) => !v);
+  }
 
   // Data signals
   readonly listData = toSignal(
@@ -151,7 +166,7 @@ export class ListPage {
   private restoreFocus(): void {
     try {
       this.lastFocusedEl?.focus();
-    } catch {}
+    } catch { }
     this.lastFocusedEl = null;
   }
 

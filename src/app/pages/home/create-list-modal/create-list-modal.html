@@ -1,27 +1,31 @@
-<div class="fixed inset-0 z-40 bg-black/60" aria-hidden="true" (click)="onCancel()"></div>
+<div class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" aria-hidden="true" (click)="onCancel()"></div>
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
   <div role="dialog" aria-modal="true" aria-labelledby="create-list-title"
-    class="w-full max-w-md card p-5 outline-none">
-    <h2 id="create-list-title" class="text-lg font-semibold text-text ribbon-underline inline-block pb-1">Nouvelle liste
-    </h2>
-    <p class="mt-2 text-sm text-text-muted">Entre un titre pour ta liste.</p>
+    class="w-full max-w-md glass-panel p-8 outline-none">
+    <h2 id="create-list-title" class="text-3xl font-bold font-christmas text-gold-gradient drop-shadow-lg mb-2">Nouvelle
+      liste</h2>
+    <p class="text-white/70">Entre un titre pour ta liste de Noël.</p>
 
-    <form class="mt-4 space-y-3" (ngSubmit)="submit()">
-      <label for="list-title" class="sr-only">Titre de la liste</label>
-      <input id="list-title" type="text" class="input-base" [formControl]="titleCtrl" placeholder="Ex. Noël 2025"
-        [attr.aria-invalid]="titleCtrl.invalid ? 'true' : null" autofocus />
+    <form class="mt-6 space-y-4" (ngSubmit)="submit()">
+      <div>
+        <label for="list-title" class="sr-only">Titre de la liste</label>
+        <input id="list-title" type="text" class="input-base text-lg placeholder-white/40" [formControl]="titleCtrl"
+          placeholder="Ex. Noël 2025" [attr.aria-invalid]="titleCtrl.invalid ? 'true' : null" autofocus />
+      </div>
 
       @if (error()) {
-      <p class="text-sm text-red-300" role="alert">{{ error() }}</p>
+      <p class="text-sm text-red-400 bg-red-900/20 px-3 py-2 rounded border border-red-500/20" role="alert">{{ error()
+        }}</p>
       }
 
-      <div class="mt-2 flex items-center justify-end gap-2">
-        <button type="button" class="btn-secondary btn-sm" (click)="onCancel()" [disabled]="creating()">
+      <div class="mt-6 flex items-center justify-end gap-3">
+        <app-christmas-button variant="secondary" size="sm" (click)="onCancel()" [disabled]="creating()">
           Annuler
-        </button>
-        <button type="submit" class="btn-primary btn-sm" [disabled]="creating() || titleCtrl.invalid">
+        </app-christmas-button>
+        <app-christmas-button variant="primary" size="sm" type="submit" [busy]="creating()"
+          [disabled]="creating() || titleCtrl.invalid">
           {{ creating() ? 'Création…' : 'Créer la liste' }}
-        </button>
+        </app-christmas-button>
       </div>
     </form>
   </div>

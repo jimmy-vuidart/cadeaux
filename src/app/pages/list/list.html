@@ -27,8 +27,17 @@
     </div>
 
     <!-- Add Gift Section (Separate Card) -->
+    <!-- Add Gift Section (Toggle) -->
+    @if (showAddForm()) {
     <app-add-gift-form [titleControl]="giftTitle" [urlControl]="giftUrl" [submitting]="submitting()"
-      [titleInvalid]="giftTitleInvalid()" [error]="addError()" (addGift)="addGift()" />
+      [titleInvalid]="giftTitleInvalid()" [error]="addError()" (addGift)="addGift()" (cancel)="toggleAddForm()" />
+    } @else {
+    <div class="flex justify-end">
+      <app-christmas-button variant="primary" size="sm" icon="add_circle" (click)="toggleAddForm()">
+        Ajouter des cadeaux
+      </app-christmas-button>
+    </div>
+    }
   </div>
 
   <app-share-toast [message]="shareInfo()" [visible]="toastVisible()" />

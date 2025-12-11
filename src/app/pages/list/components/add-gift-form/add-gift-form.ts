@@ -10,9 +10,10 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 export class AddGiftFormComponent {
   titleControl = input.required<FormControl<string>>();
   urlControl = input.required<FormControl<string | null>>();
-  submitting = input(false);
-  titleInvalid = input(false);
-  error = input<string | null>(null);
+  readonly submitting = input(false);
+  readonly titleInvalid = input(false);
+  readonly error = input<string | null>(null);
 
-  addGift = output<void>();
+  readonly addGift = output<void>();
+  readonly cancel = output<void>();
 }

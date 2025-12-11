@@ -1,10 +1,9 @@
 <section class="mt-8">
   <div class="mb-4 flex items-center justify-between gap-3">
     <h2 class="text-3xl font-christmas text-gold-gradient drop-shadow-lg">Cadeaux</h2>
-    <button type="button" class="btn-secondary btn-sm rounded-md" (click)="toggleFillMode.emit()"
-      [attr.aria-pressed]="fillMode() ? 'true' : null">
+    <app-christmas-button variant="primary" size="sm" [pressed]="fillMode()" (click)="toggleFillMode.emit()">
       {{ fillMode() ? 'Quitter le mode remplissage' : 'Passer en mode remplissage' }}
-    </button>
+    </app-christmas-button>
   </div>
   @if (fillMode()) {
   <p
@@ -62,10 +61,9 @@
           </button>
           <div class="min-w-0 flex flex-col">
             @if (g.url) {
-            <a class="truncate font-bold text-base text-gold-gradient hover:underline decoration-gold-400/50 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+            <a class="truncate font-bold text-base text-gold-gradient underline decoration-gold-400/50 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
               [href]="g.url" target="_blank" rel="noopener noreferrer">
               {{ g.title }}
-              <span class="material-symbols-outlined text-sm align-middle ml-1 opacity-70">open_in_new</span>
             </a>
             } @else {
             <p class="truncate font-bold text-base text-white">{{ g.title }}</p>

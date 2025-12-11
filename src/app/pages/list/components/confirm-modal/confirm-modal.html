@@ -4,22 +4,23 @@
   <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
 
   <!-- Dialog -->
-  <div #dialogEl
-    class="relative z-10 w-full max-w-md card-glass bg-black/80 backdrop-blur-xl p-8 outline-none shadow-2xl border border-white/10"
-    role="dialog" aria-modal="true" [attr.aria-labelledby]="'confirm-title'" [attr.aria-describedby]="'confirm-desc'"
-    tabindex="-1" (click)="onDialogClick($event)" (keydown)="onKeydown($event)">
-    <h2 id="confirm-title"
-      class="mb-3 text-2xl font-bold text-gold-gradient font-christmas border-b-2 border-red-100 pb-2">{{
+  <div #dialogEl class="relative z-10 w-full max-w-md glass-panel p-8 outline-none" role="dialog" aria-modal="true"
+    [attr.aria-labelledby]="'confirm-title'" [attr.aria-describedby]="'confirm-desc'" tabindex="-1"
+    (click)="onDialogClick($event)" (keydown)="onKeydown($event)">
+
+    <h2 id="confirm-title" class="mb-4 text-3xl font-bold text-gold-gradient font-christmas drop-shadow-lg">{{
       title() }}
     </h2>
-    <p id="confirm-desc" class="whitespace-pre-wrap text-sm text-text-muted">{{ message() }}</p>
-    <div class="mt-5 flex justify-end gap-3">
-      <button type="button" class="btn-secondary btn-sm" (click)="cancel.emit()">
+
+    <p id="confirm-desc" class="whitespace-pre-wrap text-white/80 text-lg leading-relaxed">{{ message() }}</p>
+
+    <div class="mt-8 flex justify-end gap-3">
+      <app-christmas-button variant="secondary" size="sm" (click)="cancel.emit()">
         {{ cancelLabel() }}
-      </button>
-      <button #confirmBtn type="button" class="btn-primary btn-sm" (click)="confirm.emit()">
+      </app-christmas-button>
+      <app-christmas-button #confirmBtn variant="primary" size="sm" (click)="confirm.emit()">
         {{ confirmLabel() }}
-      </button>
+      </app-christmas-button>
     </div>
   </div>
 </div>
