@@ -21,6 +21,11 @@ On the list, a button will allow to pass the list in "fill" mode. This mode is a
 
 When enabling the "fill" mode, the app MUST ask for confirmation to avoid spoilers using a custom in-app modal (not the browser native confirm). The modal warns that enabling this mode will reveal which gifts are already bought. If the list is intended for the current user (recipient), they risk being spoiled. The user must confirm to proceed; otherwise the mode stays disabled.
 
+### Mobile experience
+- The app is fully usable on smartphones. Content adapts to small screens without horizontal scrolling.
+- Primary actions become full‑width buttons on mobile to make them easy to tap.
+- Dialogs fit the screen height and scroll internally when content is long, so confirmations are readable and accessible on phones.
+
 ### UI structure (subcomponents)
 
 The gift list page is organized into clear sections, each managed by a focused subcomponent (no change in features, only structure):

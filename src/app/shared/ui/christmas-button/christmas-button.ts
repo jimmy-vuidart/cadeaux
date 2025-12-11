@@ -24,7 +24,8 @@ export class ChristmasButtonComponent {
         const v = this.variant();
         const s = this.size();
 
-        let base = 'rounded-md transition-all duration-300 font-bold flex items-center justify-center gap-2 relative overflow-hidden';
+        // Allow text to wrap on small screens, avoid overflow, and keep nice alignment
+        let base = 'rounded-md transition-all duration-300 font-bold inline-flex items-center justify-center gap-2 relative min-w-0 max-w-full whitespace-normal break-words text-center';
 
         // Variant styles
         if (v === 'primary') {

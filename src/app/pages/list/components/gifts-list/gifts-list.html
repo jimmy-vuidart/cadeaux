@@ -1,7 +1,7 @@
 <section class="mt-8">
-  <div class="mb-4 flex items-center justify-between gap-3">
-    <h2 class="text-3xl font-christmas text-gold-gradient drop-shadow-lg">Cadeaux</h2>
-    <app-christmas-button variant="primary" size="sm" [pressed]="fillMode()" (click)="toggleFillMode.emit()">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-2xl sm:text-3xl font-christmas text-gold-gradient drop-shadow-lg">Cadeaux</h2>
+    <app-christmas-button variant="primary" size="sm" [pressed]="fillMode()" (click)="toggleFillMode.emit()" [customClass]="'w-full sm:w-auto'">
       {{ fillMode() ? 'Quitter le mode « cadeaux achetés »' : 'Passer en mode « cadeaux achetés »' }}
     </app-christmas-button>
   </div>
@@ -18,8 +18,12 @@
   <ul class="card-glass flex flex-col divide-y divide-white/10 overflow-hidden" role="list">
     @for (g of gifts(); track g.id; let i = $index) {
     <li class="px-4 py-3 transition-colors hover:bg-white/5" (dragover)="onDragOver($event, i)" (drop)="onDrop(i)"
-      [class.bg-white/10]="isDragging(i)" [class.ring-inset]="isDropTarget(i)" [class.ring-2]="isDropTarget(i)"
-      [class.ring-gold-400]="isDropTarget(i)" role="listitem">
+      [ngClass]="{
+        'bg-white/10': isDragging(i),
+        'ring-inset': isDropTarget(i),
+        'ring-2': isDropTarget(i),
+        'ring-gold-400': isDropTarget(i)
+      }" role="listitem">
       @if (!fillMode() && editingId() === g.id) {
       <form class="flex flex-col gap-3 py-1" (ngSubmit)="submitEdit.emit()">
         <div>

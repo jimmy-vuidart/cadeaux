@@ -8,6 +8,26 @@
 
 - Ensure modifications still build successfuly using `npm run build`.
 
+## Responsiveness and mobile rendering
+
+- Tailwind v4 responsive utilities (`sm:`, `md:`, etc.) are used to scale typography, spacings, and layout for small screens.
+- Primary actions can expand to full width on small screens via `[customClass]="'w-full sm:w-auto'"` on `app-christmas-button` usages.
+- Buttons allow label wrapping to avoid overflow on narrow devices. Implementation:
+  - `ChristmasButtonComponent` base classes include `inline-flex`, `min-w-0`, `max-w-full`, `whitespace-normal`, `break-words`, and `text-center`.
+- Modals and dialogs are constrained to the viewport and scroll internally when content is long:
+  - Containers use `w-full`, `mx-4`, `max-h-[80vh]`, `overflow-auto`, and responsive paddings `p-6 sm:p-8`.
+  - Titles and body text scale down on mobile (`text-2xl sm:text-3xl`, `text-base sm:text-lg`).
+- Header rows that combine a title and an action button use `flex-wrap` so the action can wrap below on phones.
+- Avoid horizontal scrolling site‑wide: `body` already sets `overflow-x: hidden` in `src/styles.css`.
+
+### Components updated for mobile
+
+- `src/app/shared/ui/christmas-button/christmas-button.ts`: base classes updated to allow text wrapping and full‑width usage.
+- `src/app/pages/list/components/confirm-modal/confirm-modal.html`: responsive width/paddings and internal scrolling.
+- `src/app/pages/home/create-list-modal/create-list-modal.html`: responsive paddings and internal scrolling; buttons can become full width on mobile.
+- `src/app/pages/home/home.html`: hero title scales on mobile; primary CTA becomes full‑width on small screens.
+- `src/app/pages/list/components/gifts-list/gifts-list.html`: header row wraps on small screens; toggle button can be full width on mobile.
+
 ## Local development – Firebase Emulators
 
 - The project uses Firebase Emulators locally for Auth and Realtime Database.

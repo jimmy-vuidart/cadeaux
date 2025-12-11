@@ -32,8 +32,8 @@
     <app-add-gift-form [titleControl]="giftTitle" [urlControl]="giftUrl" [submitting]="submitting()"
       [titleInvalid]="giftTitleInvalid()" [error]="addError()" (addGift)="addGift()" (cancel)="toggleAddForm()" />
     } @else {
-    <div class="flex justify-end">
-      <app-christmas-button variant="primary" size="sm" icon="add_circle" (click)="toggleAddForm()">
+    <div class="flex sm:justify-end">
+      <app-christmas-button variant="primary" size="sm" icon="add_circle" (click)="toggleAddForm()" [customClass]="'w-full sm:w-auto'">
         Ajouter des cadeaux
       </app-christmas-button>
     </div>

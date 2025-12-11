@@ -3,12 +3,13 @@ import { FormControl, FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import type { Gift } from '@shared/models/gift';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-gifts-list',
   templateUrl: './gifts-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, ChristmasButtonComponent],
+  imports: [ReactiveFormsModule, FormsModule, ChristmasButtonComponent, NgClass],
 })
 export class GiftsListComponent {
   gifts = input.required<Gift[]>();
@@ -55,7 +56,7 @@ export class GiftsListComponent {
       // Some browsers require setting data to start a drag
       evt?.dataTransfer?.setData('text/plain', String(index));
       if (evt?.dataTransfer) evt.dataTransfer.effectAllowed = 'move';
-    } catch { }
+    } catch {}
   }
 
   onDragEnd(): void {

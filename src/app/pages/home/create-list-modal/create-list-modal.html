@@ -1,8 +1,8 @@
 <div class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" aria-hidden="true" (click)="onCancel()"></div>
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
   <div role="dialog" aria-modal="true" aria-labelledby="create-list-title"
-    class="w-full max-w-md glass-panel p-8 outline-none">
-    <h2 id="create-list-title" class="text-3xl font-bold font-christmas text-gold-gradient drop-shadow-lg mb-2">Nouvelle
+    class="w-full max-w-md glass-panel p-6 sm:p-8 outline-none max-h-[80vh] overflow-auto">
+    <h2 id="create-list-title" class="text-2xl sm:text-3xl font-bold font-christmas text-gold-gradient drop-shadow-lg mb-2">Nouvelle
       liste</h2>
     <p class="text-white/70">Entre un titre pour ta liste de Noël.</p>
 
@@ -18,12 +18,12 @@
         }}</p>
       }
 
-      <div class="mt-6 flex items-center justify-end gap-3">
-        <app-christmas-button variant="secondary" size="sm" (click)="onCancel()" [disabled]="creating()">
+      <div class="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3">
+        <app-christmas-button variant="secondary" size="sm" (click)="onCancel()" [disabled]="creating()" [customClass]="'w-full sm:w-auto'">
           Annuler
         </app-christmas-button>
         <app-christmas-button variant="primary" size="sm" type="submit" [busy]="creating()"
-          [disabled]="creating() || titleCtrl.invalid">
+          [disabled]="creating() || titleCtrl.invalid" [customClass]="'w-full sm:w-auto'">
           {{ creating() ? 'Création…' : 'Créer la liste' }}
         </app-christmas-button>
       </div>
