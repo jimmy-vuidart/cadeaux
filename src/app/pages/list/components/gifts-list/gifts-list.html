@@ -15,26 +15,31 @@
   } @else if (gifts().length > 1) {
   <p class="mb-3 text-xs text-white/50 italic text-right">Astuce : déplace les cadeaux pour les réorganiser.</p>
   }
-  <ul class="flex flex-col gap-2" role="list">
+
+  <ul class="card-glass flex flex-col divide-y divide-white/10 overflow-hidden" role="list">
     @for (g of gifts(); track g.id; let i = $index) {
-    <li class="card-glass px-3 py-2 transition-all" (dragover)="onDragOver($event, i)" (drop)="onDrop(i)"
-      [class.opacity-50]="isDragging(i)" [class.scale-[1.01]]="isDropTarget(i)" [class.ring-1]="isDropTarget(i)"
+    <li class="px-4 py-3 transition-colors hover:bg-white/5" (dragover)="onDragOver($event, i)" (drop)="onDrop(i)"
+      [class.bg-white/10]="isDragging(i)" [class.ring-inset]="isDropTarget(i)" [class.ring-2]="isDropTarget(i)"
       [class.ring-gold-400]="isDropTarget(i)" role="listitem">
       @if (!fillMode() && editingId() === g.id) {
-      <form class="flex flex-col gap-2" (ngSubmit)="submitEdit.emit()">
-        <label [for]="'edit-title-' + g.id" class="sr-only">Titre du cadeau</label>
-        <input [id]="'edit-title-' + g.id" type="text" class="input-base py-1" [formControl]="editTitleControl()!"
-          placeholder="Titre du cadeau" [attr.aria-invalid]="editTitleInvalid() ? 'true' : null"
-          [disabled]="editSubmitting() || isUpdating()(g.id!)" />
-        <label [for]="'edit-url-' + g.id" class="sr-only">URL du cadeau (optionnel)</label>
-        <input [id]="'edit-url-' + g.id" type="url" class="input-base py-1" [formControl]="editUrlControl()!"
-          placeholder="https://exemple.com/produit (optionnel)" inputmode="url"
-          [disabled]="editSubmitting() || isUpdating()(g.id!)" />
+      <form class="flex flex-col gap-3 py-1" (ngSubmit)="submitEdit.emit()">
+        <div>
+          <label [for]="'edit-title-' + g.id" class="block text-xs font-bold text-gold-400 mb-1">Titre</label>
+          <input [id]="'edit-title-' + g.id" type="text" class="input-base py-1" [formControl]="editTitleControl()!"
+            placeholder="Titre du cadeau" [attr.aria-invalid]="editTitleInvalid() ? 'true' : null"
+            [disabled]="editSubmitting() || isUpdating()(g.id!)" />
+        </div>
+        <div>
+          <label [for]="'edit-url-' + g.id" class="block text-xs font-bold text-gold-400 mb-1">Lien (optionnel)</label>
+          <input [id]="'edit-url-' + g.id" type="url" class="input-base py-1" [formControl]="editUrlControl()!"
+            placeholder="https://exemple.com/produit" inputmode="url"
+            [disabled]="editSubmitting() || isUpdating()(g.id!)" />
+        </div>
         <div class="flex items-center gap-2 justify-end mt-1">
           <button type="button" class="btn-secondary btn-sm" (click)="cancelEdit.emit()">
             Annuler
           </button>
-          <button type="submit" class="btn-primary btn-sm"
+          <button type="submit" class="btn-primary btn-sm rounded-md"
             [disabled]="editSubmitting() || editTitleInvalid() || isUpdating()(g.id!)"
             [attr.aria-label]="'Enregistrer les modifications pour ' + g.title">
             Enregistrer
@@ -101,7 +106,7 @@
           </button>
           } @else {
           <button type="button"
-            class="btn-secondary btn-sm px-2 border-0 bg-transparent hover:bg-white/10 text-white/70 hover:text-white rounded-md"
+            class="inline-flex size-8 items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-colors"
             (click)="startEdit.emit(g)" [disabled]="isUpdating()(g.id!)" [attr.aria-label]="'Modifier ' + g.title">
             <span class="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
           </button>
@@ -118,7 +123,7 @@
       }
     </li>
     } @empty {
-    <li class="px-4 py-8 text-center text-white/50 italic border border-dashed border-white/10 rounded-xl bg-white/5">
+    <li class="px-4 py-12 text-center text-white/50 italic">
       <span class="block text-4xl mb-3 opacity-50">✨</span>
       Ta liste est vide pour le moment.<br />Ajoute ton premier souhait ci-dessous.
     </li>

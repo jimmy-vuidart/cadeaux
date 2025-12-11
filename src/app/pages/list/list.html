@@ -12,18 +12,21 @@
     <div class="snowflake">❄</div>
   </div>
 
-  <div class="mx-auto w-full max-w-2xl relative z-10 glass-panel p-6 sm:p-10 animate-fade-in-up">
-    <app-list-header [title]="title" [sharing]="sharing()" (share)="share()" />
+  <div class="mx-auto w-full max-w-2xl relative z-10 space-y-8 animate-fade-in-up">
+    <!-- List Section -->
+    <div class="glass-panel p-6 sm:p-10">
+      <app-list-header [title]="title" [sharing]="sharing()" (share)="share()" />
 
-    <app-gifts-list [gifts]="gifts()" [fillMode]="fillMode()" [isUpdating]="isUpdatingFn" [editingId]="editingGiftId()"
-      [deletingId]="deletingGiftId()" [editTitleControl]="editTitle" [editUrlControl]="editUrl"
-      [editSubmitting]="editSubmitting()" [editTitleInvalid]="editTitleInvalid()" [editError]="editError()"
-      (toggleFillMode)="toggleFillMode()" (toggleBought)="toggleBought($event)" (startEdit)="startEditGift($event)"
-      (cancelEdit)="cancelEdit()" (submitEdit)="submitEdit()" (startDelete)="startDeleteGift($event)"
-      (cancelDelete)="cancelDeleteGift()" (confirmDelete)="confirmDeleteGift()" (reorderMove)="onReorderMove($event)" />
+      <app-gifts-list [gifts]="gifts()" [fillMode]="fillMode()" [isUpdating]="isUpdatingFn"
+        [editingId]="editingGiftId()" [deletingId]="deletingGiftId()" [editTitleControl]="editTitle"
+        [editUrlControl]="editUrl" [editSubmitting]="editSubmitting()" [editTitleInvalid]="editTitleInvalid()"
+        [editError]="editError()" (toggleFillMode)="toggleFillMode()" (toggleBought)="toggleBought($event)"
+        (startEdit)="startEditGift($event)" (cancelEdit)="cancelEdit()" (submitEdit)="submitEdit()"
+        (startDelete)="startDeleteGift($event)" (cancelDelete)="cancelDeleteGift()"
+        (confirmDelete)="confirmDeleteGift()" (reorderMove)="onReorderMove($event)" />
+    </div>
 
-    <div class="my-8 h-px bg-white/10 w-full"></div>
-
+    <!-- Add Gift Section (Separate Card) -->
     <app-add-gift-form [titleControl]="giftTitle" [urlControl]="giftUrl" [submitting]="submitting()"
       [titleInvalid]="giftTitleInvalid()" [error]="addError()" (addGift)="addGift()" />
   </div>

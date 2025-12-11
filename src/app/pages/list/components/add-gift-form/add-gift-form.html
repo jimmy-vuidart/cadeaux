@@ -1,19 +1,29 @@
-<h2 class="mt-8 mb-4 text-3xl font-bold font-christmas text-gold-gradient drop-shadow-lg inline-block">Ajouter un cadeau
-</h2>
-<section class="card-glass p-4 sm:p-6">
-  <form class="flex flex-col gap-3 sm:flex-row" (ngSubmit)="addGift.emit()">
-    <label for="gift-title" class="sr-only">Titre du cadeau</label>
-    <input id="gift-title" type="text" class="input-base" [formControl]="titleControl()"
-      placeholder="Ex. Lego, livre, etc." [attr.aria-invalid]="titleInvalid() ? 'true' : null" />
-    <label for="gift-url" class="sr-only">URL du cadeau (optionnel)</label>
-    <input id="gift-url" type="url" class="input-base" [formControl]="urlControl()"
-      placeholder="https://exemple.com/produit (optionnel)" inputmode="url" />
-    <button type="submit" class="btn-primary flex-shrink-0 rounded-md" [disabled]="submitting() || titleInvalid()">
-      Ajouter
-    </button>
+<section class="card-glass p-6">
+  <h2 class="mb-4 text-2xl font-bold font-christmas text-gold-gradient drop-shadow-md pb-2 border-b border-white/10">
+    Ajouter un cadeau</h2>
+  <form class="flex flex-col gap-4" (ngSubmit)="addGift.emit()">
+    <div>
+      <label for="gift-title" class="block text-sm font-bold text-gold-400 mb-1">Titre du cadeau</label>
+      <input id="gift-title" type="text" class="input-base" [formControl]="titleControl()"
+        placeholder="Ex. Lego, livre, etc." [attr.aria-invalid]="titleInvalid() ? 'true' : null" />
+    </div>
+
+    <div>
+      <label for="gift-url" class="block text-sm font-bold text-gold-400 mb-1">Lien internet (optionnel)</label>
+      <input id="gift-url" type="url" class="input-base" [formControl]="urlControl()"
+        placeholder="https://exemple.com/produit" inputmode="url" />
+    </div>
+
+    <div class="flex justify-end pt-2">
+      <button type="submit" class="btn-primary rounded-md px-6 shadow-lg shadow-red-500/20"
+        [disabled]="submitting() || titleInvalid()">
+        Ajouter
+      </button>
+    </div>
   </form>
 
   @if (error()) {
-  <p class="mt-2 text-sm text-red-300" role="alert">{{ error() }}</p>
+  <p class="mt-4 text-sm text-red-300 bg-red-900/40 p-3 rounded-md border border-red-500/30" role="alert">{{ error() }}
+  </p>
   }
 </section>
