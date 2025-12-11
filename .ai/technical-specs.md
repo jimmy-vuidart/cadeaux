@@ -28,6 +28,13 @@
 - `src/app/pages/home/home.html`: hero title scales on mobile; primary CTA becomes full‑width on small screens.
 - `src/app/pages/list/components/gifts-list/gifts-list.html`: header row wraps on small screens; toggle button can be full width on mobile.
 
+#### Ensuring truly full‑width buttons inside flex containers (mobile)
+
+- When a button sits in a `flex` container that uses `flex-wrap`, add both of the following to guarantee the button spans the whole row on small screens:
+  - On the button host element (the Angular component tag): `class="w-full basis-full sm:w-auto sm:basis-auto"`.
+  - On the underlying button via the component API: `[customClass]="'w-full sm:w-auto'"`.
+- This combination ensures the flex item itself takes the entire row on phones while reverting to natural (auto) width from `sm` breakpoint and up.
+
 #### Gift cards width and title wrapping (phones)
 
 - Ensure gift list cards fully fit the viewport on small devices:
