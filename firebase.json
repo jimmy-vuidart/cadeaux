@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "public": "dist/cadeaux-vuidart/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      { "source": "**", "destination": "/index.html" }
+    ]
+  }
+}

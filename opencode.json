@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "lmstudio": {
+      "models": {
+        "ministral": {
+          "id": "mistralai/ministral-3-14b-reasoning",
+          "options": {
+            "reasoningEffort": "high",
+            "textVerbosity": "low",
+            "reasoningSummary": "auto"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,12 +1,21 @@
-You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+# Project structure
 
-## TypeScript Best Practices
+- This app uses Firebase Realtime Database via AngularFire for data storage.
+- This app use TailwindCSS for styling.
+
+## File structure
+
+- All main pages are stored in the `src/app/pages` folder.
+  - Any component who is exclusive to a page should be stored in the same folder as the page. (ex: a 'Gift' component for the 'GiftPage' should be stored in the same folder as the 'GiftPage', inside a subfolder for the component)
+- All shared features across all app (auth systems, data models, etc.) should be stored in the `src/app/shared` folder, with subfolders for each element type.
+
+# TypeScript Best Practices
 
 - Use strict type checking
 - Prefer type inference when the type is obvious
 - Avoid the `any` type; use `unknown` when type is uncertain
 
-## Angular Best Practices
+# Angular Best Practices
 
 - Always use standalone components over NgModules
 - Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
