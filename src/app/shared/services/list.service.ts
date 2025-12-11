@@ -70,11 +70,14 @@ export class ListService {
 
   async addGift(listId: string, title: string, url?: string): Promise<string> {
     const newRef = push(this.giftsRef(listId));
+    const normalizedUrl = (url ?? '').trim()
+      ? this.normalizeUrl((url ?? '').trim())
+      : undefined;
     await set(newRef, {
       title,
       bought: false,
       // Only persist url when provided
-      ...(url ? { url } : {}),
+      ...(normalizedUrl ? { url: normalizedUrl } : {}),
       // Use timestamp for append ordering by default
       order: Date.now(),
     } satisfies Omit<Gift, 'id'>);
@@ -102,7 +105,7 @@ export class ListService {
     if (typeof patch.title === 'string') payload.title = patch.title.trim();
     if (patch.url !== undefined) {
       const trimmed = (patch.url ?? '').trim();
-      if (trimmed) payload.url = trimmed;
+      if (trimmed) payload.url = this.normalizeUrl(trimmed);
       else payload.url = null; // remove url key by setting null (RTDB will keep null but UI treats as absent)
     }
     await update(ref(this.db, `lists/${listId}/gifts/${giftId}`), payload);
@@ -115,5 +118,15 @@ export class ListService {
       updates[`lists/${listId}/gifts/${id}/order`] = index;
     });
     await update(ref(this.db), updates);
+  }
+
+  // Ensure URLs have a protocol; default to https:// when missing.
+  private normalizeUrl(input: string): string {
+    const s = (input ?? '').trim();
+    if (!s) return s;
+    if (s.startsWith('//')) return 'https:' + s;
+    // Has a scheme like http:, https:, mailto:, etc.
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) return s;
+    return `https://${s}`;
   }
 }
