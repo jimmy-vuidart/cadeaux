@@ -15,12 +15,14 @@
   - `list-header/` (`ListHeaderComponent`): Displays the page title and a Share button.
     - Inputs: `title: string`, `sharing: boolean`
     - Outputs: `share()`
-  - `gifts-list/` (`GiftsListComponent`): Renders the list of gifts and the fill-mode UI.
-    - Inputs: `gifts: Gift[]`, `fillMode: boolean`, `isUpdating: (id: string | null | undefined) => boolean`
-    - Outputs: `toggleFillMode()`, `toggleBought(gift: Gift)`
+  - `gifts-list/` (`GiftsListComponent`): Renders the list of gifts, the fill-mode UI, and inline editing for a selected gift.
+    - Inputs: `gifts: Gift[]`, `fillMode: boolean`, `isUpdating: (id: string | null | undefined) => boolean`, `editingId: string | null`, `editTitleControl: FormControl<string>`, `editUrlControl: FormControl<string|null>`, `editSubmitting: boolean`, `editTitleInvalid: boolean`, `editError: string | null`
+    - Outputs: `toggleFillMode()`, `toggleBought(gift: Gift)`, `startEdit(gift: Gift)`, `cancelEdit()`, `submitEdit()`, `reorderMove({ fromIndex: number; toIndex: number })`
+    - Notes: includes a drag handle button at the start of each gift row to support HTML5 drag & drop reordering. Dragging is disabled while in fill mode or during inline editing. Visual feedback: the dragged row becomes semi-transparent and the hovered drop target row is highlighted with a blue ring and background tint; the handle shows a grabbing cursor while active and sets `aria-grabbed="true"`.
   - `add-gift-form/` (`AddGiftFormComponent`): Form to add a gift with validation and error message.
     - Inputs: `titleControl: FormControl<string>`, `urlControl: FormControl<string|null>`, `submitting: boolean`, `titleInvalid: boolean`, `error: string | null`
-    - Outputs: `submit()`
+    - Outputs: `addGift()`
+    - Implementation notes: imports both `ReactiveFormsModule` and `FormsModule` so that `(ngSubmit)` is handled by Angular and prevents the native form submission/reload.
   - `share-toast/` (`ShareToastComponent`): Non-blocking toast for share/copy feedback.
     - Inputs: `message: string | null`, `visible: boolean`
 
@@ -96,6 +98,32 @@ Note: When passing function inputs to child components (e.g., `isUpdating`), kee
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+### ListService API (data for lists and gifts)
+
+- `getList(id: string): Observable<GiftList | null>`: stream a list by id.
+- `listAll(): Observable<GiftList[]>`: stream all lists.
+- `listGifts(listId: string): Observable<Gift[]>`: stream gifts of a list. Items include an optional `order` field used for sorting client-side.
+- `createList(title?: string): Promise<string>`: create a list with a kebab-case id derived from title.
+- `addGift(listId: string, title: string, url?: string): Promise<string>`: add a gift.
+  - Implementation detail: new gifts receive a default `order` timestamp so they appear at the end until reordered.
+- `toggleBought(listId: string, giftId: string, bought: boolean): Promise<void>`: toggle bought flag.
+- `updateGift(listId: string, giftId: string, patch: { title?: string; url?: string | null }): Promise<void>`: update a gift title and/or URL. Passing `null` or empty string for URL removes it.
+- `renameList(id: string, title: string): Promise<void>`: rename list title.
+- `deleteGift(listId: string, giftId: string): Promise<void>`: delete a gift.
+- `reorderGifts(listId: string, orderedIds: string[]): Promise<void>`: persist a new order by writing sequential `order` values (0..n-1) for the provided IDs.
+
+### Ordering model
+
+- `Gift` model now includes an optional `order?: number | null` used to store the list position.
+- UI sorting: the `ListPage` sorts gifts by `order` ascending; items without `order` are placed last, then sorted by title and id for stability.
+- Reordering flow: `GiftsListComponent` emits `reorderMove` with source and target indices; `ListPage` computes the new ordered IDs and calls `ListService.reorderGifts` to persist.
+
+### DnD Visuals & Accessibility
+
+- Template uses conditional classes to style the source and target items during drag (`opacity-60` for source, `ring-2 ring-blue-400 bg-slate-700` for drop target).
+- The drag handle button toggles `cursor-grabbing` while dragging and sets `aria-grabbed="true"`.
+- Motion respects user preferences using Tailwind’s `motion-safe:` utilities for subtle scale on active.
 
 ### List IDs generation
 

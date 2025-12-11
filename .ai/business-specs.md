@@ -21,7 +21,9 @@ When enabling the "fill" mode, the app MUST ask for confirmation to avoid spoile
 The gift list page is organized into clear sections, each managed by a focused subcomponent (no change in features, only structure):
 
 - Header: shows the list title and the Share button.
-- Gifts list: shows all gifts, with a toggle for the fill mode and a checkbox per gift in fill mode.
+- Gifts list: shows all gifts, with a toggle for the fill mode and a checkbox per gift in fill mode. A drag handle at the start of each gift allows reordering the list by drag & drop (disabled while in fill mode or when editing a gift).
+  - Reordering provides clear visual feedback: the dragged row becomes semi‑transparent and the potential drop target row is highlighted.
+- Each gift has an Edit action (when not in fill mode) to change the title and optional URL. The edition form opens inline just under the concerned gift item.
 - Add gift form: inputs to add a new gift (title and optional URL) with validation and error message.
 - Share toast: transient confirmation message for share/copy actions.
 
@@ -39,6 +41,15 @@ The gift list page is organized into clear sections, each managed by a focused s
 - When adding a gift, the user can optionally provide a URL to the product/page.
 - When a gift has a URL, its title is displayed as a clickable link that opens in a new tab.
 - When no URL is provided, the title is shown as plain text.
+
+### Edit a gift
+
+- From the gifts list, an Edit button appears on each item when the list is not in fill mode.
+- Clicking Edit opens a small edition form inline below the selected gift. The form mirrors the add form fields and validation.
+- Editing lets the user change:
+  - Title (required, max 200 chars)
+  - URL (optional). Leaving the URL empty removes it from the gift.
+- Actions: Save and Cancel. Save applies changes immediately; Cancel closes the form without changes.
 
 ### List creation and IDs
 

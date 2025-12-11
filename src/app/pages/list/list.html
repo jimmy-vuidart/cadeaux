@@ -6,8 +6,18 @@
       [gifts]="gifts()"
       [fillMode]="fillMode()"
       [isUpdating]="isUpdatingFn"
+      [editingId]="editingGiftId()"
+      [editTitleControl]="editTitle"
+      [editUrlControl]="editUrl"
+      [editSubmitting]="editSubmitting()"
+      [editTitleInvalid]="editTitleInvalid()"
+      [editError]="editError()"
       (toggleFillMode)="toggleFillMode()"
       (toggleBought)="toggleBought($event)"
+      (startEdit)="startEditGift($event)"
+      (cancelEdit)="cancelEdit()"
+      (submitEdit)="submitEdit()"
+      (reorderMove)="onReorderMove($event)"
     />
 
     <app-add-gift-form
@@ -16,7 +26,7 @@
       [submitting]="submitting()"
       [titleInvalid]="giftTitleInvalid()"
       [error]="addError()"
-      (submit)="addGift()"
+      (addGift)="addGift()"
     />
   </div>
 

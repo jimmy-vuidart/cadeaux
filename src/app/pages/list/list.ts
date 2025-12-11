@@ -47,6 +47,21 @@ export class ListPage {
   readonly addError = signal<string | null>(null);
   readonly fillMode = signal(false);
   readonly updating = signal(new Set<string>());
+  // Inline edit state
+  readonly editingGiftId = signal<string | null>(null);
+  readonly editTitle = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.maxLength(200)],
+  });
+  readonly editUrl = new FormControl<string | null>('', {
+    validators: [Validators.maxLength(500)],
+  });
+  readonly editSubmitting = signal(false);
+  readonly editError = signal<string | null>(null);
+  readonly editTitleInvalid = toSignal(
+    this.editTitle.statusChanges.pipe(map(() => this.editTitle.invalid)),
+    { initialValue: this.editTitle.invalid },
+  );
   readonly sharing = signal(false);
   readonly shareInfo = signal<string | null>(null);
   readonly toastVisible = signal(false);
@@ -66,6 +81,20 @@ export class ListPage {
     this.route.paramMap.pipe(
       map((pm) => pm.get('id') as string),
       switchMap((id) => this.lists.listGifts(id)),
+      // stable sort: first by defined order ascending, then by title, then by id
+      map((arr) =>
+        [...arr].sort((a, b) => {
+          const ao = a.order ?? Number.POSITIVE_INFINITY;
+          const bo = b.order ?? Number.POSITIVE_INFINITY;
+          if (ao !== bo) return ao - bo;
+          const at = (a.title || '').toLowerCase();
+          const bt = (b.title || '').toLowerCase();
+          if (at !== bt) return at < bt ? -1 : 1;
+          const ai = a.id || '';
+          const bi = b.id || '';
+          return ai < bi ? -1 : ai > bi ? 1 : 0;
+        }),
+      ),
     ),
     { initialValue: [] as Gift[] },
   );
@@ -145,6 +174,66 @@ export class ListPage {
       const after = new Set(this.updating());
       after.delete(giftId);
       this.updating.set(after);
+    }
+  }
+
+  startEditGift(gift: Gift): void {
+    const id = gift.id || null;
+    if (!id) return;
+    this.editingGiftId.set(id);
+    this.editError.set(null);
+    this.editSubmitting.set(false);
+    this.editTitle.reset(gift.title ?? '');
+    this.editUrl.reset(gift.url ?? '');
+  }
+
+  cancelEdit(): void {
+    this.editingGiftId.set(null);
+    this.editSubmitting.set(false);
+    this.editError.set(null);
+    this.editTitle.reset('');
+    this.editUrl.reset('');
+  }
+
+  async submitEdit(): Promise<void> {
+    const listId = this.id();
+    const giftId = this.editingGiftId();
+    if (!listId || !giftId) return;
+    if (this.editTitle.invalid) return;
+    this.editSubmitting.set(true);
+    this.editError.set(null);
+    const set = new Set(this.updating());
+    set.add(giftId);
+    this.updating.set(set);
+    try {
+      const title = this.editTitle.value.trim();
+      const rawUrl = (this.editUrl.value ?? '').trim();
+      await this.lists.updateGift(listId, giftId, { title, url: rawUrl || null });
+      this.cancelEdit();
+    } catch (e) {
+      console.error(e);
+      this.editError.set('Impossible de modifier le cadeau. Réessaie.');
+    } finally {
+      this.editSubmitting.set(false);
+      const after = new Set(this.updating());
+      after.delete(giftId);
+      this.updating.set(after);
+    }
+  }
+
+  async onReorderMove(ev: { fromIndex: number; toIndex: number }): Promise<void> {
+    const listId = this.id();
+    if (!listId) return;
+    const current = this.gifts();
+    if (!current?.length) return;
+    const arr = [...current];
+    const [moved] = arr.splice(ev.fromIndex, 1);
+    arr.splice(ev.toIndex, 0, moved);
+    const ids = arr.map((g) => g.id!).filter(Boolean);
+    try {
+      await this.lists.reorderGifts(listId, ids);
+    } catch (e) {
+      console.error('Failed to reorder gifts', e);
     }
   }
 

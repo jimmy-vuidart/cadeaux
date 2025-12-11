@@ -75,6 +75,8 @@ export class ListService {
       bought: false,
       // Only persist url when provided
       ...(url ? { url } : {}),
+      // Use timestamp for append ordering by default
+      order: Date.now(),
     } satisfies Omit<Gift, 'id'>);
     return newRef.key as string;
   }
@@ -89,5 +91,29 @@ export class ListService {
 
   async deleteGift(listId: string, giftId: string): Promise<void> {
     await remove(ref(this.db, `lists/${listId}/gifts/${giftId}`));
+  }
+
+  async updateGift(
+    listId: string,
+    giftId: string,
+    patch: { title?: string; url?: string | null }
+  ): Promise<void> {
+    const payload: any = {};
+    if (typeof patch.title === 'string') payload.title = patch.title.trim();
+    if (patch.url !== undefined) {
+      const trimmed = (patch.url ?? '').trim();
+      if (trimmed) payload.url = trimmed;
+      else payload.url = null; // remove url key by setting null (RTDB will keep null but UI treats as absent)
+    }
+    await update(ref(this.db, `lists/${listId}/gifts/${giftId}`), payload);
+  }
+
+  async reorderGifts(listId: string, orderedIds: string[]): Promise<void> {
+    // Batch update order indexes to 0..n-1
+    const updates: Record<string, any> = {};
+    orderedIds.forEach((id, index) => {
+      updates[`lists/${listId}/gifts/${id}/order`] = index;
+    });
+    await update(ref(this.db), updates);
   }
 }

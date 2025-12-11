@@ -5,4 +5,6 @@ export interface Gift {
   bought?: boolean;
   // Optional link to the gift product/page
   url?: string;
+  // Order index for drag & drop reordering (lower first)
+  order?: number | null;
 }
