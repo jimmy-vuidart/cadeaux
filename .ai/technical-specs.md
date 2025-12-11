@@ -2,6 +2,11 @@
 
 - This app uses Firebase Realtime Database via AngularFire for data storage.
 - This app use TailwindCSS for styling.
+- Tailwind v4 is configured via `@import 'tailwindcss'` and uses `@theme` and `@utility` blocks inside `src/styles.css` to define design tokens and app-specific utilities.
+
+## General guidelines
+
+- Ensure modifications still build successfuly using `npm run build`.
 
 ## Local development – Firebase Emulators
 
@@ -29,9 +34,12 @@
     - Inputs: `title: string`, `sharing: boolean`
     - Outputs: `share()`
   - `gifts-list/` (`GiftsListComponent`): Renders the list of gifts, the fill-mode UI, and inline editing for a selected gift.
-    - Inputs: `gifts: Gift[]`, `fillMode: boolean`, `isUpdating: (id: string | null | undefined) => boolean`, `editingId: string | null`, `editTitleControl: FormControl<string>`, `editUrlControl: FormControl<string|null>`, `editSubmitting: boolean`, `editTitleInvalid: boolean`, `editError: string | null`
-    - Outputs: `toggleFillMode()`, `toggleBought(gift: Gift)`, `startEdit(gift: Gift)`, `cancelEdit()`, `submitEdit()`, `reorderMove({ fromIndex: number; toIndex: number })`
-    - Notes: includes a drag handle button at the start of each gift row to support HTML5 drag & drop reordering. Dragging is disabled while in fill mode or during inline editing. Visual feedback: the dragged row becomes semi-transparent and the hovered drop target row is highlighted with a blue ring and background tint; the handle shows a grabbing cursor while active and sets `aria-grabbed="true"`.
+    - Inputs: `gifts: Gift[]`, `fillMode: boolean`, `isUpdating: (id: string | null | undefined) => boolean`, `editingId: string | null`, `deletingId: string | null`, `editTitleControl: FormControl<string>`, `editUrlControl: FormControl<string|null>`, `editSubmitting: boolean`, `editTitleInvalid: boolean`, `editError: string | null`
+    - Outputs: `toggleFillMode()`, `toggleBought(gift: Gift)`, `startEdit(gift: Gift)`, `cancelEdit()`, `submitEdit()`, `startDelete(gift: Gift)`, `cancelDelete()`, `confirmDelete()`, `reorderMove({ fromIndex: number; toIndex: number })`
+    - Notes:
+      - Includes a drag handle button at the start of each gift row to support HTML5 drag & drop reordering. Dragging is disabled while in fill mode or during inline editing. Visual feedback: the dragged row becomes semi-transparent and the hovered drop target row is highlighted with a blue ring and background tint; the handle shows a grabbing cursor while active and sets `aria-grabbed="true"`.
+      - Action buttons (Edit, Delete, Confirm, Cancel) use a consistent compact icon‑button style: each control is a `32x32` round button (`size-8`) containing a `24x24` icon (`size-6`). Hover/focus/disabled states mirror the app theme.
+      - Icons are inline SVG with `fill`/`stroke` set to `currentColor` so color is controlled through button text color classes (e.g., `text-white` for the edit pen on dark background). This guarantees the edit pen appears white.
   - `add-gift-form/` (`AddGiftFormComponent`): Form to add a gift with validation and error message.
     - Inputs: `titleControl: FormControl<string>`, `urlControl: FormControl<string|null>`, `submitting: boolean`, `titleInvalid: boolean`, `error: string | null`
     - Outputs: `addGift()`
@@ -53,7 +61,52 @@ These components are consumed by `ListPage` (`src/app/pages/list/list.ts`) and w
 - `ConfirmModalComponent` (path: `src/app/pages/list/components/confirm-modal/`)
   - Inputs: `open: boolean`, `title: string`, `message: string`, `confirmLabel: string`, `cancelLabel: string`.
   - Outputs: `confirm()`, `cancel()`, `close()`.
-  - Styling matches existing Tailwind look (rounded panel, slate colors, focus rings).
+    - Styling matches existing Tailwind look (rounded panel, slate colors, focus rings).
+
+### Delete a gift with inline confirmation
+
+- From the gifts list (when not in fill mode), each item exposes a Delete action next to Edit.
+- Clicking Delete triggers a per-item confirmation state managed by `ListPage` via the signal `deletingGiftId`.
+  - While confirming, the usual Edit/Delete controls are replaced with two clear buttons: a green check (Confirm) and a red cross (Cancel).
+  - Accessibility: buttons have explicit `aria-label`s like “Confirmer la suppression de …” and “Annuler …”; disabled states reflect ongoing updates.
+- Data flow:
+  - `GiftsListComponent` emits `startDelete(gift)`, `cancelDelete()`, `confirmDelete()`.
+  - `ListPage` handles these:
+    - `startDeleteGift(gift)` sets `deletingGiftId`.
+    - `cancelDeleteGift()` clears it.
+    - `confirmDeleteGift()` calls `ListService.deleteGift(listId, giftId)`, wraps it in the `updating` Set for UI disabling, and clears state afterwards.
+- Service:
+  - `ListService.deleteGift(listId, giftId)` removes the gift from RTDB at `lists/{listId}/gifts/{giftId}`.
+
+## UX Theme, Tokens, and Utilities
+
+- Location: `src/styles.css` centralizes theme variables and utilities.
+- Tokens
+  - Brand palette uses a playful gift-inspired scheme (candy pink primary, teal accent, gold highlight) exposed as CSS variables and mapped into Tailwind tokens via `@theme`:
+    - `--color-brand-50..900`, `--color-accent-500/600`, `--color-gold-400`.
+  - Surfaces and text are accessible in both light and dark modes (`--surface`, `--surface-muted`, `--text`, `--text-muted`).
+  - Shape tokens: `--radius-sm|md|lg` are scaled at runtime by `UxService` through `radiusScale`.
+  - Focus ring color is aligned with the brand: `--ring`.
+- Dark theme
+  - The `<html>` element gets class `theme-dark` when the resolved theme is dark; variables swap accordingly. This is controlled by `UxService` (`src/app/ux/ux.config.ts`) which reads `UxConfig.theme` and user media query.
+- Density
+  - `UxService` writes `data-density` on `:root`. CSS adjusts radii and component paddings for `compact`.
+- Motion
+  - `UxService` resolves `motion` (`auto | reduce | prefer`) and sets `data-motion` on `:root`. Animations and transforms use motion-safe fallbacks under `:root[data-motion='reduce']`.
+- Utilities
+  - `@utility card`: base card container (surface, rounded, soft shadow).
+  - `@utility card-fancy`, `card-fancy-hover`: gradient border, elevated hover with motion-safe transform.
+  - `@utility btn-base`, `btn-primary`, `btn-secondary`, `btn-sm|md|lg` and `btn-shine` (subtle shimmer animation; disabled when `reduce` motion).
+  - `@utility input-base`, `input-invalid` for consistent form fields.
+  - Decorative helpers opt-in: `confetti` background, `ribbon-underline` for headings.
+  - Note: Pseudo-classes/elements like `:hover`, `:active`, and `::after` are applied via plain CSS selectors (e.g., `.btn-primary:hover`) rather than inside `@utility` names to comply with Tailwind v4 utility naming rules (utilities must be alphanumeric and not include `:`).
+
+## Shared UI Components
+
+- Card (`src/app/shared/ui/card/card.ts`)
+  - Inputs: `title?: string`, `ariaLabel?: string`, `fancy = false`, `hoverLift = true`, `confetti = false`, `ribbon = true`.
+  - Behavior: when `fancy` is true, applies `card-fancy` styling. Optional `hoverLift` adds hover elevation, `confetti` adds a subtle celebratory background, and `ribbon` underlines the header.
+  - Accessibility: the root section keeps `role="region"` and forwards `aria-label` when provided.
 
 # TypeScript Best Practices
 
@@ -76,6 +129,7 @@ These components are consumed by `ListPage` (`src/app/pages/list/list.ts`) and w
 
 - It MUST pass all AXE checks.
 - It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
+ - Motion respects OS preferences; any decorative animation has a reduce-motion guard.
 
 ### Components
 
@@ -220,12 +274,3 @@ Usage guidelines
     <input uiInput placeholder="Title" [invalid]="titleCtrl.invalid" />
     <textarea uiInput size="lg"></textarea>
     ```
-
-Best practices
-- Prefer shared UI components and utilities over ad-hoc Tailwind classes to ensure centralized control.
-- Keep page CSS minimal; rely on tokens/utilities for color, spacing, and states.
-- Ensure focus styles use `focus-visible:focus-ring` and do not remove outlines.
-- Never hardcode brand colors in pages; use semantic tokens or shared utilities.
-
-Notes
-- The root README.md is intentionally not modified.

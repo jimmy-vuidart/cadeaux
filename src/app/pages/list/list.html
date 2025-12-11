@@ -7,6 +7,7 @@
       [fillMode]="fillMode()"
       [isUpdating]="isUpdatingFn"
       [editingId]="editingGiftId()"
+      [deletingId]="deletingGiftId()"
       [editTitleControl]="editTitle"
       [editUrlControl]="editUrl"
       [editSubmitting]="editSubmitting()"
@@ -17,6 +18,9 @@
       (startEdit)="startEditGift($event)"
       (cancelEdit)="cancelEdit()"
       (submitEdit)="submitEdit()"
+      (startDelete)="startDeleteGift($event)"
+      (cancelDelete)="cancelDeleteGift()"
+      (confirmDelete)="confirmDeleteGift()"
       (reorderMove)="onReorderMove($event)"
     />
 

@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+import { CardComponent } from '@shared/ui/card/card';
 
 @Component({
   selector: 'app-add-gift-form',
   templateUrl: './add-gift-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [ReactiveFormsModule, FormsModule, CardComponent],
 })
 export class AddGiftFormComponent {
   titleControl = input.required<FormControl<string>>();

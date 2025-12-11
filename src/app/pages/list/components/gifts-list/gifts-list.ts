@@ -15,6 +15,8 @@ export class GiftsListComponent {
   isUpdating = input<(id: string | undefined | null) => boolean>(() => false);
   // Inline edit inputs
   editingId = input<string | null>(null);
+  // Deleting confirmation state (managed by parent)
+  deletingId = input<string | null>(null);
   editTitleControl = input<FormControl<string> | null>(null);
   editUrlControl = input<FormControl<string | null> | null>(null);
   editSubmitting = input(false);
@@ -26,6 +28,10 @@ export class GiftsListComponent {
   startEdit = output<Gift>();
   cancelEdit = output<void>();
   submitEdit = output<void>();
+  // Delete flow outputs
+  startDelete = output<Gift>();
+  cancelDelete = output<void>();
+  confirmDelete = output<void>();
 
   // Drag & drop reorder
   reorderMove = output<{ fromIndex: number; toIndex: number }>();

@@ -6,6 +6,11 @@ This app is a very small app, dedicated for my family, to handle the gift lists
 
 This page will simply display a page describing quickly the app, and allow with a button to create a new gift list
 
+### Look & feel
+- The home page welcomes the family with a joyful, gift‑themed ambiance.
+- Buttons feel lively and inviting, with a subtle festive shine on hover and clear focus highlights.
+- Sections are presented inside friendly, rounded cards. Some areas may use a celebratory style (gradient edges, confetti background) when appropriate to mark special moments like “Create a list”.
+
 ## Gift list page
 
 URL : /lists/<id>
@@ -24,8 +29,16 @@ The gift list page is organized into clear sections, each managed by a focused s
 - Gifts list: shows all gifts, with a toggle for the fill mode and a checkbox per gift in fill mode. A drag handle at the start of each gift allows reordering the list by drag & drop (disabled while in fill mode or when editing a gift).
   - Reordering provides clear visual feedback: the dragged row becomes semi‑transparent and the potential drop target row is highlighted.
 - Each gift has an Edit action (when not in fill mode) to change the title and optional URL. The edition form opens inline just under the concerned gift item.
+- Each gift has Edit and Delete actions (when not in fill mode). Deleting asks for confirmation: the usual actions are temporarily replaced with two clear buttons — a green check to confirm deletion and a red cross to cancel — to avoid accidental removals.
+  - The Edit action is displayed as a small pen icon button to keep the interface clean and familiar.
+  - All action buttons for a gift (edit, delete, confirm, cancel) share the same compact form factor for visual consistency: a small round button of equal size with a clear icon inside. Icons are legible on dark backgrounds (e.g., the edit pen is white) and each button has an accessible label for screen readers.
 - Add gift form: inputs to add a new gift (title and optional URL) with validation and error message.
 - Share toast: transient confirmation message for share/copy actions.
+
+### Visual identity and tone
+- Friendly and celebratory: soft candy pinks, teal accents, and a touch of gold to evoke ribbons and wrapping paper.
+- Light and Dark themes are both supported; the design keeps its playful personality in either mode.
+- Motion is kept delightful but subtle; when a device prefers reduced motion, animations calm down automatically.
 
 ### Partage d’une liste
 
@@ -72,7 +85,7 @@ What can be customized
 
 Shared UI building blocks
 - Buttons: Primary and secondary buttons with consistent states and accessibility.
-- Cards: Standard container for sections and panels.
+- Cards: Standard container for sections and panels. Cards can optionally be presented in a more festive style to highlight important actions or sections (e.g., gradient border, ribbon underline for titles, or a subtle confetti background).
 - Inputs: Text inputs and textareas styled consistently across the app.
 
 Principles
@@ -83,3 +96,7 @@ Principles
 How teams use it
 - Configure the global UX in one place (no page‑by‑page tweaking).
 - Compose pages using shared UI components (Button, Card, Inputs) for consistent behavior and appearance.
+
+## A more fancy and fun experience
+- The interface embraces a gift‑giving spirit with cheerful colors, playful highlights, and light celebratory details that can be enabled where they add joy (e.g., confetti for success messages or a ribbon underline on headings).
+- The experience remains practical and family‑friendly: readable, fast, and inclusive, with strong contrast and clear interactions.

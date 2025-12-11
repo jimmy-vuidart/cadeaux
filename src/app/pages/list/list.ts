@@ -49,6 +49,8 @@ export class ListPage {
   readonly updating = signal(new Set<string>());
   // Inline edit state
   readonly editingGiftId = signal<string | null>(null);
+  // Deleting confirmation state
+  readonly deletingGiftId = signal<string | null>(null);
   readonly editTitle = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(200)],
@@ -215,6 +217,36 @@ export class ListPage {
       this.editError.set('Impossible de modifier le cadeau. Réessaie.');
     } finally {
       this.editSubmitting.set(false);
+      const after = new Set(this.updating());
+      after.delete(giftId);
+      this.updating.set(after);
+    }
+  }
+
+  // Delete flow
+  startDeleteGift(gift: Gift): void {
+    const id = gift.id || null;
+    if (!id) return;
+    this.deletingGiftId.set(id);
+  }
+
+  cancelDeleteGift(): void {
+    this.deletingGiftId.set(null);
+  }
+
+  async confirmDeleteGift(): Promise<void> {
+    const listId = this.id();
+    const giftId = this.deletingGiftId();
+    if (!listId || !giftId) return;
+    const set = new Set(this.updating());
+    set.add(giftId);
+    this.updating.set(set);
+    try {
+      await this.lists.deleteGift(listId, giftId);
+    } catch (e) {
+      console.error('Failed to delete gift', e);
+    } finally {
+      this.deletingGiftId.set(null);
       const after = new Set(this.updating());
       after.delete(giftId);
       this.updating.set(after);

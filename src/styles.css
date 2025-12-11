@@ -4,16 +4,22 @@
 /* UX Theme tokens centralized via CSS variables + Tailwind @theme (Tailwind v4) */
 :root {
   /* brand */
-  --brand-50: #eef2ff;
-  --brand-100: #e0e7ff;
-  --brand-200: #c7d2fe;
-  --brand-300: #a5b4fc;
-  --brand-400: #818cf8;
-  --brand-500: #6366f1;
-  --brand-600: #4f46e5;
-  --brand-700: #4338ca;
-  --brand-800: #3730a3;
-  --brand-900: #312e81;
+  /* playful gift-inspired palette (candy pinks, teals, gold accents) */
+  --brand-50: #fff1f7;
+  --brand-100: #ffe4ef;
+  --brand-200: #ffc8de;
+  --brand-300: #ff9fc6;
+  --brand-400: #ff79b1;
+  --brand-500: #fb4996; /* primary */
+  --brand-600: #e22984;
+  --brand-700: #c0176f;
+  --brand-800: #980e59;
+  --brand-900: #6a0a41;
+
+  /* accent palette */
+  --accent-500: #14b8a6; /* teal */
+  --accent-600: #0d9488;
+  --gold-400: #facc15;
 
   /* surfaces */
   --surface: 255 255 255; /* white */
@@ -25,7 +31,7 @@
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
-  --ring: 0 0 0 3px rgba(99, 102, 241, 0.35);
+  --ring: 0 0 0 3px rgba(251, 73, 150, 0.35);
 }
 
 /* Dark theme override (opt-in by class) */
@@ -53,6 +59,9 @@
   --color-surface-muted: rgb(var(--surface-muted));
   --color-text: rgb(var(--text));
   --color-text-muted: rgb(var(--text-muted));
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-gold-400: var(--gold-400);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -72,6 +81,25 @@
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.1);
 }
 
+/* Fancy card variant with gradient border and subtle confetti dots */
+@utility card-fancy {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,1)) padding-box,
+              linear-gradient(135deg, var(--color-brand-400), var(--color-accent-500)) border-box;
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px 0 rgb(251 73 150 / 0.08), 0 2px 8px 0 rgb(20 184 166 / 0.08);
+}
+@utility card-fancy-hover {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.card-fancy-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px 0 rgb(251 73 150 / 0.10), 0 4px 12px 0 rgb(20 184 166 / 0.10);
+}
+/* Motion-safe */
+:root[data-motion='reduce'] .card-fancy-hover:hover { transform: none; }
+
 @utility btn-base {
   display: inline-flex;
   align-items: center;
@@ -82,13 +110,46 @@
   transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
 }
 
-@utility btn-primary { background-color: var(--color-brand-600); color: white; }
+@utility btn-primary {
+  background: linear-gradient(90deg, var(--color-brand-600), var(--color-brand-500));
+  color: white;
+}
+.btn-primary:hover {
+  background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-400));
+  box-shadow: 0 8px 16px 0 rgb(251 73 150 / 0.25);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px 0 rgb(251 73 150 / 0.18);
+}
+@utility btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: -150% auto -150% -150%;
+  width: 50%;
+  transform: rotate(25deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  animation: shine 1.8s ease-in-out infinite;
+}
+:root[data-motion='reduce'] .btn-shine::after { animation: none; display: none; }
+@keyframes shine {
+  0% { left: -150%; }
+  60% { left: 120%; }
+  100% { left: 120%; }
+}
 
 @utility btn-secondary {
   background-color: var(--color-surface-muted);
   color: var(--color-text);
   border: 1px solid rgb(226 232 240);
 }
+.btn-secondary:hover { box-shadow: 0 4px 10px 0 rgb(0 0 0 / 0.08); transform: translateY(-1px); }
+.btn-secondary:active { transform: translateY(0); box-shadow: 0 2px 6px 0 rgb(0 0 0 / 0.06); }
 
 @utility btn-sm { padding: 0.375rem 0.625rem; font-size: 0.875rem; }
 @utility btn-md { padding: 0.5rem 0.875rem; font-size: 0.95rem; }
@@ -116,3 +177,39 @@
 }
 
 @utility input-invalid { border-color: rgb(248 113 113); }
+
+/* App-level fun background and decorative helpers */
+body {
+  background:
+    radial-gradient(1200px 500px at -10% -10%, rgba(251,73,150,0.08), transparent 60%),
+    radial-gradient(1000px 500px at 110% 10%, rgba(20,184,166,0.08), transparent 65%),
+    linear-gradient(180deg, rgb(255 255 255), rgb(250 250 250));
+}
+.theme-dark body, .theme-dark {
+  background:
+    radial-gradient(1200px 500px at -10% -10%, rgba(251,73,150,0.10), transparent 60%),
+    radial-gradient(1000px 500px at 110% 10%, rgba(20,184,166,0.10), transparent 65%),
+    linear-gradient(180deg, rgb(9 9 11), rgb(15 15 18));
+}
+
+/* Confetti utility (opt-in, light performance) */
+@utility confetti {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(250,204,21,.6) 2px, transparent 3px),
+    radial-gradient(circle at 80% 30%, rgba(59,130,246,.5) 2px, transparent 3px),
+    radial-gradient(circle at 30% 70%, rgba(236,72,153,.5) 2px, transparent 3px),
+    radial-gradient(circle at 60% 60%, rgba(34,197,94,.5) 2px, transparent 3px);
+  background-size: 60px 60px;
+}
+
+/* Ribbon underline for headings */
+@utility ribbon-underline {
+  position: relative;
+}
+.ribbon-underline::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -0.25rem; height: 6px;
+  background: linear-gradient(90deg, var(--color-brand-500), var(--color-accent-500), var(--color-gold-400));
+  border-radius: 9999px;
+}
