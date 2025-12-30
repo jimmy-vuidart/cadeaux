@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Database, ref, set, update, remove, objectVal, listVal, push } from '@angular/fire/database';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Database, ref, set, update, remove, objectVal, listVal, push, get, query, orderByChild, equalTo } from '@angular/fire/database';
+import { Observable } from 'rxjs';
 import type { GiftList } from '../models/gift-list';
 import type { Gift } from '../models/gift';
 
@@ -20,29 +20,35 @@ export class ListService {
     return ref(this.db, `lists/${listId}/gifts`);
   }
 
-  async createList(title = 'Nouvelle liste'): Promise<string> {
+  async createList(title = 'Nouvelle liste', ownerId?: string): Promise<string> {
     const base = this.toKebab(title);
     const fallback = 'liste';
     const stem = base || fallback;
 
-    // Ensure uniqueness by appending an incrementing suffix if needed
+    // Check availability: stem, then stem-2, stem-3, etc.
     let candidate = stem;
-    let i = 2;
-    // small safety to avoid infinite loop in extreme cases
-    const MAX_TRIES = 1000;
-    while (!(await this.isIdAvailable(candidate)) && i <= MAX_TRIES) {
-      candidate = `${stem}-${i++}`;
+    let suffix = 2;
+    
+    while (!(await this.isIdAvailable(candidate))) {
+      candidate = `${stem}-${suffix}`;
+      suffix++;
+      
+      // Safety break to prevent infinite loops in extreme edge cases
+      if (suffix > 1000) throw new Error('Impossible de générer un ID unique.');
     }
 
-    await set(this.listRef(candidate), {
-      title,
-    } satisfies Omit<GiftList, 'id' | 'gifts'>);
+    const payload: Omit<GiftList, 'id' | 'gifts'> = { title };
+    if (ownerId) {
+      payload.ownerId = ownerId;
+    }
+
+    await set(this.listRef(candidate), payload);
     return candidate;
   }
 
   private async isIdAvailable(id: string): Promise<boolean> {
-    const val = await firstValueFrom(objectVal<GiftList | null>(this.listRef(id)));
-    return val === null;
+    const snapshot = await get(this.listRef(id));
+    return !snapshot.exists();
   }
 
   // Transforms a title to a Firebase-safe kebab-case id
@@ -62,6 +68,11 @@ export class ListService {
 
   listAll(): Observable<GiftList[]> {
     return listVal<GiftList>(this.listsRef(), { keyField: 'id' });
+  }
+
+  listByOwner(ownerId: string): Observable<GiftList[]> {
+    const q = query(this.listsRef(), orderByChild('ownerId'), equalTo(ownerId));
+    return listVal<GiftList>(q, { keyField: 'id' });
   }
 
   listGifts(listId: string): Observable<Gift[]> {

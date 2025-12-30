@@ -1,0 +1,67 @@
+<div class="glass-panel p-6 text-center animate-fade-in-up delay-100">
+  @if (user()) {
+    <div class="flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        @if (user()?.photoURL) {
+          <img [src]="user()?.photoURL" alt="Avatar" class="size-10 rounded-full border-2 border-gold-400">
+        }
+        <span class="text-white font-medium">Bonjour, {{ user()?.displayName || user()?.email || 'lutin' }} !</span>
+      </div>
+      <app-christmas-button variant="secondary" size="sm" (click)="logout()">
+        Se déconnecter
+      </app-christmas-button>
+    </div>
+  } @else {
+    <div class="flex flex-col items-center gap-4">
+      <p class="text-white/80 text-sm mb-2">Connecte-toi pour gérer tes listes.</p>
+
+      <form [formGroup]="form" class="w-full space-y-3 animate-fade-in">
+        <div class="flex flex-col gap-3">
+          <input
+            type="email"
+            formControlName="email"
+            uiInput
+            placeholder="Adresse email"
+            autocomplete="username"
+            [invalid]="form.controls.email.invalid && form.controls.email.touched"
+          >
+          <input
+            type="password"
+            formControlName="password"
+            uiInput
+            placeholder="Mot de passe"
+            autocomplete="current-password"
+            [invalid]="form.controls.password.invalid && form.controls.password.touched"
+          >
+        </div>
+
+        @if (error()) {
+          <p class="text-red-300 text-xs bg-red-900/30 p-2 rounded">{{ error() }}</p>
+        }
+
+        <div class="flex flex-col gap-2 pt-2">
+          <app-christmas-button variant="primary" size="md" (click)="submitLogin()" [disabled]="loading()" [customClass]="'w-full justify-center'">
+            Se connecter
+          </app-christmas-button>
+          
+          <app-christmas-button variant="secondary" size="sm" (click)="submitRegister()" [disabled]="loading()" [customClass]="'w-full justify-center opacity-80'">
+            Créer un compte
+          </app-christmas-button>
+
+          <div class="flex items-center gap-2 py-1">
+            <div class="h-px bg-white/10 flex-1"></div>
+            <span class="text-[10px] text-white/30 uppercase tracking-widest">OU</span>
+            <div class="h-px bg-white/10 flex-1"></div>
+          </div>
+
+          <app-christmas-button variant="secondary" size="sm" (click)="loginGoogle()" [disabled]="loading()" [customClass]="'w-full justify-center !text-xs !py-3'">
+            <div class="flex items-center gap-2">
+              <svg viewBox="0 0 24 24" class="size-4 shrink-0" aria-hidden="true"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .533 5.333.533 12S5.867 24 12.48 24c3.44 0 6.04-1.133 8.16-3.293 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.12H12.48z" fill="currentColor"/></svg>
+              <span>Continuer avec Google</span>
+            </div>
+          </app-christmas-button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

@@ -1,0 +1,35 @@
+{
+  "project": {
+    "name": "Cadeaux VUIDART",
+    "description": "Application de gestion de listes de cadeaux pour famille",
+    "context_files": [
+      ".ai/guidelines.md",
+      ".ai/business-specs.md",
+      ".ai/technical-specs.md"
+    ],
+    "primary_language": "fr",
+    "version": "0.0.6",
+    "last_updated": "2024-01-15"
+  },
+  "ai": {
+    "role": "Expert TypeScript/Angular pour application familiale",
+    "behavior": {
+      "follow_specs_strictly": true,
+      "prioritize_accessibility": true,
+      "mobile_first_approach": true,
+      "code_quality_focus": "high",
+      "explanation_style": "technical_but_clear"
+    },
+    "capabilities": {
+      "can_analyze_code": true,
+      "can_generate_code": true,
+      "can_suggest_improvements": true,
+      "can_explain_concepts": true
+    }
+  },
+  "workflow": {
+    "preferred_work_style": "iterative",
+    "change_approval": "required",
+    "documentation_importance": "high"
+  }
+}

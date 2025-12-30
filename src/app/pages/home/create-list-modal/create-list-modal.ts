@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ReactiveFormsModule, FormControl, Validators, FormsModule } from '@angular/forms';
 import { output } from '@angular/core';
 import { ListService } from '@shared/services/list.service';
+import { AuthService } from '@shared/services/auth.service';
 
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 
@@ -13,6 +14,7 @@ import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-
 })
 export class CreateListModalComponent {
   private readonly lists = inject(ListService);
+  private readonly auth = inject(AuthService);
 
   // Outputs
   readonly cancel = output<void>();
@@ -36,7 +38,8 @@ export class CreateListModalComponent {
     this.creating.set(true);
     this.error.set(null);
     try {
-      const id = await this.lists.createList(this.titleCtrl.value.trim());
+      const uid = this.auth.user()?.uid;
+      const id = await this.lists.createList(this.titleCtrl.value.trim(), uid);
       this.created.emit(id);
     } catch {
       this.error.set('La création a échoué. Réessaie.');
