@@ -4,7 +4,7 @@ This app is a very small app, dedicated for my family, to handle the gift lists
 
 ## Home page
 
-This page will simply display a page describing quickly the app, and allow with a button to create a new gift list
+This page will simply display a page describing quickly the app, and allow with a button to create a new gift list. If the user is not logged in, clicking this button opens the account creation modal instead.
 
 ### Look & feel
 - The home page welcomes the family with a joyful, gift‑themed ambiance.

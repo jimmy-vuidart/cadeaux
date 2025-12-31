@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, output } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '@shared/services/auth.service';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
@@ -12,6 +12,8 @@ import { UiInputDirective } from '@shared/ui/input/input';
 })
 export class LoginBlockComponent {
   private readonly auth = inject(AuthService);
+
+  readonly register = output<void>();
 
   readonly user = this.auth.user;
   readonly error = signal<string | null>(null);
@@ -31,6 +33,10 @@ export class LoginBlockComponent {
     this.form.reset();
   }
 
+  openRegister(): void {
+    this.register.emit();
+  }
+
   async submitLogin(): Promise<void> {
     if (this.form.invalid) return;
     this.loading.set(true);
@@ -38,21 +44,6 @@ export class LoginBlockComponent {
     const { email, password } = this.form.getRawValue();
     try {
       await this.auth.loginWithEmail(email, password);
-    } catch (e: any) {
-      console.error(e);
-      this.error.set(this.mapError(e.code));
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  async submitRegister(): Promise<void> {
-    if (this.form.invalid) return;
-    this.loading.set(true);
-    this.error.set(null);
-    const { email, password } = this.form.getRawValue();
-    try {
-      await this.auth.registerWithEmail(email, password);
     } catch (e: any) {
       console.error(e);
       this.error.set(this.mapError(e.code));

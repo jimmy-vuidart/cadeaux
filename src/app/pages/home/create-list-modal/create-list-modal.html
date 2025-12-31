@@ -6,7 +6,7 @@
       liste</h2>
     <p class="text-white/70">Entre un titre pour ta liste de Noël.</p>
 
-    <form class="mt-6 space-y-4" (ngSubmit)="submit()">
+    <form class="mt-6 space-y-4" (submit)="$event.preventDefault()">
       <div>
         <label for="list-title" class="sr-only">Titre de la liste</label>
         <input id="list-title" type="text" class="input-base text-lg placeholder-white/40" [formControl]="titleCtrl"
@@ -22,8 +22,8 @@
         <app-christmas-button variant="secondary" size="sm" (click)="onCancel()" [disabled]="creating()" [customClass]="'w-full sm:w-auto'">
           Annuler
         </app-christmas-button>
-        <app-christmas-button variant="primary" size="sm" type="submit" [busy]="creating()"
-          [disabled]="creating() || titleCtrl.invalid" [customClass]="'w-full sm:w-auto'">
+        <app-christmas-button variant="primary" size="sm" type="button" [busy]="creating()"
+          (click)="submit()" [disabled]="creating() || titleCtrl.invalid" [customClass]="'w-full sm:w-auto'">
           {{ creating() ? 'Création…' : 'Créer la liste' }}
         </app-christmas-button>
       </div>

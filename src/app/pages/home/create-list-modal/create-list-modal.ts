@@ -41,7 +41,8 @@ export class CreateListModalComponent {
       const uid = this.auth.user()?.uid;
       const id = await this.lists.createList(this.titleCtrl.value.trim(), uid);
       this.created.emit(id);
-    } catch {
+    } catch (e) {
+      console.error(e)
       this.error.set('La création a échoué. Réessaie.');
     } finally {
       this.creating.set(false);

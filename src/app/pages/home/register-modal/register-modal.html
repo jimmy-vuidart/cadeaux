@@ -1,0 +1,92 @@
+<pre>{{form.errors | json}}</pre>
+
+<div class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" aria-hidden="true" (click)="onCancel()"></div>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div role="dialog" aria-modal="true" aria-labelledby="register-title"
+    class="w-full max-w-md glass-panel p-6 sm:p-8 outline-none max-h-[90vh] overflow-auto animate-fade-in">
+    <h2 id="register-title" class="text-2xl sm:text-3xl font-bold font-christmas text-gold-gradient drop-shadow-lg mb-2">
+      Rejoindre la famille
+    </h2>
+    <p class="text-white/70">Crée ton compte pour gérer tes listes de cadeaux.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4">
+      <div class="space-y-4">
+        <div>
+          <label class="sr-only" for="displayName">Nom ou pseudo</label>
+          <input
+            id="displayName"
+            type="text"
+            formControlName="displayName"
+            uiInput
+            placeholder="Ton petit nom (ex: Julie)"
+            autocomplete="name"
+            [invalid]="form.controls.displayName.invalid && form.controls.displayName.touched"
+            class="text-lg placeholder-white/40"
+            autofocus
+          >
+        </div>
+
+        <div>
+          <label class="sr-only" for="regEmail">Email</label>
+          <input
+            id="regEmail"
+            type="email"
+            formControlName="email"
+            uiInput
+            placeholder="Adresse email"
+            autocomplete="username"
+            [invalid]="form.controls.email.invalid && form.controls.email.touched"
+            class="text-lg placeholder-white/40"
+          >
+        </div>
+
+        <div>
+          <label class="sr-only" for="regPassword">Mot de passe</label>
+          <input
+            id="regPassword"
+            type="password"
+            formControlName="password"
+            uiInput
+            placeholder="Mot de passe (6+ caractères)"
+            autocomplete="new-password"
+            [invalid]="form.controls.password.invalid && form.controls.password.touched"
+            class="text-lg placeholder-white/40"
+          >
+        </div>
+
+        <div>
+          <label class="sr-only" for="regConfirmPassword">Confirmer le mot de passe</label>
+          <input
+            id="regConfirmPassword"
+            type="password"
+            formControlName="confirmPassword"
+            uiInput
+            placeholder="Confirmer le mot de passe"
+            autocomplete="new-password"
+            [invalid]="(form.controls.confirmPassword.invalid || form.errors?.['passwordMismatch']) && form.controls.confirmPassword.touched"
+            class="text-lg placeholder-white/40"
+          >
+          @if (form.errors?.['passwordMismatch'] && form.controls.confirmPassword.touched) {
+             <p class="text-red-300 text-xs mt-1 ml-1">Les mots de passe ne correspondent pas.</p>
+          }
+        </div>
+      </div>
+
+      @if (error()) {
+        <p class="text-sm text-red-400 bg-red-900/20 px-3 py-2 rounded border border-red-500/20" role="alert">
+          {{ error() }}
+        </p>
+      }
+
+      <div class="mt-8 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3">
+        <app-christmas-button variant="secondary" size="sm" (click)="onCancel()" [disabled]="loading()" [customClass]="'w-full sm:w-auto'">
+          Annuler
+        </app-christmas-button>
+        <app-christmas-button variant="primary" size="sm" type="submit" [busy]="loading()"
+          [disabled]="loading() || form.invalid" [customClass]="'w-full sm:w-auto'">
+          {{ loading() ? 'Création…' : 'Créer mon compte' }}
+        </app-christmas-button>
+      </div>
+    </form>
+  </div>
+</div>

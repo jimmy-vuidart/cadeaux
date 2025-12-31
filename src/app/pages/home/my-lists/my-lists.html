@@ -1,0 +1,44 @@
+<section class="w-full max-w-4xl mx-auto space-y-6 animate-fade-in">
+  <header class="flex items-center justify-between mb-8">
+    <h2 class="text-2xl font-bold font-christmas text-gold-400 flex items-center gap-2">
+      <span class="material-symbols-outlined">format_list_bulleted</span>
+      Mes listes
+    </h2>
+    <app-christmas-button variant="primary" size="sm" (click)="createList()">
+      <span class="material-symbols-outlined text-lg">add_circle</span>
+      Nouvelle liste
+    </app-christmas-button>
+  </header>
+
+  @if (lists(); as myLists) {
+    @if (myLists.length > 0) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (list of myLists; track list.id) {
+          <a [routerLink]="['/lists', list.id]" class="group block h-full">
+            <div class="card-glass p-6 h-full flex flex-col justify-between hover:bg-white/10 transition-colors">
+              <div>
+                <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gold-400 transition-colors truncate">
+                  {{ list.title }}
+                </h3>
+                <p class="text-white/50 text-xs font-mono">
+                  /lists/{{ list.id }}
+                </p>
+              </div>
+              
+              <div class="mt-4 flex justify-end">
+                 <span class="material-symbols-outlined text-white/30 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+        <p class="text-white/60 mb-4">Tu n'as pas encore de liste.</p>
+        <app-christmas-button variant="secondary" size="md" (click)="createList()">
+          Créer ma première liste
+        </app-christmas-button>
+      </div>
+    }
+  }
+</section>

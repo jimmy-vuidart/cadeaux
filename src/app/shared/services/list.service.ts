@@ -1,5 +1,18 @@
-import { Injectable, inject } from '@angular/core';
-import { Database, ref, set, update, remove, objectVal, listVal, push, get, query, orderByChild, equalTo } from '@angular/fire/database';
+import { inject, Injectable } from '@angular/core';
+import {
+  Database,
+  equalTo,
+  get,
+  listVal,
+  objectVal,
+  orderByChild,
+  push,
+  query,
+  ref,
+  remove,
+  set,
+  update,
+} from '@angular/fire/database';
 import { Observable } from 'rxjs';
 import type { GiftList } from '../models/gift-list';
 import type { Gift } from '../models/gift';
@@ -25,16 +38,25 @@ export class ListService {
     const fallback = 'liste';
     const stem = base || fallback;
 
-    // Check availability: stem, then stem-2, stem-3, etc.
+    // Ensure stem is not empty
+    if (!stem || stem.trim() === '') {
+      throw new Error('Could not generate a valid list ID from the title');
+    }
+
     let candidate = stem;
-    let suffix = 2;
-    
-    while (!(await this.isIdAvailable(candidate))) {
-      candidate = `${stem}-${suffix}`;
-      suffix++;
-      
-      // Safety break to prevent infinite loops in extreme edge cases
-      if (suffix > 1000) throw new Error('Impossible de générer un ID unique.');
+
+    // Check availability: stem, then stem-random, then stem-timestamp
+    if (!(await this.isIdAvailable(candidate))) {
+      let random = Math.random().toString(36).substring(2, 6);
+      // Ensure random string is at least 4 characters long
+      while (random.length < 4) {
+        random = Math.random().toString(36).substring(2, 6);
+      }
+      candidate = `${stem}-${random}`;
+
+      if (!(await this.isIdAvailable(candidate))) {
+        candidate = `${stem}-${Date.now()}`;
+      }
     }
 
     const payload: Omit<GiftList, 'id' | 'gifts'> = { title };
@@ -47,6 +69,9 @@ export class ListService {
   }
 
   private async isIdAvailable(id: string): Promise<boolean> {
+    if (!id || id.trim() === '') {
+      return false; // Empty IDs are not available
+    }
     const snapshot = await get(this.listRef(id));
     return !snapshot.exists();
   }
@@ -81,9 +106,7 @@ export class ListService {
 
   async addGift(listId: string, title: string, url?: string): Promise<string> {
     const newRef = push(this.giftsRef(listId));
-    const normalizedUrl = (url ?? '').trim()
-      ? this.normalizeUrl((url ?? '').trim())
-      : undefined;
+    const normalizedUrl = (url ?? '').trim() ? this.normalizeUrl((url ?? '').trim()) : undefined;
     await set(newRef, {
       title,
       bought: false,
@@ -110,7 +133,7 @@ export class ListService {
   async updateGift(
     listId: string,
     giftId: string,
-    patch: { title?: string; url?: string | null }
+    patch: { title?: string; url?: string | null },
   ): Promise<void> {
     const payload: any = {};
     if (typeof patch.title === 'string') payload.title = patch.title.trim();
