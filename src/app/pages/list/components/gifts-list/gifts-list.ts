@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { FormControl, FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import type { Gift } from '@shared/models/gift';
+import type { UserInfo } from '@shared/models/user-info';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
-import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-gifts-list',
   templateUrl: './gifts-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, ChristmasButtonComponent, NgClass],
+  imports: [ReactiveFormsModule, FormsModule, ChristmasButtonComponent],
 })
 export class GiftsListComponent {
   gifts = input.required<Gift[]>();
@@ -24,6 +24,8 @@ export class GiftsListComponent {
   editSubmitting = input(false);
   editTitleInvalid = input(false);
   editError = input<string | null>(null);
+  // User information mapping
+  users = input<Record<string, UserInfo>>({});
   toggleFillMode = output<void>();
   toggleBought = output<Gift>();
   // Start inline edit for a gift
@@ -35,46 +37,24 @@ export class GiftsListComponent {
   cancelDelete = output<void>();
   confirmDelete = output<void>();
 
-  // Drag & drop reorder
+  // Reorder with buttons
   reorderMove = output<{ fromIndex: number; toIndex: number }>();
-  private dragIndex: number | null = null;
-  private dragOverIndex: number | null = null;
 
-  // Expose simple guards for template without leaking private fields
-  isDragging(idx: number): boolean {
-    return this.dragIndex === idx;
+  getUserDisplayName(userId: string | undefined | null): string {
+    if (!userId) return 'quelqu\'un';
+    const user = this.users()[userId];
+    return user?.displayName || user?.email || userId || 'quelqu\'un';
   }
 
-  isDropTarget(idx: number): boolean {
-    return this.dragOverIndex === idx && this.dragIndex !== idx;
+  moveUp(index: number): void {
+    if (this.fillMode() || this.editingId() || index <= 0) return;
+    this.reorderMove.emit({ fromIndex: index, toIndex: index - 1 });
   }
 
-  onDragStart(index: number, evt?: DragEvent): void {
+  moveDown(index: number): void {
     if (this.fillMode() || this.editingId()) return;
-    this.dragIndex = index;
-    try {
-      // Some browsers require setting data to start a drag
-      evt?.dataTransfer?.setData('text/plain', String(index));
-      if (evt?.dataTransfer) evt.dataTransfer.effectAllowed = 'move';
-    } catch {}
-  }
-
-  onDragEnd(): void {
-    this.dragIndex = null;
-    this.dragOverIndex = null;
-  }
-
-  onDragOver(evt: DragEvent, targetIndex?: number): void {
-    // Allow drop
-    evt.preventDefault();
-    if (typeof targetIndex === 'number') this.dragOverIndex = targetIndex;
-  }
-
-  onDrop(targetIndex: number): void {
-    if (this.fillMode() || this.editingId()) return;
-    if (this.dragIndex === null || targetIndex === this.dragIndex) return;
-    this.reorderMove.emit({ fromIndex: this.dragIndex, toIndex: targetIndex });
-    this.dragIndex = null;
-    this.dragOverIndex = null;
+    const giftsLength = this.gifts().length;
+    if (index >= giftsLength - 1) return;
+    this.reorderMove.emit({ fromIndex: index, toIndex: index + 1 });
   }
 }

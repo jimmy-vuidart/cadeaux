@@ -204,6 +204,36 @@ html {
   transform: translateY(-2px);
 }
 
+/* List Item Glass for the new list-based design */
+@utility list-item-glass {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.list-item-glass:hover {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.1);
+  transform: translateX(2px);
+}
+
+/* List icon styling */
+.list-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.list-item-glass:hover .list-icon {
+  background: rgba(234, 179, 8, 0.3);
+  border-color: rgba(234, 179, 8, 0.5);
+}
+
 /* Typography Overrides */
 h1,
 h2,

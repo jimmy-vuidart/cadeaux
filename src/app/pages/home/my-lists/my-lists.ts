@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { switchMap, of } from 'rxjs';
+import { switchMap, of, combineLatest, map } from 'rxjs';
 import { AuthService } from '@shared/services/auth.service';
 import { ListService } from '@shared/services/list.service';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
@@ -32,6 +32,33 @@ export class MyListsComponent {
       })
     ),
     { initialValue: [] as GiftList[] }
+  );
+
+  readonly listsWithGiftCounts = toSignal(
+    this.auth.user$.pipe(
+      switchMap(user => {
+        if (!user) return of([]);
+        
+        return this.listService.listByOwner(user.uid).pipe(
+          switchMap(lists => {
+            if (lists.length === 0) return of([]);
+            
+            // Fetch gift counts for each list
+            const giftCountObservables = lists.map(list => 
+              this.listService.listGifts(list.id!).pipe(
+                map(gifts => ({ 
+                  ...list, 
+                  giftCount: gifts.length 
+                }))
+              )
+            );
+            
+            return combineLatest(giftCountObservables);
+          })
+        );
+      })
+    ),
+    { initialValue: [] as Array<GiftList & { giftCount: number }> }
   );
 
   createList(): void {

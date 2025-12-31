@@ -2,9 +2,12 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ListService } from '@shared/services/list.service';
+import { UserService } from '@shared/services/user.service';
+import { AuthService } from '@shared/services/auth.service';
 import { ReactiveFormsModule, FormControl, Validators, FormsModule } from '@angular/forms';
-import { map, switchMap } from 'rxjs';
+import { map, switchMap, combineLatest, Observable, of } from 'rxjs';
 import type { Gift } from '@shared/models/gift';
+import type { UserInfo } from '@shared/models/user-info';
 import { ListHeaderComponent } from './components/list-header/list-header';
 import { GiftsListComponent } from './components/gifts-list/gifts-list';
 import { AddGiftFormComponent } from './components/add-gift-form/add-gift-form';
@@ -31,6 +34,8 @@ import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-
 export class ListPage {
   private readonly route = inject(ActivatedRoute);
   private readonly lists = inject(ListService);
+  private readonly userService = inject(UserService);
+  private readonly auth = inject(AuthService);
   private shareTimeout: any;
   private shareClearTimeout: any;
 
@@ -116,6 +121,28 @@ export class ListPage {
     { initialValue: [] as Gift[] },
   );
 
+  // User information for display names - simplified approach
+  // We'll use a signal that combines current user info with a simple mapping
+  readonly users = signal<Record<string, UserInfo>>({});
+
+  constructor() {
+    // Load current user info when available
+    this.loadCurrentUserInfo();
+  }
+
+  private loadCurrentUserInfo(): void {
+    this.auth.user$.subscribe(user => {
+      if (user) {
+        const userInfo: UserInfo = {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email
+        };
+        this.users.update(current => ({ ...current, [user.uid]: userInfo }));
+      }
+    });
+  }
+
   get title() {
     return this.listData()?.title ?? 'Liste';
   }
@@ -186,7 +213,9 @@ export class ListPage {
     set.add(giftId);
     this.updating.set(set);
     try {
-      await this.lists.toggleBought(listId, giftId, !gift.bought);
+      // Use boughtBy to determine if gift is bought (boughtBy exists and is not null)
+      const isBought = !!gift.boughtBy;
+      await this.lists.toggleBought(listId, giftId, !isBought);
     } finally {
       const after = new Set(this.updating());
       after.delete(giftId);

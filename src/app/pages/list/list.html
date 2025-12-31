@@ -20,7 +20,7 @@
       <app-gifts-list [gifts]="gifts()" [fillMode]="fillMode()" [isUpdating]="isUpdatingFn"
         [editingId]="editingGiftId()" [deletingId]="deletingGiftId()" [editTitleControl]="editTitle"
         [editUrlControl]="editUrl" [editSubmitting]="editSubmitting()" [editTitleInvalid]="editTitleInvalid()"
-        [editError]="editError()" (toggleFillMode)="toggleFillMode()" (toggleBought)="toggleBought($event)"
+        [editError]="editError()" [users]="users()" (toggleFillMode)="toggleFillMode()" (toggleBought)="toggleBought($event)"
         (startEdit)="startEditGift($event)" (cancelEdit)="cancelEdit()" (submitEdit)="submitEdit()"
         (startDelete)="startDeleteGift($event)" (cancelDelete)="cancelDeleteGift()"
         (confirmDelete)="confirmDeleteGift()" (reorderMove)="onReorderMove($event)" />

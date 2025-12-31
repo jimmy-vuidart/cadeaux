@@ -13,19 +13,12 @@
     Mode remplissage actif : coche un cadeau pour indiquer qu’il est déjà acheté.
   </p>
   } @else if (gifts().length > 1) {
-  <p class="mb-3 text-xs text-white/50 italic text-right">Astuce : déplace les cadeaux pour les réorganiser.</p>
+  <p class="mb-3 text-xs text-white/50 italic text-right">Astuce : utilise les flèches pour réorganiser les cadeaux.</p>
   }
 
   <ul class="card-glass flex flex-col divide-y divide-white/10 overflow-hidden w-full" role="list">
     @for (g of gifts(); track g.id; let i = $index) {
-      <li (dragover)="onDragOver($event, i)" (drop)="onDrop(i)"
-          class="px-4 py-3 transition-colors hover:bg-white/5 w-full"
-      [ngClass]="{
-        'bg-white/10': isDragging(i),
-        'ring-inset': isDropTarget(i),
-        'ring-2': isDropTarget(i),
-        'ring-gold-400': isDropTarget(i)
-      }" role="listitem">
+      <li class="px-4 py-3 transition-colors hover:bg-white/5 w-full" role="listitem">
       @if (!fillMode() && editingId() === g.id) {
       <form class="flex flex-col gap-3 py-1" (ngSubmit)="submitEdit.emit()">
         <div>
@@ -57,14 +50,22 @@
       } @else {
         <div class="flex items-center justify-between gap-3 w-full flex-nowrap">
           <div class="flex flex-1 min-w-0 items-center gap-3">
-          <button type="button"
-            class="inline-flex size-8 shrink-0 cursor-grab items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
-            [attr.aria-label]="'Déplacer ' + g.title" [disabled]="fillMode() || !!editingId() || isUpdating()(g.id!)"
-            [attr.draggable]="!fillMode() && !editingId() ? 'true' : null" (dragstart)="onDragStart(i, $event)"
-            (dragend)="onDragEnd()" [class.cursor-grabbing]="isDragging(i)"
-            [attr.aria-grabbed]="isDragging(i) ? 'true' : null">
-            <span aria-hidden="true" class="material-symbols-outlined">drag_indicator</span>
-          </button>
+          @if (!fillMode() && !editingId()) {
+          <div class="flex flex-col gap-1">
+            <button type="button"
+              class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
+              [attr.aria-label]="'Monter ' + g.title" [disabled]="i === 0 || isUpdating()(g.id!)"
+              (click)="moveUp(i)">
+              <span aria-hidden="true" class="material-symbols-outlined text-sm">arrow_upward</span>
+            </button>
+            <button type="button"
+              class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
+              [attr.aria-label]="'Descendre ' + g.title" [disabled]="i === gifts().length - 1 || isUpdating()(g.id!)"
+              (click)="moveDown(i)">
+              <span aria-hidden="true" class="material-symbols-outlined text-sm">arrow_downward</span>
+            </button>
+          </div>
+          }
           <div class="min-w-0 flex flex-col">
             @if (g.url) {
               <a
@@ -75,10 +76,10 @@
             } @else {
               <p class="whitespace-normal break-words sm:truncate font-bold text-base text-white">{{ g.title }}</p>
             }
-            @if (fillMode() && g.bought) {
+            @if (fillMode() && g.boughtBy) {
             <p class="text-[0.65rem] font-bold text-green-400 flex items-center gap-1 mt-0.5 uppercase tracking-wide">
               <span class="material-symbols-outlined text-sm">check_circle</span>
-              Déjà acheté
+              Acheté par {{ getUserDisplayName(g.boughtBy) }}
             </p>
             }
           </div>
@@ -88,7 +89,7 @@
           <div class="relative flex items-center">
             <input type="checkbox"
               class="peer size-6 appearance-none rounded-md border-2 border-white/30 bg-black/20 checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer transition-all"
-              [checked]="!!g.bought" (change)="toggleBought.emit(g)" [disabled]="isUpdating()(g.id!)"
+              [checked]="!!g.boughtBy" (change)="toggleBought.emit(g)" [disabled]="isUpdating()(g.id!)"
               [attr.aria-label]="'Marquer ' + g.title + ' comme acheté'" />
             <span
               class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 material-symbols-outlined text-xl">check</span>

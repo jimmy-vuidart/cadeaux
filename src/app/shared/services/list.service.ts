@@ -14,12 +14,14 @@ import {
   update,
 } from '@angular/fire/database';
 import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
 import type { GiftList } from '../models/gift-list';
 import type { Gift } from '../models/gift';
 
 @Injectable({ providedIn: 'root' })
 export class ListService {
   private readonly db = inject(Database);
+  private readonly auth = inject(AuthService);
 
   private listsRef() {
     return ref(this.db, 'lists');
@@ -107,19 +109,31 @@ export class ListService {
   async addGift(listId: string, title: string, url?: string): Promise<string> {
     const newRef = push(this.giftsRef(listId));
     const normalizedUrl = (url ?? '').trim() ? this.normalizeUrl((url ?? '').trim()) : undefined;
-    await set(newRef, {
+    const giftData: Omit<Gift, 'id'> = {
       title,
-      bought: false,
+      // boughtBy is null by default (gift is not bought)
+      boughtBy: null,
       // Only persist url when provided
       ...(normalizedUrl ? { url: normalizedUrl } : {}),
       // Use timestamp for append ordering by default
       order: Date.now(),
-    } satisfies Omit<Gift, 'id'>);
+    };
+    await set(newRef, giftData);
     return newRef.key as string;
   }
 
   async toggleBought(listId: string, giftId: string, bought: boolean): Promise<void> {
-    await update(ref(this.db, `lists/${listId}/gifts/${giftId}`), { bought });
+    const updateData: any = {};
+    
+    // When marking as bought, record who bought it
+    if (bought && this.auth.user()) {
+      updateData.boughtBy = this.auth.user()?.uid;
+    } else if (!bought) {
+      // When unmarking, clear the boughtBy field
+      updateData.boughtBy = null;
+    }
+    
+    await update(ref(this.db, `lists/${listId}/gifts/${giftId}`), updateData);
   }
 
   async renameList(id: string, title: string): Promise<void> {
