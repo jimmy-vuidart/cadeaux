@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import { AuthService } from '@shared/services/auth.service';
 import { ChristmasButtonComponent } from '../christmas-button/christmas-button';
+import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu';
 
 @Component({
   selector: 'app-top-bar',
-  imports: [ChristmasButtonComponent],
+  imports: [ChristmasButtonComponent, DropdownMenuComponent],
   templateUrl: './top-bar.html',
   styleUrl: './top-bar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,0 +1,37 @@
+<div class="relative inline-block text-left">
+  <div>
+    <button (click)="toggleMenu()" type="button" class="inline-flex justify-center items-center gap-x-1.5 rounded-md bg-transparent px-3 py-2 text-sm font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-gold-400/30 transition-all duration-200" id="menu-button" aria-expanded="true" aria-haspopup="true">
+      {{ triggerText }}
+      <svg class="-mr-1 h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
+
+  <!--
+    Dropdown menu with Christmas theme styling
+  -->
+  @if (isOpen) {
+    <div class="absolute right-0 z-50 mt-2 origin-top-right dropdown-container dropdown-animate" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+      <div class="py-1" role="none">
+        @for (item of menuItems; track item.label) {
+          @if (item.path) {
+            <a [routerLink]="item.path" (click)="handleItemClick(item)" class="dropdown-item block text-sm" role="menuitem" tabindex="-1" id="menu-item-{{ $index }}">
+              @if (item.icon) {
+                <span class="inline-block w-4 h-4 mr-2" [innerHTML]="item.icon"></span>
+              }
+              {{ item.label }}
+            </a>
+          } @else {
+            <button (click)="handleItemClick(item)" class="dropdown-item dropdown-item-logout block w-full text-left text-sm" role="menuitem" tabindex="-1" id="menu-item-{{ $index }}">
+              @if (item.icon) {
+                <span class="inline-block w-4 h-4 mr-2" [innerHTML]="item.icon"></span>
+              }
+              {{ item.label }}
+            </button>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>

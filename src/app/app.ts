@@ -6,23 +6,14 @@ import { ToastContainerComponent } from '@shared/ui/toast-container/toast-contai
 import { TopBarComponent } from '@shared/ui/top-bar/top-bar';
 import { LoginModalComponent } from '@shared/ui/login-modal/login-modal';
 import { RegisterModalComponent } from '@shared/ui/register-modal/register-modal';
+import { SnowflakesComponent } from '@shared/ui/snowflakes/snowflakes';
 import { Router } from '@angular/router';
 import { AuthService } from '@shared/services/auth.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, ToastContainerComponent, TopBarComponent, LoginModalComponent, RegisterModalComponent],
-  template: `
-    <app-top-bar (homeClick)="navigateHome()" (loginClick)="openLoginModal()" (registerClick)="openRegisterModal()"/>
-    <router-outlet/>
-    @if (showLoginModal()) {
-      <app-login-modal (cancel)="closeLoginModal()" (registered)="openRegisterModal()"/>
-    }
-    @if (showRegisterModal()) {
-      <app-register-modal (cancel)="closeRegisterModal()" (registered)="closeRegisterModal()"/>
-    }
-    <app-toast-container/>
-  `,
+  imports: [RouterOutlet, CommonModule, ToastContainerComponent, TopBarComponent, LoginModalComponent, RegisterModalComponent, SnowflakesComponent],
+  templateUrl: './app.html',
 })
 export class App {
   readonly toastService = inject(ToastService);

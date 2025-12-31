@@ -1,0 +1,60 @@
+/* Dropdown menu specific styles - Christmas theme */
+:host {
+  --dropdown-width: 12rem;
+  --dropdown-item-padding: 0.5rem 1rem;
+}
+
+/* Trigger button styles - matches topbar aesthetic */
+button#menu-button {
+  font-family: var(--font-body);
+  letter-spacing: 0.5px;
+}
+
+button#menu-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Dropdown container - glassmorphism effect */
+.dropdown-container {
+  width: var(--dropdown-width);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(234, 179, 8, 0.1);
+}
+
+/* Dropdown items - Christmas color scheme */
+.dropdown-item {
+  padding: var(--dropdown-item-padding);
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+}
+
+.dropdown-item:hover {
+  background: rgba(234, 179, 8, 0.1);
+  border-left-color: var(--gold-400);
+}
+
+/* Special style for logout item - red accent */
+.dropdown-item-logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-left-color: var(--xmas-red-500);
+}
+
+/* Animation for dropdown */
+@keyframes dropdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdown-animate {
+  animation: dropdown-fade-in 0.2s ease-out forwards;
+}

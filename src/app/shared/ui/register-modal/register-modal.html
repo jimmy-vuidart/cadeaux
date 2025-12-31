@@ -9,7 +9,22 @@
     </h2>
     <p class="text-white/70">Crée ton compte pour gérer tes listes de cadeaux.</p>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4">
+    <div class="mt-6">
+      <app-christmas-button variant="secondary" size="sm" (click)="loginGoogle()" [disabled]="loading()" [customClass]="'w-full justify-center !text-xs !py-3'">
+        <div class="flex items-center gap-2">
+          <svg viewBox="0 0 24 24" class="size-4 shrink-0" aria-hidden="true"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .533 5.333.533 12S5.867 24 12.48 24c3.44 0 6.04-1.133 8.16-3.293 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.12H12.48z" fill="currentColor"/></svg>
+          <span>Continuer avec Google</span>
+        </div>
+      </app-christmas-button>
+    </div>
+
+    <div class="flex items-center gap-2 py-3">
+      <div class="h-px bg-white/10 flex-1"></div>
+      <span class="text-[10px] text-white/30 uppercase tracking-widest">OU</span>
+      <div class="h-px bg-white/10 flex-1"></div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
       <div class="space-y-4">
         <div>
           <label class="sr-only" for="displayName">Nom ou pseudo</label>

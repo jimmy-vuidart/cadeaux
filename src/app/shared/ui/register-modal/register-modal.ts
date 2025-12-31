@@ -33,6 +33,14 @@ export class RegisterModalComponent {
     this.cancel.emit();
   }
 
+  loginGoogle(): void {
+    this.auth.loginWithGoogle().then(() => {
+      this.registered.emit();
+    }).catch(() => {
+      this.error.set('Erreur de connexion Google');
+    });
+  }
+
   async submit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();

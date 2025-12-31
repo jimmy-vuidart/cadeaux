@@ -1,17 +1,4 @@
-<div class="px-4 py-8 min-h-screen grid place-items-center">
-  <div class="snowflakes" aria-hidden="true">
-    <div class="snowflake">❅</div>
-    <div class="snowflake">❅</div>
-    <div class="snowflake">❆</div>
-    <div class="snowflake">❄</div>
-    <div class="snowflake">❅</div>
-    <div class="snowflake">❆</div>
-    <div class="snowflake">❄</div>
-    <div class="snowflake">❅</div>
-    <div class="snowflake">❆</div>
-    <div class="snowflake">❄</div>
-  </div>
-
+<div class="px-4 py-8 min-h-screen grid place-items-center main-content">
   <div class="mx-auto w-full max-w-2xl relative z-10 space-y-8 animate-fade-in-up">
     <!-- List Section -->
     <div class="glass-panel p-6 sm:p-10">
@@ -28,10 +15,10 @@
 
     <!-- Add Gift Section (Separate Card) -->
     <!-- Add Gift Section (Toggle) -->
-    @if (showAddForm()) {
+    @if (isCurrentUserOwner() && showAddForm()) {
     <app-add-gift-form [titleControl]="giftTitle" [urlControl]="giftUrl" [submitting]="submitting()"
       [titleInvalid]="giftTitleInvalid()" [error]="addError()" (addGift)="addGift()" (cancel)="toggleAddForm()" />
-    } @else {
+    } @else if (isCurrentUserOwner()) {
       <div class="flex sm:justify-end w-full">
         <app-christmas-button (click)="toggleAddForm()" [customClass]="'w-full sm:w-auto'" class="w-full basis-full sm:w-auto sm:basis-auto"
                               icon="add_circle" size="sm" variant="primary">

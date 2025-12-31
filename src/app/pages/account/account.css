@@ -1,0 +1,46 @@
+/* Account page specific styles - Christmas theme */
+:host {
+  display: block;
+}
+
+/* Main container - same as home page */
+.account-page-container {
+  min-height: calc(100vh - 6rem);
+}
+
+/* Main glass panel - matches home page structure */
+.account-glass-panel {
+  position: relative;
+  z-index: 10;
+}
+
+/* Account title with enhanced glow effect */
+.account-title {
+  text-shadow: 0 2px 15px rgba(234, 179, 8, 0.4);
+  letter-spacing: 1px;
+}
+
+/* Section cards with hover effects */
+.account-section {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.account-section:hover {
+  border-color: rgba(234, 179, 8, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(234, 179, 8, 0.15);
+}
+
+/* Section title icons */
+.account-section-icon {
+  color: var(--gold-400);
+  font-size: 1.2rem;
+}
+
+/* Responsive adjustments */
+@media (min-width: 640px) {
+  .account-glass-panel {
+    padding: 3rem;
+  }
+}

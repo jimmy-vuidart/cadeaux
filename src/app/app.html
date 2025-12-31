@@ -1,1 +1,10 @@
-<router-outlet />
+<app-snowflakes />
+<app-top-bar (homeClick)="navigateHome()" (loginClick)="openLoginModal()" (registerClick)="openRegisterModal()"/>
+<router-outlet/>
+@if (showLoginModal()) {
+  <app-login-modal (cancel)="closeLoginModal()" (registered)="openRegisterModal()"/>
+}
+@if (showRegisterModal()) {
+  <app-register-modal (cancel)="closeRegisterModal()" (registered)="closeRegisterModal()"/>
+}
+<app-toast-container/>

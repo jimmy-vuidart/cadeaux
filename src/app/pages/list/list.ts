@@ -147,6 +147,18 @@ export class ListPage {
     return this.listData()?.title ?? 'Liste';
   }
 
+  // Check if current user is the owner of the list
+  isCurrentUserOwner(): boolean {
+    const list = this.listData();
+    const currentUser = this.auth.user();
+    
+    if (!list || !currentUser) {
+      return false;
+    }
+    
+    return list.ownerId === currentUser.uid;
+  }
+
   async addGift(): Promise<void> {
     if (this.giftTitle.invalid) return;
     const id = this.id();
