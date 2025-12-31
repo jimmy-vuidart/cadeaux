@@ -1,17 +1,4 @@
-# Cadeaux VUIDART
-
-This app is a very small app, dedicated for my family, to handle the gift lists
-
-## Home page
-
-This page will simply display a page describing quickly the app, and allow with a button to create a new gift list. If the user is not logged in, clicking this button opens the account creation modal instead.
-
-### Look & feel
-- The home page welcomes the family with a joyful, gift‑themed ambiance.
-- Buttons feel lively and inviting, with a subtle festive shine on hover and clear focus highlights.
-- Sections are presented inside friendly, rounded cards. Some areas may use a celebratory style (gradient edges, confetti background) when appropriate to mark special moments like “Create a list”.
-
-## Gift list page
+# Gift List Page
 
 URL : /lists/<id>
 
@@ -21,7 +8,7 @@ On the list, a button will allow to pass the list in "fill" mode. This mode is a
 
 When enabling the "fill" mode, the app MUST ask for confirmation to avoid spoilers using a custom in-app modal (not the browser native confirm). The modal warns that enabling this mode will reveal which gifts are already bought. If the list is intended for the current user (recipient), they risk being spoiled. The user must confirm to proceed; otherwise the mode stays disabled.
 
-### Mobile experience
+## Mobile experience
 - The app is fully usable on smartphones. Content adapts to small screens without horizontal scrolling.
 - Primary actions become full‑width buttons on mobile to make them easy to tap.
 - Dialogs fit the screen height and scroll internally when content is long, so confirmations are readable and accessible on phones.
@@ -29,7 +16,7 @@ When enabling the "fill" mode, the app MUST ask for confirmation to avoid spoile
 - Cards on the gift list fit the screen width on phones; long titles wrap neatly without breaking the layout.
 - In the gifts list, action buttons (edit/delete or the checkbox in fill mode) remain aligned on the right; the gift title wraps on multiple lines before the actions when needed.
 
-### UI structure (subcomponents)
+## UI structure (subcomponents)
 
 The gift list page is organized into clear sections, each managed by a focused subcomponent (no change in features, only structure):
 
@@ -43,12 +30,12 @@ The gift list page is organized into clear sections, each managed by a focused s
 - Add gift form: inputs to add a new gift (title and optional URL) with validation and error message.
 - Share toast: transient confirmation message for share/copy actions.
 
-### Visual identity and tone
+## Visual identity and tone
 - Friendly and celebratory: soft candy pinks, teal accents, and a touch of gold to evoke ribbons and wrapping paper.
 - Light and Dark themes are both supported; the design keeps its playful personality in either mode.
 - Motion is kept delightful but subtle; when a device prefers reduced motion, animations calm down automatically.
 
-### Partage d’une liste
+## Partage d’une liste
 
 - Un bouton « Partager » est disponible sur la page d’une liste.
 - Sur smartphone/navigateur compatible, l’application utilise l’API Web Share pour ouvrir les options de partage du système.
@@ -56,15 +43,14 @@ The gift list page is organized into clear sections, each managed by a focused s
 - Un message bref confirme l’action (ou propose de copier manuellement en cas d’échec).
 - Ce message est présenté dans un toast en bas de l’écran, qui apparaît/disparaît avec une légère animation et se ferme automatiquement après quelques secondes (respect du « reduced motion » quand activé).
 
-
-### Gifts URL (optional)
+## Gifts URL (optional)
 
 - When adding a gift, the user can optionally provide a URL to the product/page.
 - When a gift has a URL, its title is displayed as a clickable link that opens in a new tab.
 - When no URL is provided, the title is shown as plain text.
  - Convenience: if the user types a URL without a protocol (e.g., `amazon.com/item`), the app automatically saves it with `https://` so the link works correctly.
 
-### Edit a gift
+## Edit a gift
 
 - From the gifts list, an Edit button appears on each item when the list is not in fill mode.
 - Clicking Edit opens a small edition form inline below the selected gift. The form mirrors the add form fields and validation.
@@ -73,39 +59,34 @@ The gift list page is organized into clear sections, each managed by a focused s
   - URL (optional). Leaving the URL empty removes it from the gift.
 - Actions: Save and Cancel. Save applies changes immediately; Cancel closes the form without changes.
 
-### List creation and IDs
+## List creation and IDs
 
 - When creating a new list, the list ID used in the URL is derived from the provided title.
 - The ID is the title transformed into kebab-case (lowercase, spaces and non-alphanumeric characters replaced by dashes, diacritics removed).
 - If the resulting ID already exists, a numeric suffix is appended (e.g., `ma-liste`, `ma-liste-2`, `ma-liste-3`, ...).
 - This guarantees stable, human-readable URLs like `/lists/anniversaire-julie`.
 
-## App UX customization and consistency
+## User Experience
 
-Overview
-- The app’s user experience (UX) is centrally configurable. Product owners can tune the visual theme, component density, and motion preferences without touching page code.
+### For List Owners
+- Displays a toggle button to show/hide the add gift form.
+- When the add gift form is visible, users can add a new gift with a title and optional URL.
+- Users can edit and delete gifts from the list.
+- Users can reorder gifts using drag and drop.
+- Users can toggle the fill mode to mark gifts as bought.
 
-What can be customized
-- Theme mode: Choose between automatic (follows device), light, or dark.
-- Brand colors: Adjust the brand palette to match identity.
-- Density: Choose comfortable or compact layout to fit more items on screen if needed.
-- Motion: Respect device preferences and optionally reduce or prefer motion.
-- Shape: Adjust the global roundness of UI elements.
+### For Non-Owners
+- Displays the list of gifts without the ability to add, edit, or delete gifts.
+- Users can toggle the fill mode to mark gifts as bought if the list owner has enabled it.
+- Users cannot reorder gifts.
 
-Shared UI building blocks
-- Buttons: Primary and secondary buttons with consistent states and accessibility.
-- Cards: Standard container for sections and panels. Cards can optionally be presented in a more festive style to highlight important actions or sections (e.g., gradient border, ribbon underline for titles, or a subtle confetti background).
-- Inputs: Text inputs and textareas styled consistently across the app.
+### Fill Mode
+- When fill mode is enabled, users can mark gifts as bought by checking a checkbox.
+- A confirmation modal is shown when enabling fill mode to prevent spoilers.
+- The modal warns that enabling fill mode will reveal which gifts are already bought.
 
-Principles
-- Consistency: All pages share the same look‑and‑feel through shared components and tokens.
-- Accessibility: Focus states are clearly visible; motion respects user preferences.
-- Brandability: Key visual aspects (colors, density, shape) can be changed from a central place.
-
-How teams use it
-- Configure the global UX in one place (no page‑by‑page tweaking).
-- Compose pages using shared UI components (Button, Card, Inputs) for consistent behavior and appearance.
-
-## A more fancy and fun experience
-- The interface embraces a gift‑giving spirit with cheerful colors, playful highlights, and light celebratory details that can be enabled where they add joy (e.g., confetti for success messages or a ribbon underline on headings).
-- The experience remains practical and family‑friendly: readable, fast, and inclusive, with strong contrast and clear interactions.
+### Sharing
+- Users can share the list using the share button in the header.
+- On mobile devices, the native share API is used if available.
+- On desktop devices, the list URL is copied to the clipboard.
+- A toast message confirms the share action.
