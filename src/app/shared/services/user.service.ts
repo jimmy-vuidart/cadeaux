@@ -110,8 +110,29 @@ export class UserService {
       return of([]);
     }
     
-    // Convert the promise to an observable
-    return from(this.getVisitedListIds(userId));
+    console.log('Setting up real-time listener for visited list IDs for user:', userId);
+    
+    // Use objectVal to listen for real-time changes
+    return objectVal<any>(this.visitedListsRef(userId)).pipe(
+      map(snapshot => {
+        if (!snapshot) {
+          console.log('No visited lists snapshot found');
+          return [];
+        }
+        
+        console.log('Visited lists snapshot received:', snapshot);
+        
+        // Extract the keys (list IDs) from the snapshot
+        if (typeof snapshot === 'object' && snapshot !== null) {
+          const listIds = Object.keys(snapshot);
+          console.log('Extracted list IDs from real-time update:', listIds);
+          return listIds;
+        } else {
+          console.log('Visited lists data is not in expected format:', typeof snapshot);
+          return [];
+        }
+      })
+    );
   }
 
   getRecentVisitedListIds(userId: string, limit: number = 5): Observable<VisitedListId[]> {

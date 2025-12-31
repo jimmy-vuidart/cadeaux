@@ -26,6 +26,7 @@
     <main class="space-y-10 w-full">
       @if (isLoggedIn()) {
         <app-my-lists (create)="onCreateList()"></app-my-lists>
+        <div class="h-2"></div>
         <app-visited-lists></app-visited-lists>
       } @else {
         <section aria-labelledby="get-started-title" class="space-y-6 flex flex-col items-center">
