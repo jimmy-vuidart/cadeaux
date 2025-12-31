@@ -74,9 +74,7 @@
   </div>
 
 
-  <div class="mt-6 w-full max-w-2xl">
-    <app-login-block (register)="onRegister()"></app-login-block>
-  </div>
+
 
   @if (showModal()) {
     <app-create-list-modal (cancel)="closeModal()" (created)="handleCreated($event)"></app-create-list-modal>
