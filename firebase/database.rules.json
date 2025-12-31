@@ -1,9 +1,15 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true,
+    ".read": "auth != null",
     "lists": {
-      ".indexOn": ["ownerId"]
+      ".indexOn": ["ownerId"],
+      ".write": "auth != null",
+      "$listId": {
+        ".write": "auth != null && root.child('lists/' + $listId + '/ownerId').val() == auth.uid",
+        "gifts": {
+          ".write": "auth != null && (newData.exists() && newData.child('bought').exists() || root.child('lists/' + $listId + '/ownerId').val() == auth.uid)"
+        }
+      }
     }
   }
 }
