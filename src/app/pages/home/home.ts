@@ -3,13 +3,14 @@ import { Router } from '@angular/router';
 import { CreateListModalComponent } from './create-list-modal/create-list-modal';
 import { LoginBlockComponent } from './login-block/login-block';
 import { MyListsComponent } from './my-lists/my-lists';
+import { VisitedListsComponent } from './visited-lists/visited-lists';
 import { RegisterModalComponent } from './register-modal/register-modal';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 import { AuthService } from '@shared/services/auth.service';
 
 @Component({
   selector: 'app-home',
-  imports: [CreateListModalComponent, LoginBlockComponent, MyListsComponent, RegisterModalComponent, ChristmasButtonComponent],
+  imports: [CreateListModalComponent, LoginBlockComponent, MyListsComponent, VisitedListsComponent, RegisterModalComponent, ChristmasButtonComponent],
   templateUrl: './home.html',
   styleUrl: './home.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

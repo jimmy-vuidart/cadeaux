@@ -10,6 +10,16 @@
           ".write": "auth != null && (newData.exists() && newData.child('bought').exists() || root.child('lists/' + $listId + '/ownerId').val() == auth.uid)"
         }
       }
+    },
+    "users": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId",
+        "visitedLists": {
+          ".read": "auth != null && auth.uid == $userId",
+          ".write": "auth != null && auth.uid == $userId"
+        }
+      }
     }
   }
 }

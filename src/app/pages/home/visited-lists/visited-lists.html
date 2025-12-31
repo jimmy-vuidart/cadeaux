@@ -1,0 +1,46 @@
+<section class="w-full max-w-4xl mx-auto space-y-6 animate-fade-in">
+  <header class="flex items-center justify-between mb-8">
+    <h2 class="text-2xl font-bold font-christmas text-gold-400 flex items-center gap-2">
+      <span class="material-symbols-outlined">history</span>
+      Listes récemment visitées
+    </h2>
+  </header>
+
+  @if (visitedListsWithDetails(); as visitedLists) {
+    @if (visitedLists.length > 0) {
+      <div class="space-y-4">
+        @for (list of visitedLists; track list.id) {
+          <a [routerLink]="['/lists', list.id]" class="group block">
+            <div class="list-item-glass p-6 flex items-center justify-between hover:bg-white/10 transition-colors">
+              <div class="flex items-center gap-4 flex-1 min-w-0">
+                <div class="list-icon bg-blue-500/20 text-blue-400 p-3 rounded-lg flex-shrink-0">
+                  <span class="material-symbols-outlined">visibility</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-xl font-bold text-white mb-1 group-hover:text-gold-400 transition-colors truncate">
+                    {{ list.title }}
+                  </h3>
+                  <p class="text-sm text-white/60 truncate">
+                    {{ list.giftCount || 0 }} cadeaux
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 flex-shrink-0">
+                <button (click)="removeList($event, list.id!)" class="text-white/60 hover:text-red-400 transition-colors" aria-label="Supprimer de mes visites">
+                  <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+                <span class="material-symbols-outlined text-white/30 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+        <p class="text-white/60 mb-4">Aucune liste récemment visitée.</p>
+        <p class="text-white/40 text-sm">Les listes que tu visites (autres que les tiennes) apparaîtront ici.</p>
+      </div>
+    }
+  }
+</section>

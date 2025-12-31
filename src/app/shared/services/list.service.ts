@@ -15,6 +15,7 @@ import {
 } from '@angular/fire/database';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { UserService } from './user.service';
 import type { GiftList } from '../models/gift-list';
 import type { Gift } from '../models/gift';
 
@@ -22,6 +23,7 @@ import type { Gift } from '../models/gift';
 export class ListService {
   private readonly db = inject(Database);
   private readonly auth = inject(AuthService);
+  private readonly userService = inject(UserService);
 
   private listsRef() {
     return ref(this.db, 'lists');
@@ -90,7 +92,44 @@ export class ListService {
   }
 
   getList(id: string): Observable<GiftList | null> {
-    return objectVal<GiftList>(this.listRef(id), { keyField: 'id' });
+    const listObservable = objectVal<GiftList>(this.listRef(id), { keyField: 'id' });
+    
+    // When the list is retrieved, check if we should record a visit
+    listObservable.subscribe(async (list) => {
+      if (list && list.id) {
+        await this.recordListVisitIfNeeded(list);
+      }
+    });
+    
+    return listObservable;
+  }
+
+  private async recordListVisitIfNeeded(list: GiftList): Promise<void> {
+    const currentUser = this.auth.user();
+    
+    if (!currentUser) {
+      // User is not logged in, don't record visit
+      console.log('User not logged in, skipping visit recording');
+      return;
+    }
+    
+    if (list.ownerId === currentUser.uid) {
+      // User is the owner of the list, don't record visit
+      console.log('User is owner of list, skipping visit recording');
+      return;
+    }
+    
+    // Record the visit
+    try {
+      console.log('Recording visit to list:', list.id, 'by user:', currentUser.uid);
+      await this.userService.recordListVisit(
+        currentUser.uid,
+        list.id!
+      );
+      console.log('Visit recorded successfully');
+    } catch (error) {
+      console.error('Failed to record list visit:', error);
+    }
   }
 
   listAll(): Observable<GiftList[]> {
