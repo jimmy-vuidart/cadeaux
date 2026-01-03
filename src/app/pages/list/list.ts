@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ListService } from '@shared/services/list.service';
 import { UserService } from '@shared/services/user.service';
 import { AuthService } from '@shared/services/auth.service';
+import { ToastService } from '@shared/services/toast.service';
 import { ReactiveFormsModule, FormControl, Validators, FormsModule } from '@angular/forms';
 import { map, switchMap, combineLatest, Observable, of } from 'rxjs';
 import type { Gift } from '@shared/models/gift';
@@ -11,7 +12,6 @@ import type { UserInfo } from '@shared/models/user-info';
 import { ListHeaderComponent } from './components/list-header/list-header';
 import { GiftsListComponent } from './components/gifts-list/gifts-list';
 import { AddGiftFormComponent } from './components/add-gift-form/add-gift-form';
-import { ShareToastComponent } from './components/share-toast/share-toast';
 import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 
@@ -23,7 +23,6 @@ import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-
     ListHeaderComponent,
     GiftsListComponent,
     AddGiftFormComponent,
-    ShareToastComponent,
     ConfirmModalComponent,
     ChristmasButtonComponent
   ],
@@ -36,6 +35,7 @@ export class ListPage {
   private readonly lists = inject(ListService);
   private readonly userService = inject(UserService);
   private readonly auth = inject(AuthService);
+  private readonly toastService = inject(ToastService);
   private shareTimeout: any;
   private shareClearTimeout: any;
 
@@ -80,8 +80,6 @@ export class ListPage {
     { initialValue: this.editTitle.invalid },
   );
   readonly sharing = signal(false);
-  readonly shareInfo = signal<string | null>(null);
-  readonly toastVisible = signal(false);
   readonly confirmFillOpen = signal(false);
   readonly showAddForm = signal(false);
   private lastFocusedEl: HTMLElement | null = null;
@@ -325,58 +323,34 @@ export class ListPage {
     }
   }
 
-  private clearShareInfoSoon(): void {
-    if (this.shareTimeout) clearTimeout(this.shareTimeout);
-    if (this.shareClearTimeout) clearTimeout(this.shareClearTimeout);
 
-    // After a few seconds, start fade-out, then remove the message once the
-    // CSS transition is expected to be finished.
-    this.shareTimeout = setTimeout(() => {
-      this.toastVisible.set(false);
-      // Allow transition to complete before clearing the content to avoid jumps
-      this.shareClearTimeout = setTimeout(() => this.shareInfo.set(null), 250);
-    }, 3500);
-  }
 
   async share(): Promise<void> {
     const url = typeof window !== 'undefined' ? window.location.href : '';
     if (!url) return;
     this.sharing.set(true);
-    this.shareInfo.set(null);
     try {
       const nav = (typeof navigator !== 'undefined' ? navigator : undefined) as any;
       if (nav && typeof nav.share === 'function') {
         // Try native share on supported devices
         await nav.share({ title: this.title, url });
         // Some platforms don't provide a success signal; we still display a small hint
-        this.shareInfo.set('Options de partage ouvertes.');
-        this.showToastAnimated();
+        this.toastService.success('Options de partage ouvertes.');
       } else {
         await this.copyToClipboard(url);
-        this.shareInfo.set('Lien copié dans le presse-papiers.');
-        this.showToastAnimated();
+        this.toastService.success('Lien copié dans le presse-papiers.');
       }
     } catch (err) {
       // Fallback to clipboard on share failure
       try {
         await this.copyToClipboard(url);
-        this.shareInfo.set('Lien copié dans le presse-papiers.');
-        this.showToastAnimated();
+        this.toastService.success('Lien copié dans le presse-papiers.');
       } catch {
-        this.shareInfo.set("Impossible de partager. Copie le lien depuis la barre d'adresse.");
-        this.showToastAnimated();
+        this.toastService.success("Impossible de partager. Copie le lien depuis la barre d'adresse.");
       }
     } finally {
       this.sharing.set(false);
-      this.clearShareInfoSoon();
     }
-  }
-
-  private showToastAnimated(): void {
-    // Start hidden so that on first render the transition can animate to visible
-    this.toastVisible.set(false);
-    // Flip to visible on the next macrotask to trigger CSS transition
-    setTimeout(() => this.toastVisible.set(true), 0);
   }
 
   private async copyToClipboard(text: string): Promise<void> {

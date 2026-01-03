@@ -36,6 +36,8 @@ export class ToastContainerComponent {
         return 'error';
       case 'warning':
         return 'warning';
+      case 'share':
+        return 'share';
       case 'info':
       default:
         return 'info';
