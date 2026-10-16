@@ -1,9 +1,15 @@
 import type { Gift } from './gift';
 
+/**
+ * Modèle de données représentant une liste de cadeaux dans PocketBase.
+ */
 export interface GiftList {
-  id?: string;
+  id: string;
   title: string;
-  ownerId?: string;
-  // Gifts are stored in a subcollection; this is only for runtime hydration when needed
+  slug: string;
+  owner?: string | null;
+  // Hydratation optionnelle des cadeaux lors du chargement de la liste
   gifts?: Gift[];
+  created?: string;
+  updated?: string;
 }

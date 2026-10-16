@@ -19,8 +19,8 @@ L'application Angular et l'API partageront un nouveau sous-domaine HTTPS : Traef
 ## Migration et déploiement
 
 - Exporter Firebase RTDB et Auth depuis le projet en ligne pendant une fenêtre de maintenance, hors dépôt Git ; produire les comptes, totaux et empreintes de contrôle.
-- Importer les listes en conservant leurs slugs afin que les chemins `/lists/:id` restent valides sur le nouveau domaine. Transformer `bought` en état acheté ; conserver un acheteur uniquement lorsqu'il existe réellement dans l'export.
-- Importer les identités Firebase dans une table de transition, sans tenter de réutiliser les mots de passe. Chaque utilisateur recrée son compte PocketBase ; un script idempotent applique ensuite le fichier de correspondance manuel `UID Firebase → utilisateur PocketBase` aux propriétaires, achats et visites. Le basculement n'a lieu qu'après résolution de tous les rattachements attendus.
+- Importer les listes en conservant leurs slugs afin que les chemins `/lists/:slug` restent valides sur le nouveau domaine. Les cadeaux achetés conservent `bought = true` sans acheteur historique (conformément à `docs/Pocketbase.md`). Les visites historiques ne sont pas importées.
+- Les données initiales de production (3 comptes propriétaires, 5 listes, 152 cadeaux et 5 cadeaux achetés) sont directement intégrées dans l'image de release via la migration `pb_migrations/1729000001_seed_prod_data.js`. Lors du premier démarrage du StatefulSet PocketBase sur le PVC vierge, les migrations créent le schéma puis peuplent immédiatement la base de données. Un script d'appoint `npm run seed` reste disponible pour re-synchronisation à chaud via l'API REST.
 - Construire deux images versionnées : frontend Angular servi par Nginx et PocketBase avec migrations et hooks inclus. Le workflow GitHub remplacera le déploiement Firebase par le build, `npm run build`, la publication GHCR, puis la mise à jour du tag dans le dépôt GitOps `noctali.cd`.
 - Ajouter l'application Argo CD dans `noctali.cd` : namespace dédié, StatefulSet PocketBase à une réplique avec PVC `local-path`, frontend, services, Ingress Traefik et certificat `letsencrypt-prod`. Conserver l'administration PocketBase hors exposition publique, via port-forward.
 - Créer hors Git les secrets Kubernetes : superutilisateur PocketBase, clé OAuth Google et secrets applicatifs. Renseigner le nouveau sous-domaine avant le déploiement et pointer son DNS vers le cluster.
@@ -31,7 +31,7 @@ L'application Angular et l'API partageront un nouveau sous-domaine HTTPS : Traef
 - Tests unitaires des services Angular : session, erreurs d'authentification, chargement par slug, droits propriétaire et adaptation des événements temps réel.
 - Tests d'intégration PocketBase : accès public à une liste, interdiction des modifications de contenu anonymes, cochage/décochage public, création et édition par le seul propriétaire, collisions de slug et réordonnancement atomique.
 - Vérification temps réel avec deux navigateurs anonymes : modification de l'état d'un cadeau visible immédiatement dans l'autre session.
-- Exécution de l'import sur une copie de l'export Firebase, avec comparaison des nombres de listes, cadeaux, achats et visites, puis contrôle du rapport de rattachements manuels.
+- Exécution de l'import sur une copie de l'export Firebase, avec comparaison des nombres de listes, cadeaux, cadeaux cochés, puis contrôle du rapport de rattachements manuels des propriétaires.
 - Exécuter `npm run build`, vérifier le déploiement Argo CD, le certificat HTTPS et le callback OAuth Google avant le basculement.
 
 ## Hypothèses et risques actés

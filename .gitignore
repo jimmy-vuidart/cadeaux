@@ -47,3 +47,8 @@ Thumbs.db
 *-debug.log
 .runtimeconfig.json
 .aider*
+
+# PocketBase local development
+/bin
+/pb_data
+/pb_data_dev

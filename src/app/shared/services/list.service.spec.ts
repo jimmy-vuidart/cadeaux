@@ -1,30 +1,52 @@
 import { TestBed } from '@angular/core/testing';
-import { Database } from '@angular/fire/database';
+import { signal } from '@angular/core';
 import { ListService } from './list.service';
-import { of } from 'rxjs';
+import { AuthService } from './auth.service';
+import { UserService } from './user.service';
+import { PocketBaseService } from './pocketbase.service';
 
+/**
+ * Tests unitaires du service ListService avec bouchonnage du client PocketBase.
+ */
 describe('ListService', () => {
   let service: ListService;
-  let dbSpy: any;
+  let mockPbService: any;
+  let mockAuthService: any;
+  let mockUserService: any;
 
   beforeEach(() => {
-    // Mock Database without jasmine
-    dbSpy = {
-      app: { options: {} }
+    mockPbService = {
+      client: {
+        send: vi.fn(),
+        collection: vi.fn().mockReturnValue({
+          getFullList: vi.fn().mockResolvedValue([]),
+          create: vi.fn().mockResolvedValue({ id: 'gift-1' }),
+          update: vi.fn().mockResolvedValue({}),
+          delete: vi.fn().mockResolvedValue({}),
+          subscribe: vi.fn().mockResolvedValue(() => {}),
+          unsubscribe: vi.fn().mockResolvedValue(true),
+        }),
+      },
+      user: signal(null),
+      isLoggedIn: signal(false),
     };
 
-    // We need to mock the firebase database functions since they are imported directly
-    // This is hard to unit test without complex mocking of module exports.
-    // However, we can try to rely on the fact that `createList` uses them.
-    
-    // Actually, testing this service with unit tests is tricky because it uses top-level functions from @angular/fire/database.
-    // But let's try to instantiate it at least.
-    
+    mockAuthService = {
+      user: signal(null),
+      isLoggedIn: signal(false),
+    };
+
+    mockUserService = {
+      recordListVisit: vi.fn().mockResolvedValue(undefined),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         ListService,
-        { provide: Database, useValue: dbSpy }
-      ]
+        { provide: PocketBaseService, useValue: mockPbService },
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: UserService, useValue: mockUserService },
+      ],
     });
     service = TestBed.inject(ListService);
   });
@@ -33,7 +55,42 @@ describe('ListService', () => {
     expect(service).toBeTruthy();
   });
 
-  // Note: Testing actual service methods requires complex mocking of Firebase functions
-  // which is beyond the scope of this simple test. The service can be instantiated
-  // and the basic structure is correct.
+  it('should create list via POST /api/custom/lists', async () => {
+    mockPbService.client.send.mockResolvedValueOnce({
+      id: 'list-123',
+      slug: 'ma-liste',
+      title: 'Ma liste',
+    });
+
+    const slug = await service.createList('Ma liste');
+    expect(slug).toBe('ma-liste');
+    expect(mockPbService.client.send).toHaveBeenCalledWith('/api/custom/lists', {
+      method: 'POST',
+      body: { title: 'Ma liste' },
+    });
+  });
+
+  it('should toggle gift bought status via POST /api/custom/gifts/:id/toggle', async () => {
+    mockPbService.client.send.mockResolvedValueOnce({
+      id: 'gift-123',
+      bought: true,
+      buyer: null,
+    });
+
+    await service.toggleBought('list-1', 'gift-123', true);
+    expect(mockPbService.client.send).toHaveBeenCalledWith('/api/custom/gifts/gift-123/toggle', {
+      method: 'POST',
+      body: { bought: true },
+    });
+  });
+
+  it('should reorder gifts via POST /api/custom/lists/:id/reorder', async () => {
+    mockPbService.client.send.mockResolvedValueOnce({ success: true });
+
+    await service.reorderGifts('list-1', ['gift-2', 'gift-1']);
+    expect(mockPbService.client.send).toHaveBeenCalledWith('/api/custom/lists/list-1/reorder', {
+      method: 'POST',
+      body: { orderedIds: ['gift-2', 'gift-1'] },
+    });
+  });
 });

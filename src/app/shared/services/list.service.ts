@@ -1,218 +1,276 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Database,
-  equalTo,
-  get,
-  listVal,
-  objectVal,
-  orderByChild,
-  push,
-  query,
-  ref,
-  remove,
-  set,
-  update,
-} from '@angular/fire/database';
-import { Observable } from 'rxjs';
+import { Observable, from, of, Subject } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { PocketBaseService } from './pocketbase.service';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
 import type { GiftList } from '../models/gift-list';
 import type { Gift } from '../models/gift';
 
+/**
+ * Service métier gérant les listes de cadeaux et les cadeaux associés via PocketBase.
+ * Prend en charge la consultation publique par slug, la synchronisation temps réel (SSE),
+ * les opérations CRUD et le réordonnancement atomique.
+ */
 @Injectable({ providedIn: 'root' })
 export class ListService {
-  private readonly db = inject(Database);
+  private readonly pbService = inject(PocketBaseService);
   private readonly auth = inject(AuthService);
   private readonly userService = inject(UserService);
 
-  private listsRef() {
-    return ref(this.db, 'lists');
+  private get pb() {
+    return this.pbService.client;
   }
 
-  private listRef(id: string) {
-    return ref(this.db, `lists/${id}`);
-  }
-
-  private giftsRef(listId: string) {
-    return ref(this.db, `lists/${listId}/gifts`);
-  }
-
-  async createList(title = 'Nouvelle liste', ownerId?: string): Promise<string> {
-    const base = this.toKebab(title);
-    const fallback = 'liste';
-    const stem = base || fallback;
-
-    // Ensure stem is not empty
-    if (!stem || stem.trim() === '') {
-      throw new Error('Could not generate a valid list ID from the title');
-    }
-
-    let candidate = stem;
-
-    // Check availability: stem, then stem-random, then stem-timestamp
-    if (!(await this.isIdAvailable(candidate))) {
-      let random = Math.random().toString(36).substring(2, 6);
-      // Ensure random string is at least 4 characters long
-      while (random.length < 4) {
-        random = Math.random().toString(36).substring(2, 6);
-      }
-      candidate = `${stem}-${random}`;
-
-      if (!(await this.isIdAvailable(candidate))) {
-        candidate = `${stem}-${Date.now()}`;
-      }
-    }
-
-    const payload: Omit<GiftList, 'id' | 'gifts'> = { title };
-    if (ownerId) {
-      payload.ownerId = ownerId;
-    }
-
-    await set(this.listRef(candidate), payload);
-    return candidate;
-  }
-
-  private async isIdAvailable(id: string): Promise<boolean> {
-    if (!id || id.trim() === '') {
-      return false; // Empty IDs are not available
-    }
-    const snapshot = await get(this.listRef(id));
-    return !snapshot.exists();
-  }
-
-  // Transforms a title to a Firebase-safe kebab-case id
-  private toKebab(input: string): string {
-    return (input ?? '')
-      .normalize('NFD') // split accents
-      .replace(/[\u0300-\u036f]+/g, '') // remove diacritics
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-') // non-alphanumerics to dashes
-      .replace(/-{2,}/g, '-') // collapse
-      .replace(/^-+|-+$/g, ''); // trim dashes
-  }
-
-  getList(id: string): Observable<GiftList | null> {
-    const listObservable = objectVal<GiftList>(this.listRef(id), { keyField: 'id' });
-    
-    // When the list is retrieved, check if we should record a visit
-    listObservable.subscribe(async (list) => {
-      if (list && list.id) {
-        await this.recordListVisitIfNeeded(list);
-      }
+  /**
+   * Crée une nouvelle liste avec génération de slug unique et associe l'utilisateur connecté.
+   * Retourne le slug de la liste créée.
+   */
+  async createList(title = 'Nouvelle liste', _ownerId?: string): Promise<string> {
+    const res = await this.pb.send<{ id: string; slug: string; title: string }>('/api/custom/lists', {
+      method: 'POST',
+      body: { title: title.trim() },
     });
-    
-    return listObservable;
+    return res.slug || res.id;
   }
 
+  /**
+   * Récupère une liste par son slug (ou son identifiant) et enregistre la visite si nécessaire.
+   */
+  getList(slugOrId: string): Observable<GiftList | null> {
+    if (!slugOrId) return of(null);
+
+    return from(
+      this.pb.send<{ list: GiftList; gifts: Gift[] }>(`/api/custom/lists/${encodeURIComponent(slugOrId)}`, {
+        method: 'GET',
+      }),
+    ).pipe(
+      map((res) => {
+        const list = res.list;
+        if (list) {
+          this.recordListVisitIfNeeded(list);
+        }
+        return list;
+      }),
+      catchError((err) => {
+        console.error('Erreur lors du chargement de la liste :', err);
+        return of(null);
+      }),
+    );
+  }
+
+  /**
+   * Enregistre la visite d'une liste par l'utilisateur connecté s'il n'en est pas le propriétaire.
+   */
   private async recordListVisitIfNeeded(list: GiftList): Promise<void> {
     const currentUser = this.auth.user();
-    
-    if (!currentUser) {
-      // User is not logged in, don't record visit
-      console.log('User not logged in, skipping visit recording');
-      return;
-    }
-    
-    if (list.ownerId === currentUser.uid) {
-      // User is the owner of the list, don't record visit
-      console.log('User is owner of list, skipping visit recording');
-      return;
-    }
-    
-    // Record the visit
+    if (!currentUser) return;
+    if (list.owner === currentUser.id || list.owner === currentUser.uid) return;
+
     try {
-      console.log('Recording visit to list:', list.id, 'by user:', currentUser.uid);
-      await this.userService.recordListVisit(
-        currentUser.uid,
-        list.id!
-      );
-      console.log('Visit recorded successfully');
+      await this.userService.recordListVisit(currentUser.id, list.id);
     } catch (error) {
-      console.error('Failed to record list visit:', error);
+      console.error('Échec de l’enregistrement de la visite :', error);
     }
   }
 
-  listAll(): Observable<GiftList[]> {
-    return listVal<GiftList>(this.listsRef(), { keyField: 'id' });
-  }
-
+  /**
+   * Retourne la liste des listes appartenant à un propriétaire donné.
+   */
   listByOwner(ownerId: string): Observable<GiftList[]> {
-    const q = query(this.listsRef(), orderByChild('ownerId'), equalTo(ownerId));
-    return listVal<GiftList>(q, { keyField: 'id' });
+    if (!ownerId) return of([]);
+
+    return from(
+      this.pb.collection('lists').getFullList<GiftList>({
+        filter: `owner = "${ownerId}"`,
+        sort: '-created',
+      }),
+    ).pipe(
+      map((records) =>
+        records.map((r) => ({
+          id: r.id,
+          title: r.title,
+          slug: r.slug,
+          owner: r.owner,
+          created: r.created,
+          updated: r.updated,
+        })),
+      ),
+      catchError((err) => {
+        console.error('Erreur lors de la récupération des listes du propriétaire :', err);
+        return of([]);
+      }),
+    );
   }
 
-  listGifts(listId: string): Observable<Gift[]> {
-    return listVal<Gift>(this.giftsRef(listId), { keyField: 'id' });
+  /**
+   * Fournit un flux réactif des cadeaux d'une liste avec synchronisation SSE en temps réel.
+   */
+  listGifts(slugOrId: string): Observable<Gift[]> {
+    if (!slugOrId) return of([]);
+
+    return new Observable<Gift[]>((subscriber) => {
+      let isUnsubscribed = false;
+      let currentGifts: Gift[] = [];
+      let currentListId = '';
+
+      // 1. Chargement initial des cadeaux via la route de lecture publique
+      this.pb
+        .send<{ list: GiftList; gifts: Gift[] }>(`/api/custom/lists/${encodeURIComponent(slugOrId)}`, {
+          method: 'GET',
+        })
+        .then((res) => {
+          if (isUnsubscribed) return;
+          currentListId = res.list.id;
+          currentGifts = res.gifts || [];
+          subscriber.next([...currentGifts]);
+
+          // 2. Abonnement en temps réel aux mutations des cadeaux de cette liste
+          return this.pb.collection('gifts').subscribe('*', async (e) => {
+            if (isUnsubscribed) return;
+            const record = e.record as any;
+
+            // Ne traiter que les cadeaux rattachés à la liste courante
+            if (record['list'] !== currentListId && e.action !== 'delete') {
+              return;
+            }
+
+            if (e.action === 'create') {
+              const newGift: Gift = {
+                id: record.id,
+                list: record.list,
+                title: record.title,
+                url: record.url || null,
+                position: record.position ?? 0,
+                bought: !!record.bought,
+                buyer: record.buyer || null,
+                buyerName: null,
+                created: record.created,
+                updated: record.updated,
+              };
+              currentGifts.push(newGift);
+            } else if (e.action === 'update') {
+              const index = currentGifts.findIndex((g) => g.id === record.id);
+              if (index !== -1) {
+                let resolvedBuyerName = currentGifts[index].buyerName;
+                // Si l'acheteur a changé
+                if (record.bought && record.buyer && record.buyer !== currentGifts[index].buyer) {
+                  try {
+                    const u = await this.pb.collection('users').getOne(record.buyer);
+                    resolvedBuyerName = u['displayName'] || u['name'] || null;
+                  } catch {
+                    resolvedBuyerName = null;
+                  }
+                } else if (!record.bought) {
+                  resolvedBuyerName = null;
+                }
+
+                currentGifts[index] = {
+                  ...currentGifts[index],
+                  title: record.title,
+                  url: record.url || null,
+                  position: record.position ?? 0,
+                  bought: !!record.bought,
+                  buyer: record.buyer || null,
+                  buyerName: resolvedBuyerName,
+                  updated: record.updated,
+                };
+              }
+            } else if (e.action === 'delete') {
+              currentGifts = currentGifts.filter((g) => g.id !== record.id);
+            }
+
+            subscriber.next([...currentGifts]);
+          });
+        })
+        .catch((err) => {
+          if (!isUnsubscribed) {
+            console.error('Erreur lors du chargement des cadeaux :', err);
+            subscriber.next([]);
+          }
+        });
+
+      // Teardown : désabonnement systématique lors de la destruction du flux
+      return () => {
+        isUnsubscribed = true;
+        this.pb.collection('gifts').unsubscribe('*').catch(() => {});
+      };
+    });
   }
 
+  /**
+   * Ajoute un cadeau à une liste.
+   */
   async addGift(listId: string, title: string, url?: string): Promise<string> {
-    const newRef = push(this.giftsRef(listId));
     const normalizedUrl = (url ?? '').trim() ? this.normalizeUrl((url ?? '').trim()) : undefined;
-    const giftData: Omit<Gift, 'id'> = {
-      title,
-      // boughtBy is null by default (gift is not bought)
-      boughtBy: null,
-      // Only persist url when provided
-      ...(normalizedUrl ? { url: normalizedUrl } : {}),
-      // Use timestamp for append ordering by default
-      order: Date.now(),
-    };
-    await set(newRef, giftData);
-    return newRef.key as string;
+    const record = await this.pb.collection('gifts').create<Gift>({
+      list: listId,
+      title: title.trim(),
+      url: normalizedUrl || null,
+      position: Date.now(),
+      bought: false,
+    });
+    return record.id;
   }
 
-  async toggleBought(listId: string, giftId: string, bought: boolean): Promise<void> {
-    const updateData: any = {};
-    
-    // When marking as bought, record who bought it
-    if (bought && this.auth.user()) {
-      updateData.boughtBy = this.auth.user()?.uid;
-    } else if (!bought) {
-      // When unmarking, clear the boughtBy field
-      updateData.boughtBy = null;
-    }
-    
-    await update(ref(this.db, `lists/${listId}/gifts/${giftId}`), updateData);
+  /**
+   * Coche ou décoche un cadeau via le point d'entrée public personnalisé.
+   */
+  async toggleBought(_listId: string, giftId: string, bought: boolean): Promise<void> {
+    await this.pb.send(`/api/custom/gifts/${giftId}/toggle`, {
+      method: 'POST',
+      body: { bought },
+    });
   }
 
+  /**
+   * Renomme une liste.
+   */
   async renameList(id: string, title: string): Promise<void> {
-    await update(this.listRef(id), { title: title.trim() });
+    await this.pb.collection('lists').update(id, { title: title.trim() });
   }
 
-  async deleteGift(listId: string, giftId: string): Promise<void> {
-    await remove(ref(this.db, `lists/${listId}/gifts/${giftId}`));
+  /**
+   * Supprime un cadeau.
+   */
+  async deleteGift(_listId: string, giftId: string): Promise<void> {
+    await this.pb.collection('gifts').delete(giftId);
   }
 
+  /**
+   * Met à jour le titre ou l'URL d'un cadeau.
+   */
   async updateGift(
-    listId: string,
+    _listId: string,
     giftId: string,
     patch: { title?: string; url?: string | null },
   ): Promise<void> {
-    const payload: any = {};
-    if (typeof patch.title === 'string') payload.title = patch.title.trim();
+    const payload: Record<string, any> = {};
+    if (typeof patch.title === 'string') payload['title'] = patch.title.trim();
     if (patch.url !== undefined) {
       const trimmed = (patch.url ?? '').trim();
-      if (trimmed) payload.url = this.normalizeUrl(trimmed);
-      else payload.url = null; // remove url key by setting null (RTDB will keep null but UI treats as absent)
+      payload['url'] = trimmed ? this.normalizeUrl(trimmed) : null;
     }
-    await update(ref(this.db, `lists/${listId}/gifts/${giftId}`), payload);
+    await this.pb.collection('gifts').update(giftId, payload);
   }
 
+  /**
+   * Réordonne atomiquement les cadeaux d'une liste.
+   */
   async reorderGifts(listId: string, orderedIds: string[]): Promise<void> {
-    // Batch update order indexes to 0..n-1
-    const updates: Record<string, any> = {};
-    orderedIds.forEach((id, index) => {
-      updates[`lists/${listId}/gifts/${id}/order`] = index;
+    await this.pb.send(`/api/custom/lists/${listId}/reorder`, {
+      method: 'POST',
+      body: { orderedIds },
     });
-    await update(ref(this.db), updates);
   }
 
-  // Ensure URLs have a protocol; default to https:// when missing.
+  /**
+   * Normalise une URL en s'assurant qu'un protocole HTTPS est présent.
+   */
   private normalizeUrl(input: string): string {
     const s = (input ?? '').trim();
     if (!s) return s;
     if (s.startsWith('//')) return 'https:' + s;
-    // Has a scheme like http:, https:, mailto:, etc.
     if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) return s;
     return `https://${s}`;
   }

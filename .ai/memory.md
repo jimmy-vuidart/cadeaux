@@ -8,3 +8,46 @@
 - 2026-08-05 : l’installation npm est alignée sur Angular 20 : `@angular/fire@20.0.1` est la version stable et n’accepte que Angular 20. Une préversion `21.0.0-rc.0` existe sous le tag npm `next` et accepte Angular 21 ; aucune version Angular 22 n’existe. Angular 20 exige aussi Vitest 3 ; Firebase Tools est maintenu en ligne 14 pour respecter le peer dependency d’AngularFire.
 - 2026-08-05 : recherche web : `@angular/fire` n’est pas officiellement déprécié. Dans l’issue #3699, un collaborateur indique le 9 juillet 2026 avoir été chargé de le réaligner : Angular 21 d’abord, puis Angular 22, sans date annoncée. Le maintenir pour un projet qui doit suivre Angular implique un risque de décalage de maintenance.
 - 2026-08-05 : plan PocketBase validé dans `docs/Pocketbase.md` : domaine `cadeaux.vuidart.com`, import Firebase limité aux listes/cadeaux et états achetés, propriétaires rattachés manuellement, pas de visites ni acheteurs historiques. Les coches restent anonymes ou attribuées à l’utilisateur connecté. Liens publics non indexés ; aucune sauvegarde est un risque explicitement accepté.
+- 2026-10-16 : tests unitaires réparés et opérationnels (16/16 passants). Ajout de `src/test-setup.ts` (zoneless), correction de `angular.json` pour `@angular/build:unit-test` et `tsconfig.spec.json`. Mocks Auth/Router ajoutés aux specs défaillantes.
+- 2026-10-16 : `npm run build` opérationnel. Node 26 + npm 12 requiert temporairement `--legacy-peer-deps` sur `npm ci` à cause des peer dependencies strictes d'AngularFire 20.
+- 2026-10-16 : constat : `.ai/Angular.md` (mentionné dans `AGENTS.md`) et `.ai/docs/` (mentionné dans `.ai/technical-specs.md`) n'existent pas sur le disque.
+- 2026-10-16 : statut de la migration : PocketBase est complètement documenté dans `docs/Pocketbase.md`, mais le code applicatif est encore 100% sur Firebase. La migration vers PocketBase reste à implémenter.
+- 2026-10-16 : enrichissement documentaire de `docs/Pocketbase.md` et alignement de `docs/UPGRADE.md` : ajout section Dev DX (proxy Angular /api vers 8090, script npm PB local), contrat strict des pb_hooks (/api/custom/*), gestion SSE/DestroyRef dans Angular, spécifications précises des Dockerfiles et procédure de rollback.
+- 2026-10-16 : exécution complète de la migration PocketBase v0.40.5 :
+  - Dépendances : retrait de @angular/fire, firebase, firebase-tools ; ajout du SDK pocketbase 0.28.1. Suppression du conflit npm eresolve.
+  - PocketBase : migrations pb_migrations/1729000000_init_schema.js validées (users, lists, gifts, visits). Routes pb_hooks/routes.pb.js implémentées (/api/custom/lists/{slug}, /api/custom/lists, /api/custom/gifts/{id}/toggle, /api/custom/lists/{id}/reorder).
+  - Angular : PocketBaseService créé, AuthService, ListService et UserService migrés sur PocketBase. Modèles alignés. proxy.conf.json configuré pour /api.
+  - Conteneurs et CI : Dockerfile.frontend (Nginx SPA), Dockerfile.pocketbase (v0.40.5), nginx.conf, workflow .github/workflows/deploy.yml (publication GHCR).
+  - Outillage : script scripts/run-pocketbase.js (téléchargement et démarrage local) et script d'import scripts/import-firebase.js (--dry-run et --apply validés).
+  - Qualité : 8 suites de tests, 28/28 tests passants. npm run build passe en 1.5s avec un bundle réduit de 38% (386 kB vs 617 kB).
+- 2026-10-17 : correction de l'erreur runtime NG0908 (Angular requires Zone.js). L'application n'utilise pas zone.js mais `provideZonelessChangeDetection()` manquait dans `src/app/app.config.ts` (présent uniquement dans `test-setup.ts`). Ajout du provider dans `appConfig` et test unitaire dédié dans `src/app/app.config.spec.ts`.
+- 2026-10-17 : intégration du seed dans la release de production :
+  - Les données réelles (5 listes, 152 cadeaux dont 5 achetés) sont embarquées directement dans l'image de conteneur PocketBase sous la migration `pb_migrations/1729000001_seed_prod_data.js`.
+  - Aucun utilisateur préconfiguré ni mot de passe par défaut n'est généré ni stocké dans la migration de prod pour des raisons de sécurité. Les listes sont créées sans propriétaire obligatoire ; la migration lie le propriétaire uniquement si le compte existe déjà en base.
+  - Script générateur `scripts/generate-seed-migration.js` (`npm run generate:seed-migration`) mis à jour pour exclure les comptes utilisateurs de la migration.
+  - `scripts/seed-prod.js` désactive également par défaut la création de comptes utilisateurs (activable uniquement via `--create-users` pour le dev).
+  - Au démarrage du pod K3S sur volume vierge, PocketBase applique automatiquement le schéma puis peuple les 5 listes et 152 cadeaux sans action manuelle.
+  - Validation effectuée sur base vierge : 152 cadeaux, 5 listes, 0 utilisateur, 5 achetés créés immédiatement.
+  - Tests (32/32 passants) et `npm run build` au vert.
+- 2026-10-17 : activation de la connexion Google OAuth2 sur PocketBase :
+  - Migration `pb_migrations/1729000002_enable_google_oauth.js` activant `users.oauth2` avec le provider `google`. Récupère `GOOGLE_CLIENT_ID` / `PB_GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET` / `PB_GOOGLE_CLIENT_SECRET` (avec identifiants factices pour le schéma dev local).
+  - Hook `pb_hooks/oauth.pb.js` : synchronisation dynamique des secrets au boot (`onBootstrap`) en cas d'injection ou rotation SealedSecret dans K3S, et enrichissement automatique de `displayName` depuis le profil Google (`onRecordAuthWithOAuth2Request`).
+  - Fermeture automatique du popup OAuth2 dans `src/index.html` lors du retour de redirection `/api/oauth2-redirect` vers la SPA.
+  - Tests : 10 suites de test / 30 tests passants (`auth.service.spec.ts` enrichi). Compilation validée via `npm run build` (1.6s).
+  - Documentation mise à jour dans `docs/Pocketbase.md`.
+- 2026-10-17 : mise en place complète du pipeline CI/CD GitHub Actions et GitOps ArgoCD :
+  - CI GitHub Actions (`.github/workflows/deploy.yml`) : déclenché par `workflow_dispatch` (avec input `image_tag` optionnel), push sur `main` et tags `v*`. Exécute `npm test` et `npm run build`, construit les conteneurs `Dockerfile.frontend` et `Dockerfile.pocketbase` en `linux/amd64` avec cache GHA, publie sur GHCR sous `ghcr.io/jimmy-vuidart/cadeaux-frontend` et `ghcr.io/jimmy-vuidart/cadeaux-pocketbase` (avec tag unifié et `:latest` sur main).
+  - Synchronisation GitOps : le job CI extrait `noctali.cd` via `${{ secrets.NOCTALI_CD_TOKEN || secrets.GITOPS_TOKEN || secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}`, met à jour les tags dans `apps/cadeaux/kustomization.yaml` via regex sed ciblée, et pousse sur `master` avec commit conventionnel `cd(cadeaux): update images to <tag>`.
+  - Manifestes K8s / ArgoCD (`../noctali.cd/apps/cadeaux/`) : base Kustomize créée avec `namespace.yaml`, `statefulset-pocketbase.yaml` (PVC local-path 1 Gi, port 8090, probes /api/health), `deployment-frontend.yaml` (Nginx SPA, port 80), `service.yaml`, `ingress.yaml` (Traefik TLS letsencrypt-prod sur `cadeaux.vuidart.com`, routage /api vers PocketBase et / vers frontend, découverte Homepage), `ingress-http-redirect.yaml`, `middleware-*.yaml` et `README.md`. Rendu `kubectl kustomize` validé avec succès.
+- 2026-10-17 : configuration des secrets Google OAuth2 via Bitnami SealedSecrets :
+  - `statefulset-pocketbase.yaml` : injection des variables `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET` depuis le Secret Kubernetes `cadeaux-secrets` (clés `google-client-id` et `google-client-secret`).
+  - Outillage GitOps : script `apps/cadeaux/create-secret.sh` créé (sur le modèle de `umami`/`kama-bot`) chiffrant interactivement ou par variables d'environnement les identifiants via `kubeseal` vers `apps/cadeaux/sealed-secret.yaml`.
+  - Intégration Kustomize : `sealed-secret.yaml` ajouté aux ressources de `kustomization.yaml` et documenté dans le `README.md`.
+- 2026-10-17 : création de la page de règles de confidentialité (`/privacy`) :
+  - Composant `PrivacyPage` (`src/app/pages/privacy/privacy.ts`, `.html`, `.css`, `.spec.ts`) conforme aux exigences Google OAuth2 et RGPD (présentation du projet, données collectées via OAuth, finalité, non-partage des données, auto-hébergement, droits et contact `tidiusff@gmail.com`).
+  - Route `/privacy` déclarée dans `src/app/app.routes.ts` avec chargement fainéant (lazy chunk 4.8 kB).
+  - Lien discret ajouté dans le footer global de l'application (`src/app/app.html`).
+  - Validation : 10 suites de test / 32 tests passants, `npm run build` réussi en 1.5s.
+- 2026-10-17 : gestion des branches noctali.cd :
+  - Feature Umami : commit `e462437` dans le worktree `.claude/worktrees/cranky-meninsky-8eca37` sur la branche `claude/cranky-meninsky-8eca37` (`apps/umami/README.md` et `apps/umami/reset-admin-password.sh`).
+  - Dépôt noctali.cd basculé sur la nouvelle branche `feat/cadeaux` isolant les manifestes `apps/cadeaux/`.

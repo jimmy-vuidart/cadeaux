@@ -1,6 +1,11 @@
 <app-snowflakes />
 <app-top-bar (homeClick)="navigateHome()" (loginClick)="openLoginModal()" (registerClick)="openRegisterModal()"/>
 <router-outlet/>
+<footer class="relative z-10 py-4 text-center text-xs text-white/40">
+  <a routerLink="/privacy" class="hover:text-white/70 underline underline-offset-4 transition-colors">
+    Règles de confidentialité
+  </a>
+</footer>
 @if (showLoginModal()) {
   <app-login-modal (cancel)="closeLoginModal()" (registered)="openRegisterModal()"/>
 }

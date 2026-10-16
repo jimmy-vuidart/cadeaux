@@ -1,160 +1,121 @@
 import { inject, Injectable } from '@angular/core';
-import { Auth, getAuth, User } from '@angular/fire/auth';
-import { Database, objectVal, push, ref, set, update, query, orderByChild, equalTo, listVal, get, remove } from '@angular/fire/database';
 import { Observable, from, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
+import { PocketBaseService } from './pocketbase.service';
 import type { UserInfo } from '../models/user-info';
 import type { VisitedListId } from '../models/visited-list';
 
+/**
+ * Service gérant les informations utilisateurs et l'historique des listes visitées dans PocketBase.
+ */
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly auth = inject(Auth);
-  private readonly db = inject(Database);
+  private readonly pbService = inject(PocketBaseService);
 
+  private get pb() {
+    return this.pbService.client;
+  }
+
+  /**
+   * Récupère le profil d'un utilisateur par son identifiant.
+   */
   async getUserInfo(uid: string): Promise<UserInfo | null> {
+    if (!uid) return null;
     try {
-      const auth = getAuth();
-      // For the current user, we can get info directly
-      if (uid === auth.currentUser?.uid) {
-        const user = auth.currentUser;
-        return user ? this.userToUserInfo(user) : null;
-      }
-      
-      // For other users, we need to use the Firebase Admin SDK or
-      // fetch from the database. Since we're not using the database anymore,
-      // we'll return null for other users in this simplified version.
-      // In a real app, you might want to cache user info or use a different approach.
-      return null;
+      const record = await this.pb.collection('users').getOne(uid);
+      return {
+        id: record.id,
+        uid: record.id,
+        displayName: record['displayName'] || record['name'] || null,
+        email: record['email'] || null,
+      };
     } catch (error) {
-      console.error('Error getting user info:', error);
+      console.error('Erreur lors de la récupération des informations utilisateur :', error);
       return null;
     }
   }
 
-  async getUsersInfo(uids: string[]): Promise<Record<string, UserInfo>> {
-    if (uids.length === 0) {
-      return {};
-    }
-    
-    const results: Record<string, UserInfo> = {};
-    
-    // Get info for each user
-    for (const uid of uids) {
-      const userInfo = await this.getUserInfo(uid);
-      if (userInfo) {
-        results[uid] = userInfo;
-      }
-    }
-    
-    return results;
-  }
-
-  private userToUserInfo(user: User): UserInfo {
-    return {
-      uid: user.uid,
-      displayName: user.displayName,
-      email: user.email
-    };
-  }
-
-  private visitedListsRef(userId: string) {
-    return ref(this.db, `users/${userId}/visitedLists`);
-  }
-
+  /**
+   * Enregistre ou actualise la date de dernière visite d'une liste par un utilisateur.
+   */
   async recordListVisit(userId: string, listId: string): Promise<void> {
-    if (!userId || !listId) {
-      console.error('User ID and List ID are required to record a visit');
-      return;
-    }
+    if (!userId || !listId) return;
 
-    console.log('Recording visit in UserService - User:', userId, 'List:', listId);
-    // Store just the list ID as a string value
-    await set(ref(this.db, `users/${userId}/visitedLists/${listId}`), true);
-    console.log('Visit recorded in database');
-  }
-
-  async getVisitedListIds(userId: string): Promise<VisitedListId[]> {
-    if (!userId) {
-      return [];
-    }
-    
-    console.log('Fetching visited list IDs for user:', userId);
-    
     try {
-      const snapshot = await get(this.visitedListsRef(userId));
-      if (!snapshot.exists()) {
-        console.log('No visited lists found for user');
-        return [];
-      }
-      
-      const visitedLists = snapshot.val();
-      console.log('Raw visited lists data:', visitedLists);
-      
-      // Ensure visitedLists is an object and extract keys
-      if (typeof visitedLists === 'object' && visitedLists !== null) {
-        const listIds = Object.keys(visitedLists);
-        console.log('Extracted list IDs:', listIds);
-        return listIds;
+      const existing = await this.pb
+        .collection('visits')
+        .getFirstListItem(`user = "${userId}" && list = "${listId}"`)
+        .catch(() => null);
+
+      const now = new Date().toISOString();
+      if (existing) {
+        await this.pb.collection('visits').update(existing.id, { lastVisited: now });
       } else {
-        console.log('Visited lists data is not in expected format:', typeof visitedLists);
-        return [];
+        await this.pb.collection('visits').create({
+          user: userId,
+          list: listId,
+          lastVisited: now,
+        });
       }
     } catch (error) {
-      console.error('Error fetching visited list IDs:', error);
+      console.error('Erreur lors de l’enregistrement de la visite :', error);
+    }
+  }
+
+  /**
+   * Récupère les identifiants de listes visitées par un utilisateur sous forme de promesse.
+   */
+  async getVisitedListIds(userId: string): Promise<VisitedListId[]> {
+    if (!userId) return [];
+    try {
+      const records = await this.pb.collection('visits').getFullList({
+        filter: `user = "${userId}"`,
+        sort: '-lastVisited',
+      });
+      return records.map((r) => r['list'] as string);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des listes visitées :', error);
       return [];
     }
   }
 
+  /**
+   * Fournit un flux Observable des identifiants des listes visitées par l'utilisateur.
+   */
   getVisitedListIdsObservable(userId: string): Observable<VisitedListId[]> {
-    if (!userId) {
-      return of([]);
-    }
-    
-    console.log('Setting up real-time listener for visited list IDs for user:', userId);
-    
-    // Use objectVal to listen for real-time changes
-    return objectVal<any>(this.visitedListsRef(userId)).pipe(
-      map(snapshot => {
-        if (!snapshot) {
-          console.log('No visited lists snapshot found');
-          return [];
-        }
-        
-        console.log('Visited lists snapshot received:', snapshot);
-        
-        // Extract the keys (list IDs) from the snapshot
-        if (typeof snapshot === 'object' && snapshot !== null) {
-          const listIds = Object.keys(snapshot);
-          console.log('Extracted list IDs from real-time update:', listIds);
-          return listIds;
-        } else {
-          console.log('Visited lists data is not in expected format:', typeof snapshot);
-          return [];
-        }
-      })
+    if (!userId) return of([]);
+
+    return from(this.getVisitedListIds(userId)).pipe(
+      catchError((err) => {
+        console.error('Erreur dans getVisitedListIdsObservable :', err);
+        return of([]);
+      }),
     );
   }
 
+  /**
+   * Récupère les N listes visitées les plus récentes.
+   */
   getRecentVisitedListIds(userId: string, limit: number = 5): Observable<VisitedListId[]> {
     return this.getVisitedListIdsObservable(userId).pipe(
-      map(ids => ids.slice(0, limit)) // Simple approach: take first N IDs
+      map((ids) => ids.slice(0, limit)),
     );
   }
 
+  /**
+   * Supprime une liste visitée de l'historique d'un utilisateur.
+   */
   async removeVisitedList(userId: string, listId: string): Promise<void> {
-    if (!userId || !listId) {
-      console.error('User ID and List ID are required to remove a visit');
-      return;
-    }
-
-    console.log('Removing visited list - User:', userId, 'List:', listId);
-    
+    if (!userId || !listId) return;
     try {
-      await remove(ref(this.db, `users/${userId}/visitedLists/${listId}`));
-      console.log('Visited list removed successfully');
+      const existing = await this.pb
+        .collection('visits')
+        .getFirstListItem(`user = "${userId}" && list = "${listId}"`);
+      if (existing) {
+        await this.pb.collection('visits').delete(existing.id);
+      }
     } catch (error) {
-      console.error('Error removing visited list:', error);
-      throw error;
+      console.error('Erreur lors de la suppression de la visite :', error);
     }
   }
 }

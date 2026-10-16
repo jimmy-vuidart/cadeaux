@@ -58,7 +58,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {},
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "cadeaux-vuidart:build:production"
@@ -70,7 +72,13 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "cadeaux-vuidart:build",
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "providersFile": "src/test-setup.ts"
+          }
         }
       }
     }

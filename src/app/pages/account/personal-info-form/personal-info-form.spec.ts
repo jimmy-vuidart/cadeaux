@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PersonalInfoFormComponent } from './personal-info-form';
 import { AuthService } from '../../../shared/services/auth.service';
 import { UserService } from '../../../shared/services/user.service';
-import { Auth } from '@angular/fire/auth';
 import { ChristmasButtonComponent } from '../../../shared/ui/christmas-button/christmas-button';
 import { of } from 'rxjs';
 
@@ -16,21 +15,27 @@ describe('PersonalInfoFormComponent', () => {
     // Mock AuthService
     mockAuthService = {
       user: () => ({
+        id: 'test-user-id',
         uid: 'test-user-id',
-        displayName: 'Test User'
+        displayName: 'Test User',
       }),
       user$: of({
+        id: 'test-user-id',
         uid: 'test-user-id',
-        displayName: 'Test User'
-      })
+        displayName: 'Test User',
+      }),
+      updateDisplayName: (name: string) => Promise.resolve(),
     };
 
     // Mock UserService
     mockUserService = {
-      getUserInfo: (uid: string) => Promise.resolve({
-        uid: 'test-user-id',
-        displayName: 'Test User'
-      })
+      getUserInfo: (uid: string) =>
+        Promise.resolve({
+          id: 'test-user-id',
+          uid: 'test-user-id',
+          displayName: 'Test User',
+          email: 'test@test.fr',
+        }),
     };
 
     await TestBed.configureTestingModule({
@@ -38,8 +43,7 @@ describe('PersonalInfoFormComponent', () => {
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: UserService, useValue: mockUserService },
-        { provide: Auth, useValue: {} }
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PersonalInfoFormComponent);

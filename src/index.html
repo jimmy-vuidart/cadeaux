@@ -19,6 +19,12 @@
 </head>
 
 <body>
+  <script>
+    // Fermeture automatique de la fenêtre popup après la redirection OAuth2
+    if (window.opener && (window.location.hash.includes('oauth2-redirect') || window.location.pathname.includes('oauth2-redirect'))) {
+      window.close();
+    }
+  </script>
   <app-root></app-root>
 </body>
 

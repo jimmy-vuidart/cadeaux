@@ -76,10 +76,14 @@
             } @else {
               <p class="whitespace-normal break-words sm:truncate font-bold text-base text-white">{{ g.title }}</p>
             }
-            @if (fillMode() && g.boughtBy) {
+            @if (fillMode() && g.bought) {
             <p class="text-[0.65rem] font-bold text-green-400 flex items-center gap-1 mt-0.5 uppercase tracking-wide">
               <span class="material-symbols-outlined text-sm">check_circle</span>
-              Acheté par {{ getUserDisplayName(g.boughtBy) }}
+              @if (g.buyerName) {
+                Acheté par {{ g.buyerName }}
+              } @else {
+                Acheté
+              }
             </p>
             }
           </div>
@@ -89,7 +93,7 @@
           <div class="relative flex items-center">
             <input type="checkbox"
               class="peer size-6 appearance-none rounded-md border-2 border-white/30 bg-black/20 checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer transition-all"
-              [checked]="!!g.boughtBy" (change)="toggleBought.emit(g)" [disabled]="isUpdating()(g.id!)"
+              [checked]="g.bought" (change)="toggleBought.emit(g)" [disabled]="isUpdating()(g.id!)"
               [attr.aria-label]="'Marquer ' + g.title + ' comme acheté'" />
             <span
               class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 material-symbols-outlined text-xl">check</span>

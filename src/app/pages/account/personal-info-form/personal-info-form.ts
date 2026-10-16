@@ -2,9 +2,11 @@ import { ChangeDetectionStrategy, Component, inject, signal, effect } from '@ang
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../shared/services/auth.service';
 import { UserService } from '../../../shared/services/user.service';
-import { Auth, updateProfile } from '@angular/fire/auth';
 import { ChristmasButtonComponent } from '../../../shared/ui/christmas-button/christmas-button';
 
+/**
+ * Composant de formulaire permettant à l'utilisateur de modifier son nom d'affichage.
+ */
 @Component({
   selector: 'app-personal-info-form',
   standalone: true,
@@ -13,15 +15,14 @@ import { ChristmasButtonComponent } from '../../../shared/ui/christmas-button/ch
   styleUrl: './personal-info-form.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    'class': 'personal-info-form'
-  }
+    class: 'personal-info-form',
+  },
 })
 export class PersonalInfoFormComponent {
   readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
-  private readonly auth = inject(Auth);
 
-  // Form state
+  // État du formulaire
   displayName = signal('');
   isEditing = signal(false);
   isSaving = signal(false);
@@ -30,7 +31,7 @@ export class PersonalInfoFormComponent {
   successMessage = signal('');
 
   constructor() {
-    // Set up effect to react to user changes
+    // Réaction aux changements de session utilisateur
     effect(() => {
       const user = this.authService.user();
       if (user) {
@@ -47,11 +48,11 @@ export class PersonalInfoFormComponent {
       this.isLoading.set(true);
       const user = this.authService.user();
       if (user) {
-        const userInfo = await this.userService.getUserInfo(user.uid);
+        const userInfo = await this.userService.getUserInfo(user.id || user.uid);
         this.displayName.set(userInfo?.displayName || '');
       }
     } catch (error) {
-      console.error('Error loading user info:', error);
+      console.error('Erreur lors du chargement des informations utilisateur :', error);
       this.errorMessage.set('Erreur de chargement des informations utilisateur');
     } finally {
       this.isLoading.set(false);
@@ -59,8 +60,7 @@ export class PersonalInfoFormComponent {
   }
 
   toggleEdit(): void {
-    this.isEditing.update(prev => !prev);
-    // Clear messages when starting to edit
+    this.isEditing.update((prev) => !prev);
     this.errorMessage.set('');
     this.successMessage.set('');
   }
@@ -72,7 +72,8 @@ export class PersonalInfoFormComponent {
       return;
     }
 
-    if (!this.displayName()?.trim()) {
+    const trimmed = (this.displayName() ?? '').trim();
+    if (!trimmed) {
       this.errorMessage.set('Le nom d\'affichage ne peut pas être vide');
       return;
     }
@@ -81,21 +82,18 @@ export class PersonalInfoFormComponent {
       this.isSaving.set(true);
       this.errorMessage.set('');
       this.successMessage.set('');
-      
-      await updateProfile(user, {
-        displayName: this.displayName()
-      });
-      
-      // Refresh the user info
+
+      await this.authService.updateDisplayName(trimmed);
+
+      // Rafraîchir les données locales
       await this.loadUserInfo();
-      
+
       this.successMessage.set('Nom d\'affichage mis à jour avec succès !');
       this.isEditing.set(false);
-      
-      // Clear success message after 3 seconds
+
       setTimeout(() => this.successMessage.set(''), 3000);
     } catch (error) {
-      console.error('Error updating display name:', error);
+      console.error('Erreur lors de la mise à jour du nom d\'affichage :', error);
       this.errorMessage.set('Erreur lors de la mise à jour du nom d\'affichage');
     } finally {
       this.isSaving.set(false);
@@ -105,7 +103,6 @@ export class PersonalInfoFormComponent {
   cancelEdit(): void {
     this.isEditing.set(false);
     this.errorMessage.set('');
-    // Reset to original value
     this.loadUserInfo();
   }
 }

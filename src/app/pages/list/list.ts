@@ -132,9 +132,10 @@ export class ListPage {
     this.auth.user$.subscribe(user => {
       if (user) {
         const userInfo: UserInfo = {
-          uid: user.uid,
+          id: user.id || user.uid,
+          uid: user.uid || user.id,
           displayName: user.displayName,
-          email: user.email
+          email: user.email,
         };
         this.users.update(current => ({ ...current, [user.uid]: userInfo }));
       }
@@ -149,12 +150,12 @@ export class ListPage {
   isCurrentUserOwner(): boolean {
     const list = this.listData();
     const currentUser = this.auth.user();
-    
+
     if (!list || !currentUser) {
       return false;
     }
-    
-    return list.ownerId === currentUser.uid;
+
+    return list.owner === currentUser.id || list.owner === currentUser.uid;
   }
 
   async addGift(): Promise<void> {
@@ -223,9 +224,7 @@ export class ListPage {
     set.add(giftId);
     this.updating.set(set);
     try {
-      // Use boughtBy to determine if gift is bought (boughtBy exists and is not null)
-      const isBought = !!gift.boughtBy;
-      await this.lists.toggleBought(listId, giftId, !isBought);
+      await this.lists.toggleBought(listId, giftId, !gift.bought);
     } finally {
       const after = new Set(this.updating());
       after.delete(giftId);

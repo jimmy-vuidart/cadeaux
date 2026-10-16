@@ -8,7 +8,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
-    "emulators": "npx firebase emulators:start --import=./firebase/mock --export-on-exit"
+    "dev:pb": "node scripts/run-pocketbase.js",
+    "seed": "node scripts/seed-prod.js",
+    "generate:seed-migration": "node scripts/generate-seed-migration.js"
   },
   "prettier": {
     "printWidth": 100,
@@ -28,10 +30,10 @@
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
     "@angular/core": "^20.3.0",
-    "@angular/fire": "^20.0.0",
     "@angular/forms": "^20.3.0",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "pocketbase": "^0.28.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -40,7 +42,6 @@
     "@angular/cli": "^20.3.0",
     "@angular/compiler-cli": "^20.3.0",
     "@tailwindcss/postcss": "^4.1.12",
-    "firebase-tools": "^14.0.0",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.3",
     "prettier": "3.7.4",
