@@ -51,3 +51,10 @@
 - 2026-10-17 : gestion des branches noctali.cd :
   - Feature Umami : commit `e462437` dans le worktree `.claude/worktrees/cranky-meninsky-8eca37` sur la branche `claude/cranky-meninsky-8eca37` (`apps/umami/README.md` et `apps/umami/reset-admin-password.sh`).
   - Dépôt noctali.cd basculé sur la nouvelle branche `feat/cadeaux` isolant les manifestes `apps/cadeaux/`.
+- 2026-10-17 : ajustement du workflow CI/CD `.github/workflows/deploy.yml` :
+  - Déclenchement exclusif par `workflow_dispatch` (suppression des triggers automatiques `push`).
+  - Input `release_type` de type `choice` : `hotfix` (par défaut), `minor`, `major`.
+  - Calcul SemVer automatique à partir des tags existants (`git tag --sort=-v:refname`) : incrémente le patch, le minor ou le major (ex: `0.0.6` -> `1.0.0` en major, ou `0.0.7` en hotfix).
+  - Publication des images Docker sur GHCR avec le tag versionné et `:latest`.
+  - Création et push automatique du tag Git `v<version>` sur `cadeaux`.
+  - Mise à jour du tag des deux conteneurs dans `apps/cadeaux/kustomization.yaml` sur `noctali.cd` et push sur `master`.

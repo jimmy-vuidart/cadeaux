@@ -1,22 +1,25 @@
 # Workflow CI/CD pour l'application Cadeaux.
-# Exécute les tests unitaires et le build Angular, construit et publie les images
-# Docker du frontend et de PocketBase sur GHCR, puis synchronise les tags dans noctali.cd.
+# Déclenché manuellement via workflow_dispatch avec choix d'incrément SemVer (hotfix, minor, major).
+# Exécute les tests, compile le frontend, publie les images conteneurs sur GHCR,
+# pose le tag Git versionné et synchronise le tag dans le dépôt GitOps noctali.cd.
 
 name: Deploy
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
-      image_tag:
-        description: 'Tag personnalisé pour les images Docker (laisser vide pour sha-<commit>)'
-        required: false
-        type: string
+      release_type:
+        description: 'Type d’incrément de version'
+        required: true
+        type: choice
+        default: 'hotfix'
+        options:
+          - hotfix
+          - minor
+          - major
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -27,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,29 +48,38 @@ jobs:
       - name: Build frontend application
         run: npm run build
 
-      - name: Determine image tag
+      - name: Determine new SemVer tag
         id: vars
         run: |
-          if [ -n "${{ inputs.image_tag }}" ]; then
-            TAG="${{ inputs.image_tag }}"
-          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            TAG="${GITHUB_REF#refs/tags/}"
-          else
-            TAG="sha-$(echo "${{ github.sha }}" | cut -c1-7)"
-          fi
+          git fetch --tags --force 2>/dev/null || true
 
-          TAGS_FRONTEND="ghcr.io/jimmy-vuidart/cadeaux-frontend:${TAG}"
-          TAGS_POCKETBASE="ghcr.io/jimmy-vuidart/cadeaux-pocketbase:${TAG}"
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          echo "Dernier tag détecté : ${LATEST_TAG:-aucun}"
 
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            TAGS_FRONTEND="${TAGS_FRONTEND},ghcr.io/jimmy-vuidart/cadeaux-frontend:latest"
-            TAGS_POCKETBASE="${TAGS_POCKETBASE},ghcr.io/jimmy-vuidart/cadeaux-pocketbase:latest"
-          fi
+          VERSION="${LATEST_TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION:-0.0.0}"
+          MAJOR=${MAJOR:-0}
+          MINOR=${MINOR:-0}
+          PATCH=${PATCH:-0}
 
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          echo "frontend_tags=${TAGS_FRONTEND}" >> "$GITHUB_OUTPUT"
-          echo "pocketbase_tags=${TAGS_POCKETBASE}" >> "$GITHUB_OUTPUT"
-          echo "Image tag déterminé : ${TAG}"
+          case "${{ inputs.release_type }}" in
+            major)
+              NEW_TAG="$((MAJOR + 1)).0.0"
+              ;;
+            minor)
+              NEW_TAG="${MAJOR}.$((MINOR + 1)).0"
+              ;;
+            hotfix)
+              NEW_TAG="${MAJOR}.${MINOR}.$((PATCH + 1))"
+              ;;
+            *)
+              echo "Type de release non reconnu : ${{ inputs.release_type }}" >&2
+              exit 1
+              ;;
+          esac
+
+          echo "Nouveau tag calculé : ${NEW_TAG}"
+          echo "tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -84,7 +98,9 @@ jobs:
           file: ./Dockerfile.frontend
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.vars.outputs.frontend_tags }}
+          tags: |
+            ghcr.io/jimmy-vuidart/cadeaux-frontend:${{ steps.vars.outputs.tag }}
+            ghcr.io/jimmy-vuidart/cadeaux-frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -95,9 +111,21 @@ jobs:
           file: ./Dockerfile.pocketbase
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.vars.outputs.pocketbase_tags }}
+          tags: |
+            ghcr.io/jimmy-vuidart/cadeaux-pocketbase:${{ steps.vars.outputs.tag }}
+            ghcr.io/jimmy-vuidart/cadeaux-pocketbase:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Create and push Git tag on cadeaux
+        run: |
+          NEW_TAG="${{ steps.vars.outputs.tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "v${NEW_TAG}" -m "Release v${NEW_TAG}"
+          git push origin "v${NEW_TAG}"
+          echo "Tag Git v${NEW_TAG} poussé sur origin."
 
       - name: Checkout GitOps repo (noctali.cd)
         uses: actions/checkout@v4
