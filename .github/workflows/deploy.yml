@@ -1,7 +1,8 @@
 # Workflow CI/CD pour l'application Cadeaux.
 # Déclenché manuellement via workflow_dispatch avec choix d'incrément SemVer (hotfix, minor, major).
-# Exécute les tests, compile le frontend, publie les images conteneurs sur GHCR,
-# pose le tag Git versionné et synchronise le tag dans le dépôt GitOps noctali.cd.
+# Détermine et incrémente la version à partir du package.json du projet Angular,
+# exécute les tests, compile le frontend, publie les images conteneurs sur GHCR,
+# committe la nouvelle version de package.json, pose le tag Git et synchronise noctali.cd.
 
 name: Deploy
 
@@ -45,41 +46,36 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Build frontend application
-        run: npm run build
-
-      - name: Determine new SemVer tag
+      - name: Determine and bump SemVer from package.json
         id: vars
         run: |
-          git fetch --tags --force 2>/dev/null || true
-
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
-          echo "Dernier tag détecté : ${LATEST_TAG:-aucun}"
-
-          VERSION="${LATEST_TAG#v}"
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION:-0.0.0}"
-          MAJOR=${MAJOR:-0}
-          MINOR=${MINOR:-0}
-          PATCH=${PATCH:-0}
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Version actuelle dans package.json : ${CURRENT_VERSION}"
 
           case "${{ inputs.release_type }}" in
             major)
-              NEW_TAG="$((MAJOR + 1)).0.0"
+              SEMVER_TYPE="major"
               ;;
             minor)
-              NEW_TAG="${MAJOR}.$((MINOR + 1)).0"
+              SEMVER_TYPE="minor"
               ;;
             hotfix)
-              NEW_TAG="${MAJOR}.${MINOR}.$((PATCH + 1))"
+              SEMVER_TYPE="patch"
               ;;
             *)
-              echo "Type de release non reconnu : ${{ inputs.release_type }}" >&2
+              echo "Type d’incrément non reconnu : ${{ inputs.release_type }}" >&2
               exit 1
               ;;
           esac
 
-          echo "Nouveau tag calculé : ${NEW_TAG}"
+          NEW_RAW=$(npm version "${SEMVER_TYPE}" --no-git-tag-version)
+          NEW_TAG="${NEW_RAW#v}"
+
+          echo "Nouvelle version package.json : ${NEW_TAG}"
           echo "tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build frontend application
+        run: npm run build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -117,15 +113,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Create and push Git tag on cadeaux
+      - name: Commit version bump and push Git tag on cadeaux
         run: |
           NEW_TAG="${{ steps.vars.outputs.tag }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          git add package.json package-lock.json
+          git commit -m "chore(release): bump version to ${NEW_TAG}"
           git tag -a "v${NEW_TAG}" -m "Release v${NEW_TAG}"
-          git push origin "v${NEW_TAG}"
-          echo "Tag Git v${NEW_TAG} poussé sur origin."
+
+          git pull --rebase origin main
+          git push origin main --tags
+          echo "Version ${NEW_TAG} committée et tag Git v${NEW_TAG} poussé sur cadeaux."
 
       - name: Checkout GitOps repo (noctali.cd)
         uses: actions/checkout@v4

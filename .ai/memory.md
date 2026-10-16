@@ -54,10 +54,8 @@
 - 2026-10-17 : ajustement du workflow CI/CD `.github/workflows/deploy.yml` :
   - Déclenchement exclusif par `workflow_dispatch` (suppression des triggers automatiques `push`).
   - Input `release_type` de type `choice` : `hotfix` (par défaut), `minor`, `major`.
-  - Calcul SemVer automatique à partir des tags existants (`git tag --sort=-v:refname`) : incrémente le patch, le minor ou le major (ex: `0.0.6` -> `1.0.0` en major, ou `0.0.7` en hotfix).
+  - Calcul et incrément SemVer basés sur `package.json` du projet Angular via `npm version <major|minor|patch> --no-git-tag-version`.
+  - Version initiale synchronisée à `0.0.6` dans `package.json` et `package-lock.json` (alignée avec le dernier tag existant `v0.0.6`).
   - Publication des images Docker sur GHCR avec le tag versionné et `:latest`.
-  - Création et push automatique du tag Git `v<version>` sur `cadeaux`.
+  - Commit du bump de `package.json`/`package-lock.json` (`chore(release): bump version to <version>`) et tag Git `v<version>` poussés sur `main`.
   - Mise à jour du tag des deux conteneurs dans `apps/cadeaux/kustomization.yaml` sur `noctali.cd` et push sur `master`.
-  - Commits validés et poussés :
-    - `cadeaux` (`main`) : `d225df3` (`ci(deploy): workflow de déploiement SemVer via workflow_dispatch`).
-    - `noctali.cd` (`feat/cadeaux`) : `e44047b` (`feat(cadeaux): manifestes K8s et base Kustomize pour l'application cadeaux`).
