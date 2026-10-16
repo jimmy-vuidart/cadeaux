@@ -55,7 +55,7 @@
   - Déclenchement exclusif par `workflow_dispatch` (suppression des triggers automatiques `push`).
   - Input `release_type` de type `choice` : `hotfix` (par défaut), `minor`, `major`.
   - Calcul et incrément SemVer basés sur `package.json` du projet Angular via `npm version <major|minor|patch> --no-git-tag-version`.
-  - Version initiale synchronisée à `0.0.6` dans `package.json` et `package-lock.json` (alignée avec le dernier tag existant `v0.0.6`).
+  - Version initiale alignée à `0.1.0` dans `package.json` et `package-lock.json` suite au premier déploiement réussi sur GitHub Actions (PR #10 mergée dans `noctali.cd`, images `0.1.0` publiées sur GHCR et tag `v0.1.0` créé).
   - Publication des images Docker sur GHCR avec le tag versionné et `:latest`.
   - Commit du bump de `package.json`/`package-lock.json` (`chore(release): bump version to <version>`) et tag Git `v<version>` poussés sur `main`.
   - Mise à jour du tag des deux conteneurs dans `apps/cadeaux/kustomization.yaml` sur `noctali.cd` et push sur `master`.
