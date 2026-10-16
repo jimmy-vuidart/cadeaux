@@ -58,3 +58,6 @@
   - Publication des images Docker sur GHCR avec le tag versionné et `:latest`.
   - Création et push automatique du tag Git `v<version>` sur `cadeaux`.
   - Mise à jour du tag des deux conteneurs dans `apps/cadeaux/kustomization.yaml` sur `noctali.cd` et push sur `master`.
+  - Commits validés et poussés :
+    - `cadeaux` (`main`) : `d225df3` (`ci(deploy): workflow de déploiement SemVer via workflow_dispatch`).
+    - `noctali.cd` (`feat/cadeaux`) : `e44047b` (`feat(cadeaux): manifestes K8s et base Kustomize pour l'application cadeaux`).
