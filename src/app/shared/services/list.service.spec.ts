@@ -93,4 +93,33 @@ describe('ListService', () => {
       body: { orderedIds: ['gift-2', 'gift-1'] },
     });
   });
+
+  it('should fetch lists by owner with filter and sort by -created', async () => {
+    const mockLists = [
+      { id: 'l1', title: 'Liste 1', slug: 'l1', owner: 'u1', created: '2026-10-17', updated: '2026-10-17' },
+    ];
+    const mockCollection = mockPbService.client.collection();
+    mockCollection.getFullList.mockResolvedValueOnce(mockLists);
+
+    const result = await new Promise((resolve) => {
+      service.listByOwner('u1').subscribe(resolve);
+    });
+
+    expect(mockCollection.getFullList).toHaveBeenCalledWith({
+      filter: 'owner = "u1"',
+      sort: '-created',
+    });
+    expect(result).toEqual(mockLists);
+  });
+
+  it('should catch error and return empty array when getFullList fails', async () => {
+    const mockCollection = mockPbService.client.collection();
+    mockCollection.getFullList.mockRejectedValueOnce(new Error('PocketBase 400'));
+
+    const result = await new Promise((resolve) => {
+      service.listByOwner('u1').subscribe(resolve);
+    });
+
+    expect(result).toEqual([]);
+  });
 });

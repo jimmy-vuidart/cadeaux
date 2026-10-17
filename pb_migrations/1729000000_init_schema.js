@@ -30,6 +30,8 @@ migrate((app) => {
     cascadeDelete: true,
     required: false,
   }));
+  lists.fields.add(new AutodateField({ name: 'created', onCreate: true, onUpdate: false }));
+  lists.fields.add(new AutodateField({ name: 'updated', onCreate: true, onUpdate: true }));
   lists.listRule = '';
   lists.viewRule = '';
   lists.createRule = '@request.auth.id != ""';
@@ -61,6 +63,8 @@ migrate((app) => {
     cascadeDelete: false,
     required: false,
   }));
+  gifts.fields.add(new AutodateField({ name: 'created', onCreate: true, onUpdate: false }));
+  gifts.fields.add(new AutodateField({ name: 'updated', onCreate: true, onUpdate: true }));
   gifts.listRule = '';
   gifts.viewRule = '';
   gifts.createRule = '@request.auth.id != "" && list.owner = @request.auth.id';
@@ -89,6 +93,8 @@ migrate((app) => {
     required: true,
   }));
   visits.fields.add(new DateField({ name: 'lastVisited', required: true }));
+  visits.fields.add(new AutodateField({ name: 'created', onCreate: true, onUpdate: false }));
+  visits.fields.add(new AutodateField({ name: 'updated', onCreate: true, onUpdate: true }));
   visits.listRule = '@request.auth.id != "" && user = @request.auth.id';
   visits.viewRule = '@request.auth.id != "" && user = @request.auth.id';
   visits.createRule = '@request.auth.id != "" && user = @request.auth.id';

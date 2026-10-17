@@ -59,3 +59,7 @@
   - Publication des images Docker sur GHCR avec le tag versionné et `:latest`.
   - Commit du bump de `package.json`/`package-lock.json` (`chore(release): bump version to <version>`) et tag Git `v<version>` poussés sur `main`.
   - Mise à jour du tag des deux conteneurs dans `apps/cadeaux/kustomization.yaml` sur `noctali.cd` et push sur `master`.
+- 2026-10-17 : correction de l'erreur `ClientResponseError 400: Something went wrong while processing your request` lors de `listByOwner` :
+  - Cause : `list.service.ts` triait les listes via `sort: '-created'`. Or dans PocketBase v0.23+, les champs `created` et `updated` ne sont plus générés implicitement pour les collections de type `base` si non déclarés avec `new AutodateField(...)`. PocketBase rejetait donc la requête avec HTTP 400.
+  - Correction : ajout des champs `AutodateField` (`created`, `updated`) dans `pb_migrations/1729000000_init_schema.js` (pour initialisations vierges) et création de `pb_migrations/1729000003_add_autodate_fields.js` pour migrer les bases existantes et renseigner les timestamps des enregistrements existants.
+  - Tests : enrichissement de `list.service.spec.ts` avec la couverture de `listByOwner` (succès et fallback d'erreur). 10 suites / 34 tests passants et `npm run build` réussi.
