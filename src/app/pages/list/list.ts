@@ -15,6 +15,11 @@ import { AddGiftFormComponent } from './components/add-gift-form/add-gift-form';
 import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 
+/**
+ * Composant de page affichant le détail d'une liste de cadeaux.
+ * Permet l'affichage des cadeaux, le partage du lien, l'ajout et l'édition par le propriétaire,
+ * et la consultation / coche pour les visiteurs non propriétaires.
+ */
 @Component({
   selector: 'app-list',
   imports: [
@@ -179,6 +184,10 @@ export class ListPage {
   }
 
   toggleFillMode(): void {
+    // Les propriétaires ne peuvent pas activer le mode remplissage pour éviter l'auto-spoiler
+    if (this.isCurrentUserOwner()) {
+      return;
+    }
     const currentlyOn = this.fillMode();
     if (currentlyOn) {
       // Turning off does not require confirmation

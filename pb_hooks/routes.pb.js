@@ -4,16 +4,16 @@
  * la coche/décoche sécurisée et le réordonnancement atomique.
  */
 
-// 1. Consultation publique d'une liste par son slug avec cadeaux et résolution du nom de l'acheteur
+// 1. Consultation publique d'une liste par son slug ou son identifiant avec cadeaux et résolution du nom de l'acheteur
 routerAdd('GET', '/api/custom/lists/{slug}', (e) => {
-  const slug = e.request.pathValue('slug');
-  if (!slug) {
-    throw new BadRequestError('Slug manquant');
+  const slugOrId = e.request.pathValue('slug');
+  if (!slugOrId) {
+    throw new BadRequestError('Identifiant ou slug manquant');
   }
 
   let listRecord;
   try {
-    listRecord = $app.findFirstRecordByFilter('lists', 'slug = {:slug}', { slug });
+    listRecord = $app.findFirstRecordByFilter('lists', 'slug = {:slugOrId} || id = {:slugOrId}', { slugOrId });
   } catch (err) {
     throw new NotFoundError('Liste introuvable');
   }
@@ -193,7 +193,7 @@ routerAdd('POST', '/api/custom/lists/{id}/reorder', (e) => {
 
   let listRecord;
   try {
-    listRecord = $app.findRecordById('lists', listId);
+    listRecord = $app.findFirstRecordByFilter('lists', 'id = {:id} || slug = {:id}', { id: listId });
   } catch (err) {
     throw new NotFoundError('Liste introuvable');
   }
@@ -214,7 +214,7 @@ routerAdd('POST', '/api/custom/lists/{id}/reorder', (e) => {
       const gId = orderedIds[i];
       try {
         const gift = txApp.findRecordById('gifts', gId);
-        if (gift.get('list') === listId) {
+        if (gift.get('list') === listRecord.id) {
           gift.set('position', i);
           txApp.save(gift);
         }

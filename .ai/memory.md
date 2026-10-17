@@ -63,3 +63,14 @@
   - Cause : `list.service.ts` triait les listes via `sort: '-created'`. Or dans PocketBase v0.23+, les champs `created` et `updated` ne sont plus générés implicitement pour les collections de type `base` si non déclarés avec `new AutodateField(...)`. PocketBase rejetait donc la requête avec HTTP 400.
   - Correction : ajout des champs `AutodateField` (`created`, `updated`) dans `pb_migrations/1729000000_init_schema.js` (pour initialisations vierges) et création de `pb_migrations/1729000003_add_autodate_fields.js` pour migrer les bases existantes et renseigner les timestamps des enregistrements existants.
   - Tests : enrichissement de `list.service.spec.ts` avec la couverture de `listByOwner` (succès et fallback d'erreur). 10 suites / 34 tests passants et `npm run build` réussi.
+- 2026-10-17 : correction de l'erreur `ClientResponseError 404: Liste introuvable` lors de `GET /api/custom/lists/:slugOrId` :
+  - Cause : la route personnalisée `routes.pb.js` filtrait exclusivement sur `slug = {:slug}`. Or l'application Angular navigue et requête fréquemment les listes par leur identifiant PocketBase (ex: `list.id` dans `MyListsComponent`, `VisitedListsComponent`).
+  - Correction : mise à jour de `pb_hooks/routes.pb.js` pour rechercher par slug ou identifiant (`slug = {:slugOrId} || id = {:slugOrId}`) sur `GET /api/custom/lists/{slug}` et sécurisation identique sur `POST /api/custom/lists/{id}/reorder`.
+- 2026-10-17 : correction de l'erreur `ClientResponseError 0: The request was aborted (most likely autocancelled)` lors de la consultation d'une liste :
+  - Cause : par défaut, le SDK JavaScript PocketBase annule les requêtes en vol ayant la même signature (`requestKey`). Lors de l'initialisation de `ListPage`, `getList(id)` et `listGifts(id)` émettent simultanément une requête `GET /api/custom/lists/:id`, ce qui entraînait l'annulation immédiate de `getList`.
+  - Correction : désactivation globale de l'auto-cancellation dans `PocketBaseService` (`this.client.autoCancellation(false)`) et ajout explicite de `requestKey: null` ainsi que le filtrage des erreurs `err?.isAbort` dans `ListService`.
+  - Tests : validation des 10 suites / 34 tests unitaires et compilation `npm run build` en 1.5s.
+- 2026-10-17 : masquage UX du mode « cadeaux achetés » pour le propriétaire de la liste (anti-spoiler) :
+  - `GiftsListComponent` : ajout de l'input `showFillMode = input(true)` conditionnant l'affichage du bouton « Passer en mode « cadeaux achetés » ».
+  - `ListPage` : passage de `[showFillMode]="!isCurrentUserOwner()"` et garde défensive dans `toggleFillMode()` pour empêcher toute activation par le propriétaire.
+  - Tests : création de `gifts-list.spec.ts` (4 tests). Total porté à 11 suites / 38 tests passants et compilation `npm run build` validée en 1.5s.

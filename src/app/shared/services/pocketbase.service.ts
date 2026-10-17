@@ -20,6 +20,8 @@ export class PocketBaseService {
     // Initialisation du client PocketBase avec l'origine courante (relatif)
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     this.client = new PocketBase(baseUrl);
+    // Désactivation de l'auto-cancellation globale pour autoriser les requêtes parallèles RxJS
+    this.client.autoCancellation(false);
 
     // Initialisation du signal avec l'état actuel du authStore
     this.syncUser();

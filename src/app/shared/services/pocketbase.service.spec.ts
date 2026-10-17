@@ -14,9 +14,10 @@ describe('PocketBaseService', () => {
     service = TestBed.inject(PocketBaseService);
   });
 
-  it('should be created and have client initialized', () => {
+  it('should be created and have client initialized with autoCancellation disabled', () => {
     expect(service).toBeTruthy();
     expect(service.client).toBeTruthy();
+    expect((service.client as any).enableAutoCancellation).toBe(false);
   });
 
   it('should start with logged out state when authStore is invalid', () => {

@@ -4,7 +4,7 @@
     <div class="glass-panel p-6 sm:p-10">
       <app-list-header [title]="title" [sharing]="sharing()" (share)="share()" />
 
-      <app-gifts-list [gifts]="gifts()" [fillMode]="fillMode()" [isUpdating]="isUpdatingFn"
+      <app-gifts-list [gifts]="gifts()" [fillMode]="fillMode()" [showFillMode]="!isCurrentUserOwner()" [isUpdating]="isUpdatingFn"
         [editingId]="editingGiftId()" [deletingId]="deletingGiftId()" [editTitleControl]="editTitle"
         [editUrlControl]="editUrl" [editSubmitting]="editSubmitting()" [editTitleInvalid]="editTitleInvalid()"
         [editError]="editError()" [users]="users()" (toggleFillMode)="toggleFillMode()" (toggleBought)="toggleBought($event)"

@@ -1,11 +1,13 @@
 <section class="mt-8">
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <h2 class="text-2xl sm:text-3xl font-christmas text-gold-gradient drop-shadow-lg"></h2>
-    <app-christmas-button (click)="toggleFillMode.emit()" [customClass]="'w-full sm:w-auto'" [pressed]="fillMode()"
-                          class="w-full basis-full sm:w-auto sm:basis-auto" size="sm" variant="primary">
-      {{ fillMode() ? 'Quitter le mode « cadeaux achetés »' : 'Passer en mode « cadeaux achetés »' }}
-    </app-christmas-button>
-  </div>
+  @if (showFillMode()) {
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <h2 class="text-2xl sm:text-3xl font-christmas text-gold-gradient drop-shadow-lg"></h2>
+      <app-christmas-button (click)="toggleFillMode.emit()" [customClass]="'w-full sm:w-auto'" [pressed]="fillMode()"
+                            class="w-full basis-full sm:w-auto sm:basis-auto" size="sm" variant="primary">
+        {{ fillMode() ? 'Quitter le mode « cadeaux achetés »' : 'Passer en mode « cadeaux achetés »' }}
+      </app-christmas-button>
+    </div>
+  }
   @if (fillMode()) {
   <p
     class="mb-4 text-sm text-green-300 font-bold bg-black/40 p-3 rounded-lg border border-green-900/50 backdrop-blur-sm flex items-center gap-2">

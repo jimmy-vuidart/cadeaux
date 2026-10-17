@@ -5,6 +5,10 @@ import type { Gift } from '@shared/models/gift';
 import type { UserInfo } from '@shared/models/user-info';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 
+/**
+ * Composant d'affichage et d'interaction avec la liste des cadeaux.
+ * Gère l'édition en ligne, la suppression, la réorganisation et le mode remplissage (cadeaux achetés).
+ */
 @Component({
   selector: 'app-gifts-list',
   templateUrl: './gifts-list.html',
@@ -14,6 +18,7 @@ import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-
 export class GiftsListComponent {
   gifts = input.required<Gift[]>();
   fillMode = input(false);
+  showFillMode = input(true);
   isUpdating = input<(id: string | undefined | null) => boolean>(() => false);
   // Inline edit inputs
   editingId = input<string | null>(null);

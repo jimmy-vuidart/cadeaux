@@ -108,6 +108,7 @@ describe('ListService', () => {
     expect(mockCollection.getFullList).toHaveBeenCalledWith({
       filter: 'owner = "u1"',
       sort: '-created',
+      requestKey: null,
     });
     expect(result).toEqual(mockLists);
   });

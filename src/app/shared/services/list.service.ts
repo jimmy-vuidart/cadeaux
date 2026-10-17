@@ -43,6 +43,7 @@ export class ListService {
     return from(
       this.pb.send<{ list: GiftList; gifts: Gift[] }>(`/api/custom/lists/${encodeURIComponent(slugOrId)}`, {
         method: 'GET',
+        requestKey: null,
       }),
     ).pipe(
       map((res) => {
@@ -53,6 +54,7 @@ export class ListService {
         return list;
       }),
       catchError((err) => {
+        if (err?.isAbort) return of(null);
         console.error('Erreur lors du chargement de la liste :', err);
         return of(null);
       }),
@@ -84,6 +86,7 @@ export class ListService {
       this.pb.collection('lists').getFullList<GiftList>({
         filter: `owner = "${ownerId}"`,
         sort: '-created',
+        requestKey: null,
       }),
     ).pipe(
       map((records) =>
@@ -97,6 +100,7 @@ export class ListService {
         })),
       ),
       catchError((err) => {
+        if (err?.isAbort) return of([]);
         console.error('Erreur lors de la récupération des listes du propriétaire :', err);
         return of([]);
       }),
@@ -118,6 +122,7 @@ export class ListService {
       this.pb
         .send<{ list: GiftList; gifts: Gift[] }>(`/api/custom/lists/${encodeURIComponent(slugOrId)}`, {
           method: 'GET',
+          requestKey: null,
         })
         .then((res) => {
           if (isUnsubscribed) return;
@@ -156,7 +161,7 @@ export class ListService {
                 // Si l'acheteur a changé
                 if (record.bought && record.buyer && record.buyer !== currentGifts[index].buyer) {
                   try {
-                    const u = await this.pb.collection('users').getOne(record.buyer);
+                    const u = await this.pb.collection('users').getOne(record.buyer, { requestKey: null });
                     resolvedBuyerName = u['displayName'] || u['name'] || null;
                   } catch {
                     resolvedBuyerName = null;
@@ -185,7 +190,9 @@ export class ListService {
         })
         .catch((err) => {
           if (!isUnsubscribed) {
-            console.error('Erreur lors du chargement des cadeaux :', err);
+            if (!err?.isAbort) {
+              console.error('Erreur lors du chargement des cadeaux :', err);
+            }
             subscriber.next([]);
           }
         });
