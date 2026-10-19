@@ -11,7 +11,7 @@
   @if (fillMode()) {
   <p
     class="mb-4 text-sm text-green-300 font-bold bg-black/40 p-3 rounded-lg border border-green-900/50 backdrop-blur-sm flex items-center gap-2">
-    <span class="material-symbols-outlined text-green-400">info</span>
+    <span translate="no" class="material-symbols-outlined text-green-400">info</span>
     Mode remplissage actif : coche un cadeau pour indiquer qu’il est déjà acheté.
   </p>
   } @else if (gifts().length > 1) {
@@ -58,13 +58,13 @@
               class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
               [attr.aria-label]="'Monter ' + g.title" [disabled]="i === 0 || isUpdating()(g.id!)"
               (click)="moveUp(i)">
-              <span aria-hidden="true" class="material-symbols-outlined text-sm">arrow_upward</span>
+              <span translate="no" aria-hidden="true" class="material-symbols-outlined text-sm">arrow_upward</span>
             </button>
             <button type="button"
               class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
               [attr.aria-label]="'Descendre ' + g.title" [disabled]="i === gifts().length - 1 || isUpdating()(g.id!)"
               (click)="moveDown(i)">
-              <span aria-hidden="true" class="material-symbols-outlined text-sm">arrow_downward</span>
+              <span translate="no" aria-hidden="true" class="material-symbols-outlined text-sm">arrow_downward</span>
             </button>
           </div>
           }
@@ -80,7 +80,7 @@
             }
             @if (fillMode() && g.bought) {
             <p class="text-[0.65rem] font-bold text-green-400 flex items-center gap-1 mt-0.5 uppercase tracking-wide">
-              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span translate="no" class="material-symbols-outlined text-sm">check_circle</span>
               @if (g.buyerName) {
                 Acheté par {{ g.buyerName }}
               } @else {
@@ -97,7 +97,7 @@
               class="peer size-6 appearance-none rounded-md border-2 border-white/30 bg-black/20 checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer transition-all"
               [checked]="g.bought" (change)="toggleBought.emit(g)" [disabled]="isUpdating()(g.id!)"
               [attr.aria-label]="'Marquer ' + g.title + ' comme acheté'" />
-            <span
+            <span translate="no"
               class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 material-symbols-outlined text-xl">check</span>
           </div>
         </div>
@@ -108,25 +108,25 @@
             class="rounded-md inline-flex size-8 items-center justify-center bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-60 transition-all backdrop-blur-md"
             (click)="confirmDelete.emit()" [disabled]="isUpdating()(g.id!)"
             [attr.aria-label]="'Confirmer la suppression de ' + g.title" title="Confirmer">
-            <span class="material-symbols-outlined text-lg" aria-hidden="true">check</span>
+            <span translate="no" class="material-symbols-outlined text-lg" aria-hidden="true">check</span>
           </button>
           <button type="button"
             class="inline-flex size-8 items-center justify-center rounded-md bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-all backdrop-blur-md"
             (click)="cancelDelete.emit()" [disabled]="isUpdating()(g.id!)"
             [attr.aria-label]="'Annuler la suppression de ' + g.title" title="Annuler">
-            <span class="material-symbols-outlined text-lg" aria-hidden="true">close</span>
+            <span translate="no" class="material-symbols-outlined text-lg" aria-hidden="true">close</span>
           </button>
           } @else {
           <button type="button"
             class="inline-flex size-8 items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-colors"
             (click)="startEdit.emit(g)" [disabled]="isUpdating()(g.id!)" [attr.aria-label]="'Modifier ' + g.title">
-            <span class="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
+            <span translate="no" class="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
           </button>
           <button type="button"
             class="inline-flex size-8 items-center justify-center rounded-md text-white/40 hover:text-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-colors"
             (click)="startDelete.emit(g)" [disabled]="isUpdating()(g.id!) || !!editingId()"
             [attr.aria-label]="'Supprimer ' + g.title">
-            <span class="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
+            <span translate="no" class="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
           </button>
           }
         </div>
