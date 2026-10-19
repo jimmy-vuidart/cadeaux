@@ -17,7 +17,7 @@ Optimized for context injection. Reference files in `.ai/docs/`:
 - **Framework**: Angular 19+ (Signals, Standalone).
 - **Database**: Firebase Realtime Database.
 - **Styling**: TailwindCSS v4.
-- **Icons**: Material Symbols Outlined.
+- **Icons**: Material Symbols Outlined. Chaque `<span class="material-symbols-outlined">` porte `translate="no"`, sinon la traduction automatique du navigateur traduit le nom de ligature et l'icône s'affiche en texte. La page est déclarée `<html lang="fr">`.
 
 ## [RULES] Optimization Rules
 
