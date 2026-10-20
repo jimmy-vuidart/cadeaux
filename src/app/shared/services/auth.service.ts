@@ -48,6 +48,21 @@ export class AuthService {
   }
 
   /**
+   * Demande l'envoi d'un e-mail contenant le lien de réinitialisation du mot de passe.
+   * PocketBase répond de la même façon que l'adresse corresponde à un compte ou non.
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    await this.pb.collection('users').requestPasswordReset(email);
+  }
+
+  /**
+   * Définit un nouveau mot de passe à partir du jeton reçu dans l'e-mail de réinitialisation.
+   */
+  async confirmPasswordReset(token: string, pass: string): Promise<void> {
+    await this.pb.collection('users').confirmPasswordReset(token, pass, pass);
+  }
+
+  /**
    * Déconnexion de l'utilisateur courant.
    */
   async logout(): Promise<void> {
