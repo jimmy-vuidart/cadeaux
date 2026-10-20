@@ -68,4 +68,11 @@ describe('GiftsListComponent', () => {
 
     expect(emitted).toBe(true);
   });
+
+  it('should exclude icon ligatures from browser translation', () => {
+    // Une traduction automatique remplacerait le nom de ligature (ex. « edit ») et casserait l'icône.
+    const icons = (fixture.nativeElement as HTMLElement).querySelectorAll('.material-symbols-outlined');
+    expect(icons.length).toBeGreaterThan(0);
+    icons.forEach((icon) => expect(icon.getAttribute('translate')).toBe('no'));
+  });
 });
