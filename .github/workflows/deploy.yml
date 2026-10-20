@@ -30,14 +30,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
 
       - name: Install dependencies
@@ -78,17 +78,17 @@ jobs:
         run: npm run build
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to GitHub Container Registry (GHCR)
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Frontend Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile.frontend
@@ -101,7 +101,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push PocketBase Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile.pocketbase
@@ -128,7 +128,7 @@ jobs:
           echo "Version ${NEW_TAG} committée et tag Git v${NEW_TAG} poussé sur cadeaux."
 
       - name: Checkout GitOps repo (noctali.cd)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: jimmy-vuidart/noctali.cd
           ref: master
