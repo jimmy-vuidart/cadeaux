@@ -21,9 +21,13 @@
 
 <body>
   <script>
-    // Fermeture automatique de la fenêtre popup après la redirection OAuth2
-    if (window.opener && (window.location.hash.includes('oauth2-redirect') || window.location.pathname.includes('oauth2-redirect'))) {
+    // Fermeture de la popup OAuth2 quand PocketBase la renvoie sur /_/#/auth/oauth2-redirect-success (ou -failure).
+    // Les pages de connexion Google imposent Cross-Origin-Opener-Policy: same-origin, ce qui coupe le lien
+    // avec la fenêtre d'origine : window.opener vaut null et le SDK ne peut plus fermer la popup lui-même.
+    // Si le navigateur refuse la fermeture, on bascule sur l'accueil plutôt que sur la route inexistante /_/.
+    if (window.location.hash.startsWith('#/auth/oauth2-redirect-')) {
       window.close();
+      setTimeout(() => window.location.replace('/'), 500);
     }
   </script>
   <app-root></app-root>
