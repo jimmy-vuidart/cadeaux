@@ -82,3 +82,4 @@
   - Tests : 13 suites / 49 tests, `npm run build` OK.
   - Problèmes repérés non corrigés : `LoginBlockComponent` (`pages/home/login-block`) n'est utilisé nulle part ; `mapError` des modales login/inscription teste des codes Firebase (`auth/...`) que PocketBase ne renvoie jamais → toujours « Une erreur est survenue. » (ex. mauvais mot de passe) ; les modales d'inscription valident 6 caractères alors que PocketBase en exige 8.
   - Infra `noctali.cd/apps/cadeaux` : env `APP_URL`/`SMTP_HOST`/`SMTP_PORT` en clair, `SMTP_USERNAME`/`SMTP_PASSWORD` depuis `cadeaux-secrets` (clés `smtp-username`/`smtp-password`, `optional: true` pour que le pod démarre avant le rechiffrement du secret).
+  - `noctali.cd/.gitignore` ignore volontairement tout `create-secret.sh` (et `secret*.yaml`) : ne pas forcer l'ajout ; documenter les commandes `kubeseal` (`--merge-into` pour ajouter des clés sans ressaisir les autres) directement dans le README.
