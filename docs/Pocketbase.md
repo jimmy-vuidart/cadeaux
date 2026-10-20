@@ -63,6 +63,7 @@
   - Hook `pb_hooks/mail.pb.js` : application de ces variables aux réglages PocketBase au démarrage ; sans variables SMTP, la configuration existante est conservée.
   - Migration `pb_migrations/1729000004_password_reset_email.js` : modèle d'e-mail en français dont le lien pointe vers la page Angular `/reset-password/:token` (le modèle par défaut vise `/_/`, non exposé) et limite de 5 demandes de réinitialisation par heure. PocketBase voyant toutes les requêtes depuis Traefik, cette limite est globale.
   - Frontend : lien « Mot de passe oublié ? » dans la fenêtre de connexion (message neutre, que le compte existe ou non) et page `/reset-password/:token` pour saisir le nouveau mot de passe (8 caractères minimum, jeton valable 30 minutes et à usage unique).
+- Changement de mot de passe (page `/account`, section « Mot de passe ») : `AuthService.changePassword` envoie `oldPassword`/`password`/`passwordConfirm` à PocketBase, qui vérifie l'ancien mot de passe et invalide toutes les sessions ; l'utilisateur est aussitôt reconnecté avec son nouveau mot de passe. Les comptes créés avec Google peuvent recevoir un lien de réinitialisation à l'adresse du compte pour définir un mot de passe.
 - Remplacer le workflow Firebase par un workflow GitHub Actions qui exécute `npm ci --legacy-peer-deps`, `npm test`, `npm run build`, publie les deux images sur GHCR, puis met à jour leurs tags dans `noctali.cd`.
 - Créer `apps/cadeaux-vuidart/` dans `noctali.cd` :
   - namespace dédié et Kustomization ;

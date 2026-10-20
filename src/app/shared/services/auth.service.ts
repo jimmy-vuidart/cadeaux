@@ -63,6 +63,25 @@ export class AuthService {
   }
 
   /**
+   * Change le mot de passe de l'utilisateur connecté, après vérification du mot de passe actuel par PocketBase.
+   * PocketBase invalide toutes les sessions lors d'un changement de mot de passe : l'utilisateur est donc
+   * reconnecté immédiatement avec son nouveau mot de passe pour conserver sa session.
+   */
+  async changePassword(currentPass: string, newPass: string): Promise<void> {
+    const record = this.pb.authStore.record;
+    if (!record) {
+      throw new Error('Utilisateur non connecté');
+    }
+    const email = record['email'];
+    await this.pb.collection('users').update(record.id, {
+      oldPassword: currentPass,
+      password: newPass,
+      passwordConfirm: newPass,
+    });
+    await this.pb.collection('users').authWithPassword(email, newPass);
+  }
+
+  /**
    * Déconnexion de l'utilisateur courant.
    */
   async logout(): Promise<void> {

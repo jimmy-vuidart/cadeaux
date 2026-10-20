@@ -1,16 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '@shared/services/auth.service';
 import { ChristmasButtonComponent } from '@shared/ui/christmas-button/christmas-button';
 import { UiInputDirective } from '@shared/ui/input/input';
+import { passwordMatchValidator } from '@shared/validators/password-match';
 
 /**
  * Page de réinitialisation du mot de passe, atteinte depuis le lien reçu par e-mail.
@@ -34,7 +28,7 @@ export class PasswordResetPage {
   readonly form = new FormGroup({
     password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(8)] }),
     confirmPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-  }, { validators: this.passwordMatchValidator });
+  }, { validators: passwordMatchValidator });
 
   async submit(): Promise<void> {
     this.form.markAllAsTouched();
@@ -60,11 +54,5 @@ export class PasswordResetPage {
     } finally {
       this.loading.set(false);
     }
-  }
-
-  private passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
-    const pass = group.get('password')?.value;
-    const confirm = group.get('confirmPassword')?.value;
-    return pass === confirm ? null : { passwordMismatch: true };
   }
 }
