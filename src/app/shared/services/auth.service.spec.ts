@@ -82,6 +82,33 @@ describe('AuthService', () => {
     expect(mockUsersCollection.confirmPasswordReset).toHaveBeenCalledWith('jeton', 'nouveau123', 'nouveau123');
   });
 
+  it('should change the password then log in again with the new one', async () => {
+    mockPbService.client.authStore.record = { id: 'usr-1', email: 'test@test.fr' };
+
+    await service.changePassword('ancien123', 'nouveau123');
+
+    expect(mockUsersCollection.update).toHaveBeenCalledWith('usr-1', {
+      oldPassword: 'ancien123',
+      password: 'nouveau123',
+      passwordConfirm: 'nouveau123',
+    });
+    expect(mockUsersCollection.authWithPassword).toHaveBeenCalledWith('test@test.fr', 'nouveau123');
+  });
+
+  it('should not log in again when the password change is rejected', async () => {
+    mockUsersCollection.update.mockRejectedValueOnce({ status: 400 });
+
+    await expect(service.changePassword('faux', 'nouveau123')).rejects.toEqual({ status: 400 });
+    expect(mockUsersCollection.authWithPassword).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to change the password without a logged-in user', async () => {
+    mockPbService.client.authStore.record = null;
+
+    await expect(service.changePassword('ancien123', 'nouveau123')).rejects.toThrow('Utilisateur non connecté');
+    expect(mockUsersCollection.update).not.toHaveBeenCalled();
+  });
+
   it('should clear authStore on logout', async () => {
     await service.logout();
     expect(mockPbService.client.authStore.clear).toHaveBeenCalled();

@@ -26,6 +26,12 @@ This page allows users to manage their personal information and preferences.
 - Shows a "Modifier" button to allow the user to edit the display name.
 - If the display name is not set, it shows "Non défini".
 
+### Password Section
+- Shown only to logged-in users, below the personal information section.
+- The user types their current password, then the new password twice (8 characters minimum), and clicks "Changer le mot de passe".
+- A wrong current password shows "Mot de passe actuel incorrect.". On success, the form is cleared, a success message is shown, and the user stays logged in.
+- Accounts created with Google have no known password: a link "Recevoir un lien par email pour définir un mot de passe" sends a reset email to the account address (same flow as "Mot de passe oublié ?"). It also helps users who forgot their current password.
+
 ### Success and Error Messages
 - Success messages are displayed when the user successfully updates their display name.
 - Error messages are displayed when there is an issue loading or saving the user's information.
