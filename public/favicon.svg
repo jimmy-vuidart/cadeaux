@@ -1,0 +1,22 @@
+<!-- Favicon de l'application : paquet cadeau doré au ruban rouge sur fond bleu nuit (palette « Midnight Christmas » de src/styles.css) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="fond" cx="50%" cy="0%" r="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    <linearGradient id="or" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#fond)"/>
+  <!-- Nœud -->
+  <path d="M32 23C27 12 15 13 18 20c1.5 3 8 3.5 14 3z" fill="#ef4444"/>
+  <path d="M32 23C37 12 49 13 46 20c-1.5 3-8 3.5-14 3z" fill="#ef4444"/>
+  <!-- Boîte et couvercle -->
+  <rect x="14" y="31" width="36" height="24" rx="3" fill="url(#or)"/>
+  <rect x="10" y="22" width="44" height="11" rx="3" fill="#facc15"/>
+  <!-- Ruban -->
+  <rect x="28" y="22" width="8" height="33" fill="#dc2626"/>
+</svg>
