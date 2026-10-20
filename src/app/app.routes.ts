@@ -5,4 +5,5 @@ export const routes: Routes = [
   { path: 'lists/:id', loadComponent: () => import('./pages/list/list').then((m) => m.ListPage) },
   { path: 'account', loadComponent: () => import('./pages/account/account').then((m) => m.AccountPage) },
   { path: 'privacy', loadComponent: () => import('./pages/privacy/privacy').then((m) => m.PrivacyPage) },
+  { path: 'reset-password/:token', loadComponent: () => import('./pages/password-reset/password-reset').then((m) => m.PasswordResetPage) },
 ];

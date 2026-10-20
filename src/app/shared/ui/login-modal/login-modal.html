@@ -28,10 +28,19 @@
           autocomplete="current-password"
           [invalid]="form.controls.password.invalid && form.controls.password.touched"
         >
+        <div class="text-right mt-1">
+          <button type="button" (click)="forgotPassword()" [disabled]="loading()" class="text-xs text-white/50 hover:text-white underline underline-offset-4 transition-colors">
+            Mot de passe oublié ?
+          </button>
+        </div>
       </div>
 
       @if (error()) {
         <p class="text-red-300 text-xs bg-red-900/30 p-2 rounded">{{ error() }}</p>
+      }
+
+      @if (info()) {
+        <p class="text-green-300 text-xs bg-green-900/30 p-2 rounded">{{ info() }}</p>
       }
 
       <div class="space-y-3">

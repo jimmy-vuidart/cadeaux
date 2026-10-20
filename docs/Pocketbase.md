@@ -57,6 +57,12 @@
   - Migration `pb_migrations/1729000002_enable_google_oauth.js` : activation du provider `google` sur la collection `users`.
   - Hook `pb_hooks/oauth.pb.js` : mise à jour dynamique au démarrage si les variables d'environnement changent, et enrichissement automatique de `displayName` à partir du profil Google.
   - Script dans `src/index.html` : détection et fermeture automatique de la fenêtre popup d'authentification après la redirection OAuth2.
+- Réinitialisation du mot de passe par e-mail :
+  - Relais SMTP Gmail (`smtp.gmail.com:465`, TLS implicite) authentifié par un mot de passe d'application du compte Google expéditeur ; aucun serveur mail n'est hébergé sur le cluster.
+  - Variables d'environnement : `APP_URL` (URL publique utilisée dans les liens des e-mails), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME` (adresse Gmail, également utilisée comme expéditeur) et `SMTP_PASSWORD`.
+  - Hook `pb_hooks/mail.pb.js` : application de ces variables aux réglages PocketBase au démarrage ; sans variables SMTP, la configuration existante est conservée.
+  - Migration `pb_migrations/1729000004_password_reset_email.js` : modèle d'e-mail en français dont le lien pointe vers la page Angular `/reset-password/:token` (le modèle par défaut vise `/_/`, non exposé) et limite de 5 demandes de réinitialisation par heure. PocketBase voyant toutes les requêtes depuis Traefik, cette limite est globale.
+  - Frontend : lien « Mot de passe oublié ? » dans la fenêtre de connexion (message neutre, que le compte existe ou non) et page `/reset-password/:token` pour saisir le nouveau mot de passe (8 caractères minimum, jeton valable 30 minutes et à usage unique).
 - Remplacer le workflow Firebase par un workflow GitHub Actions qui exécute `npm ci --legacy-peer-deps`, `npm test`, `npm run build`, publie les deux images sur GHCR, puis met à jour leurs tags dans `noctali.cd`.
 - Créer `apps/cadeaux-vuidart/` dans `noctali.cd` :
   - namespace dédié et Kustomization ;
@@ -90,7 +96,7 @@
 ## Hypothèses actées
 
 - Les liens historiques restent `/lists/:slug`.
-- L'inscription e-mail et Google est conservée ; aucun flux de réinitialisation de mot de passe ou SMTP n'est ajouté.
+- L'inscription e-mail et Google est conservée. La réinitialisation de mot de passe par e-mail passe par un relais SMTP Gmail (voir « Réinitialisation du mot de passe par e-mail »).
 - Les propriétaires recréent leur compte avant import et sont rattachés manuellement.
 - Les cadeaux déjà cochés restent cochés, mais sans acheteur historique.
 - Les listes sont publiques mais non indexées ; elles ne constituent pas des données confidentielles.
