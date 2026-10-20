@@ -17,6 +17,8 @@ describe('AuthService', () => {
       authWithPassword: vi.fn().mockResolvedValue({}),
       create: vi.fn().mockResolvedValue({ id: 'new-user' }),
       update: vi.fn().mockResolvedValue({}),
+      requestPasswordReset: vi.fn().mockResolvedValue(true),
+      confirmPasswordReset: vi.fn().mockResolvedValue(true),
     };
 
     mockPbService = {
@@ -68,6 +70,16 @@ describe('AuthService', () => {
       displayName: 'Mon Nom',
     });
     expect(mockUsersCollection.authWithPassword).toHaveBeenCalledWith('test@test.fr', 'secret123');
+  });
+
+  it('should delegate requestPasswordReset to pb.collection("users").requestPasswordReset', async () => {
+    await service.requestPasswordReset('test@test.fr');
+    expect(mockUsersCollection.requestPasswordReset).toHaveBeenCalledWith('test@test.fr');
+  });
+
+  it('should confirm password reset with the token and the password twice', async () => {
+    await service.confirmPasswordReset('jeton', 'nouveau123');
+    expect(mockUsersCollection.confirmPasswordReset).toHaveBeenCalledWith('jeton', 'nouveau123', 'nouveau123');
   });
 
   it('should clear authStore on logout', async () => {
