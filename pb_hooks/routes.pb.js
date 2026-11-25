@@ -18,6 +18,25 @@ routerAdd('GET', '/api/custom/lists/{slug}', (e) => {
     throw new NotFoundError('Liste introuvable');
   }
 
+  // Récupération des catégories associées triées par position
+  const groupRecords = $app.findRecordsByFilter(
+    'gift_groups',
+    'list = {:listId}',
+    'position',
+    0,
+    0,
+    { listId: listRecord.id }
+  );
+
+  const groups = groupRecords.map((grp) => ({
+    id: grp.id,
+    list: grp.get('list'),
+    name: grp.get('name'),
+    position: grp.get('position'),
+    created: grp.get('created'),
+    updated: grp.get('updated'),
+  }));
+
   // Récupération des cadeaux associés triés par position
   const giftRecords = $app.findRecordsByFilter(
     'gifts',
@@ -43,6 +62,7 @@ routerAdd('GET', '/api/custom/lists/{slug}', (e) => {
     return {
       id: g.id,
       list: g.get('list'),
+      group: g.get('group') || null,
       title: g.get('title'),
       url: g.get('url') || null,
       position: g.get('position'),
@@ -63,6 +83,7 @@ routerAdd('GET', '/api/custom/lists/{slug}', (e) => {
       created: listRecord.get('created'),
       updated: listRecord.get('updated'),
     },
+    groups: groups,
     gifts: gifts,
   });
 });
@@ -220,6 +241,54 @@ routerAdd('POST', '/api/custom/lists/{id}/reorder', (e) => {
         }
       } catch (err) {
         // Ignorer si le cadeau n'existe plus
+      }
+    }
+  });
+
+  return e.json(200, { success: true });
+}, $apis.requireAuth());
+
+// 5. Réordonnancement atomique des catégories réservé au propriétaire de la liste
+routerAdd('POST', '/api/custom/lists/{id}/reorder-groups', (e) => {
+  const authRecord = e.auth;
+  if (!authRecord) {
+    throw new UnauthorizedError('Authentification requise');
+  }
+
+  const listId = e.request.pathValue('id');
+  if (!listId) {
+    throw new BadRequestError('Identifiant de liste manquant');
+  }
+
+  let listRecord;
+  try {
+    listRecord = $app.findFirstRecordByFilter('lists', 'id = {:id} || slug = {:id}', { id: listId });
+  } catch (err) {
+    throw new NotFoundError('Liste introuvable');
+  }
+
+  if (listRecord.get('owner') !== authRecord.id) {
+    throw new ForbiddenError('Action réservée au propriétaire de la liste');
+  }
+
+  const data = e.requestInfo().body || {};
+  const orderedIds = data.orderedIds;
+  if (!Array.isArray(orderedIds)) {
+    throw new BadRequestError('orderedIds doit être un tableau');
+  }
+
+  // Mise à jour de chaque position de catégorie sous transaction SQLite
+  $app.runInTransaction((txApp) => {
+    for (let i = 0; i < orderedIds.length; i++) {
+      const groupId = orderedIds[i];
+      try {
+        const group = txApp.findRecordById('gift_groups', groupId);
+        if (group.get('list') === listRecord.id) {
+          group.set('position', i);
+          txApp.save(group);
+        }
+      } catch (err) {
+        // Ignorer si la catégorie n'existe plus
       }
     }
   });

@@ -5,6 +5,7 @@
 export interface Gift {
   id: string;
   list: string;
+  group?: string | null;
   title: string;
   url?: string | null;
   position?: number;

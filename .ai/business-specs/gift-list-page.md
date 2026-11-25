@@ -66,19 +66,33 @@ The gift list page is organized into clear sections, each managed by a focused s
 - If the resulting ID already exists, a numeric suffix is appended (e.g., `ma-liste`, `ma-liste-2`, `ma-liste-3`, ...).
 - This guarantees stable, human-readable URLs like `/lists/anniversaire-julie`.
 
+## Gift groups (categories)
+
+- A list owner can organize gifts into named categories (groups) to make long lists easier to read.
+- When a list has no categories, gifts are displayed as a simple flat list with no category headers.
+- When at least one category exists, each category is displayed as its own collapsible card. Any gift without a category is placed in a collapsible « Sans catégorie » section at the bottom.
+- Any visitor or owner can click a category header to collapse or expand it, or use « Tout replier / Tout déplier » when multiple sections are visible. The collapsed state is temporary for the current view and is not persisted across reloads.
+- Empty categories remain visible to the list owner (so gifts can be added to them) and are hidden from visitors.
+- List owners can:
+  - Create a new category from the « Nouvelle catégorie » action.
+  - Rename a category inline, reorder categories with up/down arrows, and delete a category (inline confirmation). Deleting a category never deletes its gifts: they automatically move to « Sans catégorie ».
+  - Assign or change a gift's category when adding or editing a gift.
+  - Use a quick `+` shortcut directly on a category header to open the add-gift form pre-selected on that category.
+  - Reorder gifts within their category using up/down arrows.
+- Visitors cannot see owner-only controls (reorder arrows, edit, delete, quick add).
+- When fill mode (« cadeaux achetés ») is enabled by a non-owner visitor, each category header displays a bought progress counter (e.g. `2/3 achetés`) so buyers can see completion even when a category is collapsed. This counter is never shown outside fill mode or to the list owner.
+
 ## User Experience
 
 ### For List Owners
-- Displays a toggle button to show/hide the add gift form.
-- When the add gift form is visible, users can add a new gift with a title and optional URL.
-- Users can edit and delete gifts from the list.
-- Users can reorder gifts using drag and drop.
-- Users can toggle the fill mode to mark gifts as bought.
+- Displays toggle buttons to show/hide the add gift form and the create category form.
+- When the add gift form is visible, users can add a new gift with a title, optional URL, and optional category (when categories exist).
+- Users can edit, delete, and reorder gifts (within their category or in the flat list) as well as manage categories.
+- The fill mode (« cadeaux achetés ») is hidden for the list owner to prevent spoilers.
 
 ### For Non-Owners
-- Displays the list of gifts without the ability to add, edit, or delete gifts.
-- Users can toggle the fill mode to mark gifts as bought if the list owner has enabled it.
-- Users cannot reorder gifts.
+- Displays the list of gifts (grouped into collapsible categories when present) without any edit, delete, or reorder controls.
+- Users can toggle the fill mode to mark gifts as bought.
 
 ### Fill Mode
 - When fill mode is enabled, users can mark gifts as bought by checking a checkbox.

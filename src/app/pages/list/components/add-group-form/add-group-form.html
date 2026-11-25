@@ -1,0 +1,26 @@
+<section class="card-glass p-6">
+  <h2 class="mb-4 text-2xl font-bold font-christmas text-gold-gradient drop-shadow-md pb-2 border-b border-white/10">
+    Nouvelle catégorie</h2>
+  <form class="flex flex-col gap-4" (ngSubmit)="addGroup.emit()">
+    <div>
+      <label for="group-name" class="block text-sm font-bold text-gold-400 mb-1">Nom de la catégorie</label>
+      <input #nameInput id="group-name" type="text" class="input-base" [formControl]="nameControl()"
+        placeholder="Ex. Jeux de société, Lecture, Cuisine…" [attr.aria-invalid]="nameInvalid() ? 'true' : null" />
+    </div>
+
+    <div class="flex justify-end pt-2">
+      <button type="button" class="btn-secondary rounded-md mr-auto" (click)="cancel.emit()" title="Fermer"
+        aria-label="Fermer">
+        Fermer
+      </button>
+      <button type="submit" class="btn-primary rounded-md px-6" [disabled]="submitting() || nameInvalid()">
+        Créer
+      </button>
+    </div>
+  </form>
+
+  @if (error()) {
+  <p class="mt-4 text-sm text-red-300 bg-red-900/40 p-3 rounded-md border border-red-500/30" role="alert">{{ error() }}
+  </p>
+  }
+</section>

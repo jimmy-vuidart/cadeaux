@@ -4,7 +4,7 @@
   <form class="flex flex-col gap-4" (ngSubmit)="addGift.emit()">
     <div>
       <label for="gift-title" class="block text-sm font-bold text-gold-400 mb-1">Titre du cadeau</label>
-      <input id="gift-title" type="text" class="input-base" [formControl]="titleControl()"
+      <input #titleInput id="gift-title" type="text" class="input-base" [formControl]="titleControl()"
         placeholder="Ex. Lego, livre, etc." [attr.aria-invalid]="titleInvalid() ? 'true' : null" />
     </div>
 
@@ -13,6 +13,18 @@
       <input id="gift-url" type="url" class="input-base" [formControl]="urlControl()"
         placeholder="https://exemple.com/produit" inputmode="url" />
     </div>
+
+    @if (groups().length > 0 && groupControl()) {
+    <div>
+      <label for="gift-group" class="block text-sm font-bold text-gold-400 mb-1">Catégorie (optionnel)</label>
+      <select id="gift-group" class="input-base" [formControl]="groupControl()!">
+        <option [ngValue]="null" class="bg-slate-900 text-white">Aucune catégorie</option>
+        @for (grp of groups(); track grp.id) {
+        <option [ngValue]="grp.id" class="bg-slate-900 text-white">{{ grp.name }}</option>
+        }
+      </select>
+    </div>
+    }
 
     <div class="flex justify-end pt-2">
       <button type="button" class="btn-secondary rounded-md mr-auto" (click)="cancel.emit()" title="Fermer"

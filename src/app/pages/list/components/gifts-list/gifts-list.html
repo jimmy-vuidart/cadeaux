@@ -8,20 +8,235 @@
       </app-christmas-button>
     </div>
   }
+
   @if (fillMode()) {
-  <p
-    class="mb-4 text-sm text-green-300 font-bold bg-black/40 p-3 rounded-lg border border-green-900/50 backdrop-blur-sm flex items-center gap-2">
-    <span translate="no" class="material-symbols-outlined text-green-400">info</span>
-    Mode remplissage actif : coche un cadeau pour indiquer qu’il est déjà acheté.
-  </p>
-  } @else if (gifts().length > 1) {
-  <p class="mb-3 text-xs text-white/50 italic text-right">Astuce : utilise les flèches pour réorganiser les cadeaux.</p>
+    <p
+      class="mb-4 text-sm text-green-300 font-bold bg-black/40 p-3 rounded-lg border border-green-900/50 backdrop-blur-sm flex items-center gap-2">
+      <span translate="no" class="material-symbols-outlined text-green-400">info</span>
+      Mode remplissage actif : coche un cadeau pour indiquer qu’il est déjà acheté.
+    </p>
   }
 
-  <ul class="card-glass flex flex-col divide-y divide-white/10 overflow-hidden w-full" role="list">
-    @for (g of gifts(); track g.id; let i = $index) {
-      <li class="px-4 py-3 transition-colors hover:bg-white/5 w-full" role="listitem">
-      @if (!fillMode() && editingId() === g.id) {
+  @if (hasGroups()) {
+    <!-- Barre d'astuce et bouton Tout replier / Tout déplier -->
+    @if (sections().length > 0) {
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+        @if (!fillMode() && isOwner()) {
+          <p class="text-xs text-white/50 italic">Astuce : clique sur une catégorie pour la replier, ou utilise les flèches pour réorganiser.</p>
+        } @else if (!fillMode()) {
+          <p class="text-xs text-white/50 italic">Clique sur une catégorie pour la replier ou la déplier.</p>
+        } @else {
+          <span></span>
+        }
+        @if (sections().length > 1) {
+          <button type="button"
+            class="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1 text-xs font-bold text-slate-300 border border-white/15 hover:border-gold-400/50 hover:text-gold-300 transition-colors select-none"
+            (click)="toggleAllSections()">
+            <span translate="no" aria-hidden="true" class="material-symbols-outlined text-base">
+              {{ allCollapsed() ? 'unfold_more' : 'unfold_less' }}
+            </span>
+            <span>{{ allCollapsed() ? 'Tout déplier' : 'Tout replier' }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Option A : cartes accordéon séparées par catégorie -->
+    <div class="flex flex-col gap-4">
+      @for (sec of sections(); track sec.id) {
+        <div class="card-glass overflow-hidden w-full"
+             [class.border-dashed]="sec.isUncategorized"
+             [class.border-white/15]="sec.isUncategorized">
+          <!-- En-tête de catégorie -->
+          <div class="flex items-center justify-between gap-2 px-3.5 py-3 bg-white/[0.045] border-b transition-colors"
+               [class.border-white/10]="!isCollapsed(sec.id) || deletingGroupId() === sec.id"
+               [class.border-transparent]="isCollapsed(sec.id) && deletingGroupId() !== sec.id">
+            @if (isOwner() && !fillMode() && editingGroupId() === sec.id && !sec.isUncategorized) {
+              <form class="flex flex-1 items-center gap-2 min-w-0" (ngSubmit)="submitEditGroup.emit()">
+                <input [id]="'edit-group-' + sec.id" type="text"
+                  class="input-base py-1.5 px-2.5 text-sm flex-1 min-w-0"
+                  [formControl]="editGroupNameControl()!"
+                  placeholder="Nom de la catégorie"
+                  [attr.aria-label]="'Renommer la catégorie ' + sec.name"
+                  [attr.aria-invalid]="editGroupNameInvalid() ? 'true' : null"
+                  [disabled]="editGroupSubmitting() || isUpdatingGroup()(sec.id)" />
+                <button type="submit"
+                  class="rounded-md inline-flex size-8 shrink-0 items-center justify-center bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-60 transition-all select-none"
+                  [disabled]="editGroupSubmitting() || editGroupNameInvalid() || isUpdatingGroup()(sec.id)"
+                  [attr.aria-label]="'Enregistrer le nom de ' + sec.name" title="Enregistrer">
+                  <span translate="no" aria-hidden="true" class="material-symbols-outlined text-lg">check</span>
+                </button>
+                <button type="button"
+                  class="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-all select-none"
+                  (click)="cancelEditGroup.emit()"
+                  [disabled]="editGroupSubmitting() || isUpdatingGroup()(sec.id)"
+                  aria-label="Annuler le renommage" title="Annuler">
+                  <span translate="no" aria-hidden="true" class="material-symbols-outlined text-lg">close</span>
+                </button>
+              </form>
+            } @else {
+              <button type="button"
+                class="flex flex-1 min-w-0 items-center gap-2 text-left py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 rounded-md select-none"
+                [attr.aria-expanded]="!isCollapsed(sec.id)"
+                (click)="toggleSection(sec.id)">
+                <span translate="no" aria-hidden="true"
+                  class="material-symbols-outlined text-xl shrink-0 transition-transform duration-200"
+                  [class.text-gold-400]="!isCollapsed(sec.id)"
+                  [class.text-white/45]="isCollapsed(sec.id)"
+                  [class.-rotate-90]="isCollapsed(sec.id)">expand_more</span>
+                <span class="font-bold text-base truncate"
+                  [class.text-gold-300]="!sec.isUncategorized"
+                  [class.text-slate-300]="sec.isUncategorized">{{ sec.name }}</span>
+
+                @if (fillMode() && !isOwner() && sec.gifts.length > 0) {
+                  @if (sec.boughtCount === sec.gifts.length) {
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.7rem] font-bold shrink-0 bg-green-500/25 border border-green-400/50 text-green-200">
+                      <span translate="no" aria-hidden="true" class="material-symbols-outlined text-xs">check_circle</span>
+                      {{ sec.boughtCount }}/{{ sec.gifts.length }} achetés
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-bold shrink-0 bg-green-500/15 border border-green-500/35 text-green-300">
+                      {{ sec.boughtCount }}/{{ sec.gifts.length }} achetés
+                    </span>
+                  }
+                } @else {
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-bold shrink-0 bg-white/10 text-white/75">
+                    {{ sec.gifts.length }}
+                  </span>
+                }
+              </button>
+
+              @if (isOwner() && !fillMode() && !sec.isUncategorized && sec.group) {
+                <div class="flex items-center gap-1 shrink-0">
+                  @if (deletingGroupId() === sec.id) {
+                    <button type="button"
+                      class="rounded-md inline-flex size-8 items-center justify-center bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-60 transition-all select-none"
+                      (click)="confirmDeleteGroup.emit()"
+                      [disabled]="isUpdatingGroup()(sec.id)"
+                      [attr.aria-label]="'Confirmer la suppression de la catégorie ' + sec.name" title="Confirmer">
+                      <span translate="no" aria-hidden="true" class="material-symbols-outlined text-lg">check</span>
+                    </button>
+                    <button type="button"
+                      class="inline-flex size-8 items-center justify-center rounded-md bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-all select-none"
+                      (click)="cancelDeleteGroup.emit()"
+                      [disabled]="isUpdatingGroup()(sec.id)"
+                      [attr.aria-label]="'Annuler la suppression de la catégorie ' + sec.name" title="Annuler">
+                      <span translate="no" aria-hidden="true" class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  } @else {
+                    <button type="button"
+                      class="inline-flex size-7 items-center justify-center rounded-md text-gold-400/80 hover:bg-gold-500/20 hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-40 transition-colors select-none"
+                      (click)="quickAddInGroup.emit(sec.id)"
+                      [disabled]="isUpdatingGroup()(sec.id)"
+                      [attr.aria-label]="'Ajouter un cadeau dans ' + sec.name"
+                      title="Ajouter un cadeau dans cette catégorie">
+                      <span translate="no" aria-hidden="true" class="material-symbols-outlined text-lg">add</span>
+                    </button>
+                    @if (groups().length > 1 && !editingGroupId()) {
+                      <button type="button"
+                        class="inline-flex size-6 items-center justify-center rounded-md text-white/35 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-30 transition-colors select-none"
+                        [attr.aria-label]="'Monter la catégorie ' + sec.name"
+                        [disabled]="sec.groupIndex === 0 || isUpdatingGroup()(sec.id)"
+                        (click)="moveGroupUp(sec.groupIndex)">
+                        <span translate="no" aria-hidden="true" class="material-symbols-outlined text-sm">arrow_upward</span>
+                      </button>
+                      <button type="button"
+                        class="inline-flex size-6 items-center justify-center rounded-md text-white/35 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-30 transition-colors select-none"
+                        [attr.aria-label]="'Descendre la catégorie ' + sec.name"
+                        [disabled]="sec.groupIndex === groups().length - 1 || isUpdatingGroup()(sec.id)"
+                        (click)="moveGroupDown(sec.groupIndex)">
+                        <span translate="no" aria-hidden="true" class="material-symbols-outlined text-sm">arrow_downward</span>
+                      </button>
+                    }
+                    <button type="button"
+                      class="inline-flex size-7 items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-40 transition-colors select-none"
+                      (click)="startEditGroup.emit(sec.group)"
+                      [disabled]="isUpdatingGroup()(sec.id)"
+                      [attr.aria-label]="'Renommer la catégorie ' + sec.name" title="Renommer">
+                      <span translate="no" aria-hidden="true" class="material-symbols-outlined text-lg">edit</span>
+                    </button>
+                    <button type="button"
+                      class="inline-flex size-7 items-center justify-center rounded-md text-white/40 hover:text-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-40 transition-colors select-none"
+                      (click)="startDeleteGroup.emit(sec.group)"
+                      [disabled]="isUpdatingGroup()(sec.id) || !!editingGroupId()"
+                      [attr.aria-label]="'Supprimer la catégorie ' + sec.name" title="Supprimer">
+                      <span translate="no" aria-hidden="true" class="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+          @if (editingGroupId() === sec.id && editGroupError()) {
+            <p class="px-4 py-2 text-xs text-red-300 bg-red-950/50 border-b border-red-500/30" role="alert">
+              {{ editGroupError() }}
+            </p>
+          }
+
+          @if (deletingGroupId() === sec.id && sec.gifts.length > 0) {
+            <p class="px-4 py-2 text-xs text-red-200 bg-red-500/10 border-b border-red-500/25">
+              Supprimer cette catégorie ?
+              @if (sec.gifts.length === 1) {
+                Le cadeau passera dans « Sans catégorie ».
+              } @else {
+                Les <strong>{{ sec.gifts.length }} cadeaux</strong> passeront dans « Sans catégorie ».
+              }
+            </p>
+          }
+
+          @if (!isCollapsed(sec.id)) {
+            <ul class="flex flex-col divide-y divide-white/10 w-full" role="list">
+              @for (g of sec.gifts; track g.id; let i = $index) {
+                <ng-container
+                  [ngTemplateOutlet]="giftRow"
+                  [ngTemplateOutletContext]="{ $implicit: g, index: i, total: sec.gifts.length, groupId: sec.isUncategorized ? null : sec.id }" />
+              } @empty {
+                <li class="px-4 py-4 text-center text-xs text-white/45 italic">
+                  Aucun cadeau dans cette catégorie.
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      } @empty {
+        <ul class="card-glass flex flex-col divide-y divide-white/10 overflow-hidden w-full" role="list">
+          <li class="px-4 py-12 text-center text-white/50 italic">
+            <span class="block text-4xl mb-3 opacity-50">✨</span>
+            Cette liste est vide pour le moment.
+          </li>
+        </ul>
+      }
+    </div>
+  } @else {
+    <!-- Mode plat lorsqu'aucune catégorie n'est définie -->
+    @if (!fillMode() && isOwner() && gifts().length > 1) {
+      <p class="mb-3 text-xs text-white/50 italic text-right">Astuce : utilise les flèches pour réorganiser les cadeaux.</p>
+    }
+
+    <ul class="card-glass flex flex-col divide-y divide-white/10 overflow-hidden w-full" role="list">
+      @for (g of gifts(); track g.id; let i = $index) {
+        <ng-container
+          [ngTemplateOutlet]="giftRow"
+          [ngTemplateOutletContext]="{ $implicit: g, index: i, total: gifts().length, groupId: null }" />
+      } @empty {
+        <li class="px-4 py-12 text-center text-white/50 italic">
+          <span class="block text-4xl mb-3 opacity-50">✨</span>
+          @if (isOwner()) {
+            Ta liste est vide pour le moment.<br />Ajoute ton premier souhait ci-dessous.
+          } @else {
+            Cette liste est vide pour le moment.
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<!-- Modèle unique d'une ligne de cadeau (partagé entre vue plate et vue par catégories) -->
+<ng-template #giftRow let-g let-i="index" let-total="total" let-groupId="groupId">
+  <li class="px-4 py-3 transition-colors hover:bg-white/5 w-full" role="listitem">
+    @if (isOwner() && !fillMode() && editingId() === g.id) {
       <form class="flex flex-col gap-3 py-1" (ngSubmit)="submitEdit.emit()">
         <div>
           <label [for]="'edit-title-' + g.id" class="block text-xs font-bold text-gold-400 mb-1">Titre</label>
@@ -35,6 +250,18 @@
             placeholder="https://exemple.com/produit" inputmode="url"
             [disabled]="editSubmitting() || isUpdating()(g.id!)" />
         </div>
+        @if (hasGroups() && editGroupControl()) {
+          <div>
+            <label [for]="'edit-group-' + g.id" class="block text-xs font-bold text-gold-400 mb-1">Catégorie (optionnel)</label>
+            <select [id]="'edit-group-' + g.id" class="input-base py-1" [formControl]="editGroupControl()!"
+              [disabled]="editSubmitting() || isUpdating()(g.id!)">
+              <option [ngValue]="null" class="bg-slate-900 text-white">Aucune catégorie</option>
+              @for (grp of groups(); track grp.id) {
+                <option [ngValue]="grp.id" class="bg-slate-900 text-white">{{ grp.name }}</option>
+              }
+            </select>
+          </div>
+        }
         <div class="flex items-center gap-2 justify-end mt-1">
           <button type="button" class="btn-secondary btn-sm" (click)="cancelEdit.emit()">
             Annuler
@@ -47,98 +274,92 @@
         </div>
       </form>
       @if (editError()) {
-      <p class="mt-2 text-sm text-red-400" role="alert">{{ editError() }}</p>
+        <p class="mt-2 text-sm text-red-400" role="alert">{{ editError() }}</p>
       }
-      } @else {
-        <div class="flex items-center justify-between gap-3 w-full flex-nowrap">
-          <div class="flex flex-1 min-w-0 items-center gap-3">
-          @if (!fillMode() && !editingId()) {
-          <div class="flex flex-col gap-1">
-            <button type="button"
-              class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
-              [attr.aria-label]="'Monter ' + g.title" [disabled]="i === 0 || isUpdating()(g.id!)"
-              (click)="moveUp(i)">
-              <span translate="no" aria-hidden="true" class="material-symbols-outlined text-sm">arrow_upward</span>
-            </button>
-            <button type="button"
-              class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 transition-colors"
-              [attr.aria-label]="'Descendre ' + g.title" [disabled]="i === gifts().length - 1 || isUpdating()(g.id!)"
-              (click)="moveDown(i)">
-              <span translate="no" aria-hidden="true" class="material-symbols-outlined text-sm">arrow_downward</span>
-            </button>
-          </div>
+    } @else {
+      <div class="flex items-center justify-between gap-3 w-full flex-nowrap">
+        <div class="flex flex-1 min-w-0 items-center gap-3">
+          @if (isOwner() && !fillMode() && !editingId() && total > 1) {
+            <div class="flex flex-col gap-1">
+              <button type="button"
+                class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-30 transition-colors select-none"
+                [attr.aria-label]="'Monter ' + g.title" [disabled]="i === 0 || isUpdating()(g.id!)"
+                (click)="moveUp(groupId, i)">
+                <span translate="no" aria-hidden="true" class="material-symbols-outlined text-sm">arrow_upward</span>
+              </button>
+              <button type="button"
+                class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-30 transition-colors select-none"
+                [attr.aria-label]="'Descendre ' + g.title" [disabled]="i === total - 1 || isUpdating()(g.id!)"
+                (click)="moveDown(groupId, i, total)">
+                <span translate="no" aria-hidden="true" class="material-symbols-outlined text-sm">arrow_downward</span>
+              </button>
+            </div>
           }
           <div class="min-w-0 flex flex-col">
             @if (g.url) {
               <a
                 class="whitespace-normal break-words sm:truncate font-bold text-base text-gold-gradient underline decoration-gold-400/50 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
-              [href]="g.url" target="_blank" rel="noopener noreferrer">
-              {{ g.title }}
-            </a>
+                [href]="g.url" target="_blank" rel="noopener noreferrer">
+                {{ g.title }}
+              </a>
             } @else {
               <p class="whitespace-normal break-words sm:truncate font-bold text-base text-white">{{ g.title }}</p>
             }
-            @if (fillMode() && g.bought) {
-            <p class="text-[0.65rem] font-bold text-green-400 flex items-center gap-1 mt-0.5 uppercase tracking-wide">
-              <span translate="no" class="material-symbols-outlined text-sm">check_circle</span>
-              @if (g.buyerName) {
-                Acheté par {{ g.buyerName }}
-              } @else {
-                Acheté
-              }
-            </p>
+            @if (fillMode() && !isOwner() && g.bought) {
+              <p class="text-[0.65rem] font-bold text-green-400 flex items-center gap-1 mt-0.5 uppercase tracking-wide">
+                <span translate="no" class="material-symbols-outlined text-sm">check_circle</span>
+                @if (g.buyerName) {
+                  Acheté par {{ g.buyerName }}
+                } @else {
+                  Acheté
+                }
+              </p>
             }
           </div>
         </div>
-        @if (fillMode()) {
+
+        @if (fillMode() && !isOwner()) {
           <div class="flex items-center gap-2 shrink-0">
-          <div class="relative flex items-center">
-            <input type="checkbox"
-              class="peer size-6 appearance-none rounded-md border-2 border-white/30 bg-black/20 checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer transition-all"
-              [checked]="g.bought" (change)="toggleBought.emit(g)" [disabled]="isUpdating()(g.id!)"
-              [attr.aria-label]="'Marquer ' + g.title + ' comme acheté'" />
-            <span translate="no"
-              class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 material-symbols-outlined text-xl">check</span>
+            <div class="relative flex items-center">
+              <input type="checkbox"
+                class="peer size-6 appearance-none rounded-md border-2 border-white/30 bg-black/20 checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer transition-all"
+                [checked]="g.bought" (change)="toggleBought.emit(g)" [disabled]="isUpdating()(g.id!)"
+                [attr.aria-label]="'Marquer ' + g.title + ' comme acheté'" />
+              <span translate="no"
+                class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 material-symbols-outlined text-xl">check</span>
+            </div>
           </div>
-        </div>
-        } @else {
+        } @else if (isOwner()) {
           <div class="flex items-center gap-2 shrink-0">
-          @if (deletingId() === g.id) {
-          <button type="button"
-            class="rounded-md inline-flex size-8 items-center justify-center bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-60 transition-all backdrop-blur-md"
-            (click)="confirmDelete.emit()" [disabled]="isUpdating()(g.id!)"
-            [attr.aria-label]="'Confirmer la suppression de ' + g.title" title="Confirmer">
-            <span translate="no" class="material-symbols-outlined text-lg" aria-hidden="true">check</span>
-          </button>
-          <button type="button"
-            class="inline-flex size-8 items-center justify-center rounded-md bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-all backdrop-blur-md"
-            (click)="cancelDelete.emit()" [disabled]="isUpdating()(g.id!)"
-            [attr.aria-label]="'Annuler la suppression de ' + g.title" title="Annuler">
-            <span translate="no" class="material-symbols-outlined text-lg" aria-hidden="true">close</span>
-          </button>
-          } @else {
-          <button type="button"
-            class="inline-flex size-8 items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-colors"
-            (click)="startEdit.emit(g)" [disabled]="isUpdating()(g.id!)" [attr.aria-label]="'Modifier ' + g.title">
-            <span translate="no" class="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
-          </button>
-          <button type="button"
-            class="inline-flex size-8 items-center justify-center rounded-md text-white/40 hover:text-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-colors"
-            (click)="startDelete.emit(g)" [disabled]="isUpdating()(g.id!) || !!editingId()"
-            [attr.aria-label]="'Supprimer ' + g.title">
-            <span translate="no" class="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
-          </button>
-          }
-        </div>
+            @if (deletingId() === g.id) {
+              <button type="button"
+                class="rounded-md inline-flex size-8 items-center justify-center bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-60 transition-all backdrop-blur-md select-none"
+                (click)="confirmDelete.emit()" [disabled]="isUpdating()(g.id!)"
+                [attr.aria-label]="'Confirmer la suppression de ' + g.title" title="Confirmer">
+                <span translate="no" class="material-symbols-outlined text-lg" aria-hidden="true">check</span>
+              </button>
+              <button type="button"
+                class="inline-flex size-8 items-center justify-center rounded-md bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-all backdrop-blur-md select-none"
+                (click)="cancelDelete.emit()" [disabled]="isUpdating()(g.id!)"
+                [attr.aria-label]="'Annuler la suppression de ' + g.title" title="Annuler">
+                <span translate="no" class="material-symbols-outlined text-lg" aria-hidden="true">close</span>
+              </button>
+            } @else {
+              <button type="button"
+                class="inline-flex size-8 items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-colors select-none"
+                (click)="startEdit.emit(g)" [disabled]="isUpdating()(g.id!)" [attr.aria-label]="'Modifier ' + g.title">
+                <span translate="no" class="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
+              </button>
+              <button type="button"
+                class="inline-flex size-8 items-center justify-center rounded-md text-white/40 hover:text-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60 transition-colors select-none"
+                (click)="startDelete.emit(g)" [disabled]="isUpdating()(g.id!) || !!editingId()"
+                [attr.aria-label]="'Supprimer ' + g.title">
+                <span translate="no" class="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
+              </button>
+            }
+          </div>
         }
       </div>
-      }
-    </li>
-    } @empty {
-    <li class="px-4 py-12 text-center text-white/50 italic">
-      <span class="block text-4xl mb-3 opacity-50">✨</span>
-      Ta liste est vide pour le moment.<br />Ajoute ton premier souhait ci-dessous.
-    </li>
     }
-  </ul>
-</section>
+  </li>
+</ng-template>

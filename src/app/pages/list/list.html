@@ -1,38 +1,97 @@
 <div class="px-4 py-8 min-h-screen grid place-items-center main-content">
   <div class="mx-auto w-full max-w-2xl relative z-10 space-y-8 animate-fade-in-up">
-    <!-- List Section -->
+    <!-- Section Liste -->
     <div class="glass-panel p-6 sm:p-10">
       <app-list-header [title]="title" [sharing]="sharing()" (share)="share()" />
 
-      <app-gifts-list [gifts]="gifts()" [fillMode]="fillMode()" [showFillMode]="!isCurrentUserOwner()" [isUpdating]="isUpdatingFn"
-        [editingId]="editingGiftId()" [deletingId]="deletingGiftId()" [editTitleControl]="editTitle"
-        [editUrlControl]="editUrl" [editSubmitting]="editSubmitting()" [editTitleInvalid]="editTitleInvalid()"
-        [editError]="editError()" [users]="users()" (toggleFillMode)="toggleFillMode()" (toggleBought)="toggleBought($event)"
-        (startEdit)="startEditGift($event)" (cancelEdit)="cancelEdit()" (submitEdit)="submitEdit()"
-        (startDelete)="startDeleteGift($event)" (cancelDelete)="cancelDeleteGift()"
-        (confirmDelete)="confirmDeleteGift()" (reorderMove)="onReorderMove($event)" />
+      <app-gifts-list
+        [gifts]="gifts()"
+        [groups]="groups()"
+        [isOwner]="isCurrentUserOwner()"
+        [fillMode]="fillMode()"
+        [showFillMode]="!isCurrentUserOwner()"
+        [isUpdating]="isUpdatingFn"
+        [editingId]="editingGiftId()"
+        [deletingId]="deletingGiftId()"
+        [editTitleControl]="editTitle"
+        [editUrlControl]="editUrl"
+        [editGroupControl]="editGroup"
+        [editSubmitting]="editSubmitting()"
+        [editTitleInvalid]="editTitleInvalid()"
+        [editError]="editError()"
+        [editingGroupId]="editingGroupId()"
+        [deletingGroupId]="deletingGroupId()"
+        [editGroupNameControl]="editGroupName"
+        [editGroupSubmitting]="editGroupSubmitting()"
+        [editGroupNameInvalid]="editGroupNameInvalid()"
+        [editGroupError]="editGroupError()"
+        [isUpdatingGroup]="isUpdatingGroupFn"
+        [users]="users()"
+        (toggleFillMode)="toggleFillMode()"
+        (toggleBought)="toggleBought($event)"
+        (startEdit)="startEditGift($event)"
+        (cancelEdit)="cancelEdit()"
+        (submitEdit)="submitEdit()"
+        (startDelete)="startDeleteGift($event)"
+        (cancelDelete)="cancelDeleteGift()"
+        (confirmDelete)="confirmDeleteGift()"
+        (reorderMove)="onReorderMove($event)"
+        (quickAddInGroup)="onQuickAddInGroup($event)"
+        (startEditGroup)="startEditGroup($event)"
+        (cancelEditGroup)="cancelEditGroup()"
+        (submitEditGroup)="submitEditGroup()"
+        (startDeleteGroup)="startDeleteGroup($event)"
+        (cancelDeleteGroup)="cancelDeleteGroup()"
+        (confirmDeleteGroup)="confirmDeleteGroup()"
+        (reorderGroupMove)="onReorderGroupMove($event)" />
     </div>
 
-    <!-- Add Gift Section (Separate Card) -->
-    <!-- Add Gift Section (Toggle) -->
+    <!-- Section Ajout (cadeau ou catégorie, réservée au propriétaire) -->
     @if (isCurrentUserOwner() && showAddForm()) {
-    <app-add-gift-form [titleControl]="giftTitle" [urlControl]="giftUrl" [submitting]="submitting()"
-      [titleInvalid]="giftTitleInvalid()" [error]="addError()" (addGift)="addGift()" (cancel)="toggleAddForm()" />
+      <app-add-gift-form
+        [titleControl]="giftTitle"
+        [urlControl]="giftUrl"
+        [groupControl]="giftGroup"
+        [groups]="groups()"
+        [submitting]="submitting()"
+        [titleInvalid]="giftTitleInvalid()"
+        [error]="addError()"
+        (addGift)="addGift()"
+        (cancel)="toggleAddForm()" />
+    } @else if (isCurrentUserOwner() && showAddGroupForm()) {
+      <app-add-group-form
+        [nameControl]="groupName"
+        [submitting]="groupSubmitting()"
+        [nameInvalid]="groupNameInvalid()"
+        [error]="addGroupError()"
+        (addGroup)="addGroup()"
+        (cancel)="toggleAddGroupForm()" />
     } @else if (isCurrentUserOwner()) {
-      <div class="flex sm:justify-end w-full">
-        <app-christmas-button (click)="toggleAddForm()" [customClass]="'w-full sm:w-auto'" class="w-full basis-full sm:w-auto sm:basis-auto"
-                              icon="add_circle" size="sm" variant="primary">
-        Ajouter des cadeaux
-      </app-christmas-button>
-    </div>
+      <div class="flex flex-wrap sm:justify-end gap-3 w-full">
+        <app-christmas-button
+          (click)="toggleAddGroupForm()"
+          [customClass]="'w-full sm:w-auto'"
+          class="w-full basis-full sm:w-auto sm:basis-auto"
+          icon="create_new_folder"
+          size="sm"
+          variant="secondary">
+          Nouvelle catégorie
+        </app-christmas-button>
+        <app-christmas-button
+          (click)="toggleAddForm()"
+          [customClass]="'w-full sm:w-auto'"
+          class="w-full basis-full sm:w-auto sm:basis-auto"
+          icon="add_circle"
+          size="sm"
+          variant="primary">
+          Ajouter des cadeaux
+        </app-christmas-button>
+      </div>
     }
   </div>
-
-
 
   <app-confirm-modal [open]="confirmFillOpen()" [title]="'Activer le mode « cadeaux achetés »'" size="lg"
     [message]="'Activer le mode « cadeaux achetés » va afficher quels cadeaux sont déjà achetés.\n\nSi cette liste est destinée pour toi, tu risques d\'être spoilé(e).\n\nVeux-tu vraiment activer le mode remplissage ?'"
     [confirmLabel]="'Activer'" [cancelLabel]="'Annuler'" (confirm)="confirmEnableFillMode()"
     (cancel)="cancelEnableFillMode()" (close)="cancelEnableFillMode()" />
-
 </div>
